@@ -1,0 +1,24 @@
+name: warehouse
+services:
+  postgres-warehouse:
+    image: timescale/timescaledb:latest-pg14
+    container_name: warehouse-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: warehouse_user
+      POSTGRES_PASSWORD: warehouse_pass
+    volumes:
+      - ./warehouse_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - financi-network
+    restart: always
+
+volumes:
+  warehouse_data:
+
+networks:
+  financi-network:
+    external: true
