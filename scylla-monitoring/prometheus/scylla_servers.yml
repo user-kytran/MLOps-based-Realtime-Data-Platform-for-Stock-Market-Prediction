@@ -1,0 +1,18 @@
+# Định nghĩa các node Scylla để Prometheus thu thập dữ liệu
+- targets:
+    - scylla-node1:9180
+  labels:
+    cluster: scylla-cluster
+    dc: datacenter1
+
+- targets:
+    - scylla-node2:9180
+  labels:
+    cluster: scylla-cluster
+    dc: datacenter1
+  
+- targets:
+    - scylla-node3:9180
+  labels:
+    cluster: scylla-cluster
+    dc: datacenter1

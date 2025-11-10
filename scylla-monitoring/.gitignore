@@ -1,0 +1,13 @@
+docs/_build/
+docs/venv/
+*.swp
+*.pyc
+docs/bin/
+docs/include/
+docs/lib/
+docs/lib64
+docs/pip-selfcheck.json
+docs/.Python
+grafana/build/
+CURRENT_VERSION.sh
+packer-manifest.json

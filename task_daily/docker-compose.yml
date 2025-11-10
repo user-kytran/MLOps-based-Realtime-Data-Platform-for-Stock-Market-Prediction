@@ -1,0 +1,144 @@
+name: airflow-daily
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+      # PostgreSQL memory optimization
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+    restart: always
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 128M
+    #     reservations:
+    #       memory: 64M
+    command: >
+      postgres -c shared_buffers=32MB
+      -c effective_cache_size=64MB
+      -c maintenance_work_mem=16MB
+      -c checkpoint_completion_target=0.7
+      -c wal_buffers=1MB
+      -c default_statistics_target=100
+      -c random_page_cost=4
+      -c effective_io_concurrency=2
+      -c work_mem=4MB
+      -c min_wal_size=80MB
+      -c max_wal_size=1GB
+    networks:
+      - financi-network
+
+  airflow-init:
+    build: .
+    image: custom-airflow:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY:-changeme_please_set}
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=UTC
+      - AIRFLOW_UID=50000
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    user: "50000:0"
+    entrypoint: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true
+      "
+    networks:
+      - financi-network
+
+  airflow-webserver:
+    build: .
+    image: custom-airflow:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY:-changeme_please_set}
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=UTC
+      - AIRFLOW_UID=50000
+      # Memory optimization
+      - AIRFLOW__WEBSERVER__WORKERS=2
+      - AIRFLOW__WEBSERVER__WORKER_TIMEOUT=300
+      - AIRFLOW__WEBSERVER__WEB_SERVER_WORKER_TIMEOUT=300
+      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=5
+      - AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=1
+      - AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL=30
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+    #     reservations:
+    #       memory: 256M
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    user: "50000:0"
+    ports:
+      - "8087:8080"
+    command: webserver
+    restart: always
+    networks:
+      - financi-network
+
+  airflow-scheduler:
+    build: .
+    image: custom-airflow:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY:-changeme_please_set}
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=UTC
+      - AIRFLOW_UID=50000
+      # Memory optimization
+      - AIRFLOW__SCHEDULER__PARSING_PROCESSES=1
+      - AIRFLOW__SCHEDULER__MAX_THREADS=1
+      - AIRFLOW__SCHEDULER__PROCESSOR_POLL_INTERVAL=10
+      - AIRFLOW__CORE__PARALLELISM=8
+      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=5
+      - AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=1
+      - AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL=60
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+    #     reservations:
+    #       memory: 256M
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    user: "50000:0"
+    command: scheduler
+    restart: always
+    networks:
+      - financi-network
+
+volumes:
+  postgres_data:
+
+networks:
+  financi-network:
+    external: true

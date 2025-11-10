@@ -1,0 +1,18 @@
+# cassandra-driver
+# confluent-kafka
+# apache-flink==1.17.1
+# yfinance
+# fastavro
+# pyflink
+# attrs
+# httpx
+# cachetools
+# authlib
+# pyyaml
+# ujson
+pyiceberg[s3fs,pyarrow,pandas]
+pandas
+pyarrow
+boto3
+fsspec
+s3fs

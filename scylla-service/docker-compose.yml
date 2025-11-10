@@ -1,0 +1,97 @@
+name: scylla-cluster
+
+services:
+
+  scylla-node1:
+    container_name: scylla-node1
+    image: scylladb/scylla:latest
+    restart: always
+    ports:
+      - "9042:9042"   
+      - "9180:9180"
+    command: --seeds=scylla-node1,scylla-node2 --smp 3 --overprovisioned 1 --api-address 0.0.0.0 --memory 1024M
+    volumes:
+      - "scylla-data-node1:/var/lib/scylla"
+    environment:
+      - SCYLLA_CLUSTER_NAME=scylla-cluster
+      - SCYLLA_DC=datacenter1
+      - SCYLLA_RACK=rack1
+    networks:
+      - financi-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  scylla-node2:
+    container_name: scylla-node2
+    image: scylladb/scylla:latest
+    restart: always
+    ports:
+      - "9043:9042"
+      - "9181:9180"
+    command: --seeds=scylla-node1,scylla-node2 --smp 3 --overprovisioned 1 --api-address 0.0.0.0 --memory 1024M
+    volumes:
+      - "scylla-data-node2:/var/lib/scylla"
+    environment:
+      - SCYLLA_CLUSTER_NAME=scylla-cluster
+      - SCYLLA_DC=datacenter1
+      - SCYLLA_RACK=rack1
+    networks:
+      - financi-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  scylla-node3:
+    container_name: scylla-node3
+    image: scylladb/scylla:latest
+    restart: always
+    ports:
+      - "9044:9042"
+      - "9182:9180"
+    command: --seeds=scylla-node1,scylla-node2 --smp 3 --overprovisioned 1 --api-address 0.0.0.0 --memory 1024M
+    volumes:
+      - "scylla-data-node3:/var/lib/scylla"
+    environment:
+      - SCYLLA_CLUSTER_NAME=scylla-cluster
+      - SCYLLA_DC=datacenter1
+      - SCYLLA_RACK=rack1
+    networks:
+      - financi-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  scylla-setup:
+    container_name: scylla-setup
+    build:
+      context: .
+      dockerfile: Dockerfile.setup
+    depends_on:
+      scylla-node1:
+        condition: service_healthy
+      scylla-node2:
+        condition: service_healthy
+      scylla-node3:
+        condition: service_healthy
+    networks:
+      - financi-network
+    restart: "no"
+    
+volumes:
+  scylla-data-node1:
+  scylla-data-node2:
+  scylla-data-node3:
+
+networks:
+  financi-network:
+    external: true

@@ -1,0 +1,50 @@
+services:
+  backend:
+    build: ./backend
+    container_name: webstock-backend
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend:/app
+      - ../scylla-cdc-printer:/cdc-printer:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CASSANDRA_HOST=["scylla-node1","scylla-node2","scylla-node3"]
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_KEYSPACE=stock_data
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - CDC_PRINTER_PATH=/cdc-printer/target/release/scylla-cdc-printer
+
+    restart: always
+    networks:
+      - financi-network
+
+  frontend:
+    build: ./frontend
+    container_name: webstock-frontend
+    ports:
+      - "3005:3000"
+    volumes:
+      - ./frontend:/app
+      - ./frontend/.env.local:/app/.env.local:ro
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api.kytran.io.vn
+      - NEXT_PUBLIC_WS_URL=https://api.kytran.io.vn
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - financi-network
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: webstock-cloudflared
+    command: tunnel --no-autoupdate run --token eyJhIjoiMDZmMzNhZTI4Y2QzMmEwMjAxNzViODE2MzUxNGJjNzMiLCJ0IjoiMmZlYzVmYzgtN2ZiYS00MzY1LTgyZGUtMGRmYjk0ZWMyMDE3IiwicyI6Ik1HTTBNalkxTldVdFpqTXpaUzAwTUdFM0xUZ3hZV0V0WkRnek16TTRORGxoWlRKbSJ9
+    restart: unless-stopped
+    networks:
+      - financi-network
+      
+
+networks:
+  financi-network:
+    external: true

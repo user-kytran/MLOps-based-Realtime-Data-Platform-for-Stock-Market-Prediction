@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+cassandra-driver
+aiokafka
+confluent-kafka
+websockets
+attrs
+certifi
+httpx
+cachetools
+authlib
+fastavro
+yfinance
+prometheus-client
+psycopg2-binary

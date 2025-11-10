@@ -1,0 +1,42 @@
+services:
+
+  jobmanager:
+    build: .
+    container_name: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9091
+      - PYTHONPATH=/opt/flink/usrlib/example
+    ports:  
+      - "8088:8081"
+    command: jobmanager
+    volumes:
+      - .:/opt/flink/usrlib   
+    networks:
+      - financi-network
+  taskmanager:
+    build: .
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 16
+        metrics.reporters: prom
+        metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+        metrics.reporter.prom.port: 9091
+      - PYTHONPATH=/opt/flink/usrlib/example
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    networks:
+      - financi-network
+    volumes:
+      - .:/opt/flink/usrlib
+
+networks:
+  financi-network:
+    external: true

@@ -1,0 +1,66 @@
+✅ ĐÃ SETUP XONG STOCK CDC LATENCY MONITORING
+==============================================
+
+1. TRẠNG THÁI HỆ THỐNG
+   ✅ Backend: webstock-backend:8005 (có prometheus-client)
+   ✅ Prometheus: localhost:9090 (đang scrape metrics)
+   ✅ Grafana: localhost:1020 (anonymous admin)
+   ✅ Metrics endpoint: http://localhost:8005/stocks/metrics
+
+2. METRICS ĐANG HOẠT ĐỘNG
+   - cdc_active_connections: 0 (chưa có WebSocket connection)
+   - cdc_events_total: Chưa có events (chờ CDC data)
+   - cdc_latency_ms: Chưa có latency data
+
+3. KIỂM TRA
+   A. Xem metrics từ backend:
+      curl http://localhost:8005/stocks/metrics | grep cdc
+   
+   B. Xem target trong Prometheus:
+      http://localhost:9090/targets
+      → Tìm "stock_backend" phải có status "UP"
+   
+   C. Query metrics trong Prometheus:
+      http://localhost:9090/graph
+      → Query: cdc_active_connections
+   
+   D. Xem Dashboard trong Grafana:
+      http://localhost:1020
+      → Tìm dashboard "Stock CDC Latency Monitoring"
+
+4. ĐỂ CÓ DỮ LIỆU HIỂN THỊ (QUAN TRỌNG!)
+   ⚠️  CDC consumer chỉ start khi có WebSocket connection!
+   
+   Cách kích hoạt:
+   A. Mở frontend: http://localhost:3005
+   B. WebSocket tự động kết nối tới /ws/stocks_realtime
+   C. CDC consumer sẽ start và stream data từ Scylla
+   D. Metrics sẽ được ghi vào Prometheus mỗi khi có thay đổi
+   
+   Hoặc trigger thủ công:
+   curl -N http://localhost:8005/stocks/ws/stocks_realtime
+
+5. RESTART LẠI MONITORING (nếu cần)
+   cd /home/obito/main/scylla-monitoring
+   
+   ./kill-all.sh
+   
+   ./start-all.sh \
+     -v 5.2 \
+     -d prometheus_data \
+     -D "--network=financi-network -e TZ=Asia/Ho_Chi_Minh" \
+     -s ./prometheus/scylla_servers.yml \
+     -c "TZ=Asia/Ho_Chi_Minh" \
+     -c "GF_DATE_FORMATS_DEFAULT_TIMEZONE=Asia/Ho_Chi_Minh" \
+     --auto-restart \
+     --no-alertmanager \
+     --no-loki \
+     --no-renderer
+
+6. DEBUG NẾU CÓ VẤN ĐỀ
+   - Backend logs: docker logs webstock-backend
+   - Prometheus logs: docker logs aprom
+   - Grafana logs: docker logs agraf
+   - Test WebSocket: Mở frontend và kết nối WebSocket
+   - Xem CDC consumer: docker logs webstock-backend | grep CDC
+

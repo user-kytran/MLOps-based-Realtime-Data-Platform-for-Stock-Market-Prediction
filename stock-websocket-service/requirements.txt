@@ -1,0 +1,10 @@
+confluent-kafka
+yfinance
+fastavro
+pyflink
+attrs
+httpx
+cachetools
+authlib
+pyyaml
+orjson

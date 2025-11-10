@@ -1,0 +1,62 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: aprom
+    restart: unless-stopped
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus_data:/prometheus/data:Z
+      - ./prometheus/build/prometheus.yml:/etc/prometheus/prometheus.yml:z
+      - ./prometheus/prom_rules/:/etc/prometheus/prom_rules/:z
+      - ./prometheus/scylla_servers.yml:/etc/scylla.d/prometheus/targets/scylla_servers.yml:z
+      - ./prometheus/stock_backend_servers.yml:/etc/scylla.d/prometheus/stock_backend_servers.yml:z
+      - /etc/localtime:/etc/localtime:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus/data'
+      - '--web.enable-lifecycle'
+      - '--enable-feature=promql-experimental-functions'
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    networks:
+      - financi-network
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: agraf
+    restart: unless-stopped
+    user: "1000:1000"
+    ports:
+      - "1020:3000"
+    volumes:
+      - ./grafana/build:/var/lib/grafana/dashboards:z
+      - ./grafana/plugins:/var/lib/grafana/plugins:z
+      - ./grafana/provisioning:/var/lib/grafana/provisioning:z
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - GF_DEFAULT_TIMEZONE=Asia/Ho_Chi_Minh
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_PATHS_PROVISIONING=/var/lib/grafana/provisioning
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=scylladb-scylla-datasource
+      - GF_AUTH_BASIC_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
+      - GF_SECURITY_ANGULAR_SUPPORT_ENABLED=false
+      - GF_SERVER_ENABLE_GZIP=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/ver_5.2/scylla-overview.5.2.json
+    depends_on:
+      - prometheus
+    networks:
+      - financi-network
+
+
+networks:
+  financi-network:
+    external: true

@@ -1,0 +1,78 @@
+HƯỚNG DẪN TRIỂN KHAI STOCK CDC LATENCY MONITORING
+================================================
+
+1. CÁC FILE ĐÃ TẠO
+   - web-stockAI/backend/src/api/routers/stocks.py (đã cập nhật với Prometheus metrics)
+   - scylla-monitoring/prometheus/stock_backend_servers.yml (target config)
+   - scylla-monitoring/prometheus/prometheus.yml.template (đã thêm job)
+   - scylla-monitoring/grafana/stock-cdc-latency.json (dashboard)
+   - scylla-monitoring/setup-stock-monitoring.sh (script tự động)
+
+2. METRICS ĐO ĐƯỢC
+   - cdc_latency_ms: Histogram đo latency từ producer_timestamp đến consumer nhận
+   - cdc_events_total: Counter đếm số events CDC theo symbol
+   - cdc_active_connections: Gauge số lượng WebSocket connections
+
+3. CÁCH TRIỂN KHAI
+
+   A. Backend (cài thêm dependency):
+      pip install prometheus-client
+      
+      # Restart backend container để apply code mới
+
+   B. Prometheus (chạy lại monitoring với option -T):
+      cd /home/obito/main/scylla-monitoring && \
+      ./kill-all.sh && \
+      ./start-all.sh \
+      -v 5.2 \
+      -d prometheus_data \
+      -D "--network=financi-network -e TZ=Asia/Ho_Chi_Minh" \
+      -s ./prometheus/scylla_servers.yml \
+      -T ./prometheus/stock_backend_servers.yml \
+      -c "TZ=Asia/Ho_Chi_Minh" \
+      -c "GF_DATE_FORMATS_DEFAULT_TIMEZONE=Asia/Ho_Chi_Minh" \
+      --auto-restart \
+      --no-alertmanager \
+      --no-loki \
+      --no-renderer
+
+   C. Grafana:
+      - Tự động: script sẽ import dashboard
+      - Thủ công: Import file grafana/stock-cdc-latency.json
+      - Tìm dashboard: "Stock CDC Latency Monitoring"
+
+4. DASHBOARD PANELS
+   Panel 1: CDC Latency Percentiles - Line chart P50/P95/P99
+   Panel 2: CDC Latency P95 by Symbol - Latency theo từng mã
+   Panel 3: Current P95 Latency - Gauge hiện tại
+   Panel 4: Active WebSocket Connections - Số connections
+   Panel 5: CDC Events Rate - Throughput events/sec
+   Panel 6: CDC Stats by Symbol - Bảng tổng hợp
+
+5. QUERIES PROMETHEUS HỮU ÍCH
+   # P95 latency
+   histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le))
+   
+   # P95 theo symbol
+   histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le, symbol))
+   
+   # Events/second
+   sum(rate(cdc_events_total[1m]))
+   
+   # Average latency theo symbol
+   sum(rate(cdc_latency_ms_sum[1m])) by (symbol) / sum(rate(cdc_latency_ms_count[1m])) by (symbol)
+
+6. KIỂM TRA
+   - Metrics endpoint: http://localhost:8000/metrics
+   - Prometheus targets: http://localhost:9090/targets (tìm stock_backend)
+   - Grafana: http://localhost:3000
+
+7. CÁCH HOẠT ĐỘNG
+   Producer (t1) → Scylla → CDC → Consumer (t3)
+       ↓                              ↓
+   producer_timestamp          time.time()*1000
+   
+   Latency = t3 - t1 (ms)
+   
+   Đo tại stocks.py line 396-402 ngay trước khi broadcast WebSocket.
+

@@ -1,0 +1,16 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Set environment variable to indicate running in Docker
+ENV RUNNING_IN_DOCKER=true
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy setup script
+COPY scylla_setup.py .
+
+# Run setup
+CMD ["python", "scylla_setup.py"]
