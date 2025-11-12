@@ -1,0 +1,12 @@
+[
+    {
+        "stock_code": "AAM",
+        "error": "api_key not configured (no-tty). call wandb.login(key=[your_api_key])",
+        "total_time": 0.028068065643310547
+    },
+    {
+        "stock_code": "AAA",
+        "error": "api_key not configured (no-tty). call wandb.login(key=[your_api_key])",
+        "total_time": 0.035030364990234375
+    }
+]

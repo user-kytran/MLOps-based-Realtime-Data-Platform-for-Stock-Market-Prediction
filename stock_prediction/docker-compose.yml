@@ -1,0 +1,32 @@
+services:
+  stock-prediction-api:
+    build: .
+    container_name: kytran_prediction_api
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /tmp:/tmp
+      - ~/.config/rclone:/root/.config/rclone
+    ports:
+      - "8006:8006"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - POSTGRES_URL=${POSTGRES_URL}
+      - symbols=${symbols}
+      - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - stock-network
+
+networks:
+  stock-network:
+    driver: bridge

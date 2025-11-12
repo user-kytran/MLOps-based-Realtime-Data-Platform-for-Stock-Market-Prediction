@@ -1,0 +1,822 @@
+{
+    "ADG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close",
+        "(adg_polarity - 0.0) * volume"
+    ],
+    "ABS": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * abs_polarity)",
+        "(high - low) / close",
+        "(OBV - SMA_5) / SMA_5"
+    ],
+    "ADP": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(open - low) / (high - low)",
+        "(adp_polarity - fpt_polarity) * volume"
+    ],
+    "AAM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(aam_polarity - hcm_polarity)"
+    ],
+    "ABT": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(Momentum_3 * abt_polarity) + (Momentum_10 * vnd_polarity)",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "ASP": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(asp_polarity - vnd_polarity) * volume"
+    ],
+    "ACL": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close",
+        "acl_polarity * volume"
+    ],
+    "ACC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 - Momentum_10) / close",
+        "(acc_polarity - vnd_polarity) * close",
+        "(MACD - MACD_Signal) / OBV"
+    ],
+    "APH": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * aph_polarity)",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "ADS": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(ads_polarity - stk_polarity) * volume",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "BCE": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 - Momentum_10) / Momentum_10",
+        "(high - low) / close",
+        "bce_polarity * (close - SMA_5)"
+    ],
+    "AGR": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 * agr_polarity)",
+        "(high - low) / close",
+        "(MACD - MACD_Signal) / MACD_Signal"
+    ],
+    "AST": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "ast_polarity * volume / 1000000"
+    ],
+    "BFC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(BB_Upper - BB_Lower) / close",
+        "(bfc_polarity - vnd_polarity) * volume"
+    ],
+    "BAF": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * Momentum_10)",
+        "(close - BB_Lower) / BB_Lower",
+        "baf_polarity - vnd_polarity"
+    ],
+    "ANV": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(anv_polarity - idi_polarity) * volume",
+        "(high - low) / close"
+    ],
+    "APG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(apg_polarity - fpt_polarity) * volume"
+    ],
+    "BCM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(bcm_polarity - hcm_polarity)"
+    ],
+    "BKG": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(bkg_polarity - vnd_polarity) * volume"
+    ],
+    "BIC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(open - BB_Lower) / (BB_Upper - BB_Lower)",
+        "(MACD - MACD_Signal) / close",
+        "bic_polarity * (close - EMA_10) / EMA_10"
+    ],
+    "ASM": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close",
+        "asm_polarity * (close - SMA_20)"
+    ],
+    "AGG": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * agg_polarity) + (Momentum_10 * vnd_polarity)",
+        "(high - low) / close",
+        "(close - EMA_10) / EMA_10"
+    ],
+    "BMC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * 10) + bmc_polarity",
+        "(high - low) / close",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "BRC": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "MACD_Signal - MACD",
+        "(BB_Upper - BB_Lower) / close",
+        "brc_polarity * (close - EMA_10)"
+    ],
+    "BTP": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(btp_polarity - 0.5) * volume",
+        "(high - low) / close"
+    ],
+    "BSI": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(bsi_polarity - 0.5) * volume"
+    ],
+    "BVH": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(close - BB_Lower) / BB_Lower",
+        "(MACD - MACD_Signal) / close",
+        "bvh_polarity * (close - SMA_5) / SMA_5"
+    ],
+    "BWE": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(open - low) / (high - low)",
+        "bwe_polarity - vnd_polarity"
+    ],
+    "BMI": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(bmi_polarity - vnd_polarity) * volume"
+    ],
+    "BID": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(bid_polarity + ctg_polarity + hcm_polarity + mbb_polarity + lpb_polarity + shb_polarity) / 6",
+        "(high - low) / close"
+    ],
+    "C32": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(c32_polarity - vnd_polarity) * volume"
+    ],
+    "AAA": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / open",
+        "(aaa_polarity - hcm_polarity)"
+    ],
+    "CLL": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "cll_polarity * (close - EMA_10)"
+    ],
+    "CLC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(clc_polarity - vnd_polarity) * volume",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "CCL": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(Momentum_3 * ccl_polarity) + (Momentum_10 * vnd_polarity)"
+    ],
+    "CRC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)",
+        "(crc_polarity - 0.0) / 1.0"
+    ],
+    "BMP": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(Momentum_3 * bmp_polarity) + (Momentum_10 * fpt_polarity)"
+    ],
+    "CNG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(Momentum_3 - Momentum_10) / close",
+        "(cng_polarity - gas_polarity) * volume"
+    ],
+    "CRE": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 * cre_polarity)",
+        "((BB_Upper - BB_Lower) / close)",
+        "(MACD - MACD_Signal)"
+    ],
+    "CDC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close",
+        "cdc_polarity * (high - low) / close"
+    ],
+    "CMG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(close - low) / (high - low)",
+        "cmg_polarity * (close / SMA_5)"
+    ],
+    "CSM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 / close) * 100",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(csm_polarity - hcm_polarity) * 100"
+    ],
+    "CSV": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(csv_polarity - pvt_polarity) * volume"
+    ],
+    "CMX": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(open - low) / (high - low)",
+        "(cmx_polarity * volume) / 100000",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "CTR": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close",
+        "(ctr_polarity - fpt_polarity) * volume"
+    ],
+    "DAH": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * -1)",
+        "(dah_polarity - hcm_polarity)",
+        "(close - low) / (high - low)"
+    ],
+    "CTF": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(open - low) / (high - low)",
+        "ctf_polarity - hcm_polarity"
+    ],
+    "CTS": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * cts_polarity)",
+        "(open - low) / (high - low)",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "CTG": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "Momentum_3",
+        "(open - low) / (high - low)"
+    ],
+    "CTI": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 * cti_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "D2D": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(Momentum_3 * 10) + (d2d_polarity * 100)",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "DCL": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(dcl_polarity - vnd_polarity) * close"
+    ],
+    "DHA": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close",
+        "(dha_polarity - vnd_polarity) * volume"
+    ],
+    "DBT": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(Momentum_3 * Momentum_10)",
+        "(dbt_polarity - vnd_polarity)"
+    ],
+    "DC4": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dc4_polarity - vnd_polarity) * Momentum_3",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "DBD": [
+        "(close - SMA_5) / SMA_5",
+        "MACD_Signal",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "DGW": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "dgw_polarity - vnd_polarity"
+    ],
+    "DCM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dcm_polarity - gas_polarity) * volume",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close"
+    ],
+    "DHM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * dhm_polarity) + (Momentum_10 * fpt_polarity)",
+        "(high - low) / close",
+        "MACD - MACD_Signal"
+    ],
+    "DBC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(dbc_polarity - hcm_polarity)"
+    ],
+    "DSE": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close",
+        "(dse_polarity - vnd_polarity) * volume"
+    ],
+    "DGC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(dgc_polarity - vnd_polarity) * volume",
+        "(high - low) / close"
+    ],
+    "DPG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dpg_polarity - vnd_polarity) * volume",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close"
+    ],
+    "DMC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(dmc_polarity - vds_polarity) * volume"
+    ],
+    "CII": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(cii_polarity - hcm_polarity) * volume",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "CTD": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(Momentum_10 - Momentum_3) / Momentum_3",
+        "(ctd_polarity - (vnd_polarity + hcm_polarity + ree_polarity + vcg_polarity + cii_polarity) / 5) * 100"
+    ],
+    "DSN": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "Momentum_3 * dsn_polarity",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "ACB": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * acb_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "DVP": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dvp_polarity - vnd_polarity) * volume",
+        "(high - low) / close",
+        "MACD / MACD_Signal"
+    ],
+    "DRL": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(drl_polarity - vnd_polarity)",
+        "(Momentum_10 - Momentum_3) / Momentum_3",
+        "(high - low) / close"
+    ],
+    "DHC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(dhc_polarity - hcm_polarity) * close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "DXS": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(high - low) / close",
+        "dxs_polarity - hcm_polarity",
+        "(close - EMA_10) / EMA_10"
+    ],
+    "DTA": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(dta_polarity * open)",
+        "(Momentum_3 - Momentum_10) / close"
+    ],
+    "DSC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * 10) + (dsc_polarity * 1000)",
+        "(high - low) / close",
+        "(close - EMA_10) / EMA_10"
+    ],
+    "DPR": [
+        "Alpha1 = (close - SMA_5) / SMA_5",
+        "Alpha2 = (RSI_14 - 50) / 50",
+        "Alpha3 = (MACD - MACD_Signal) / close",
+        "Alpha4 = (dpr_polarity * volume) / 1000000",
+        "Alpha5 = (high - low) / close"
+    ],
+    "DRC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(open - low) / (high - low)",
+        "drc_polarity - vnd_polarity"
+    ],
+    "FCM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 * fcm_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close"
+    ],
+    "FIR": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(fir_polarity - vnd_polarity)",
+        "(high - low) / close",
+        "MACD - MACD_Signal"
+    ],
+    "ELC": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "elc_polarity - vnd_polarity"
+    ],
+    "EVF": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 - Momentum_3) / Momentum_3",
+        "(evf_polarity - hcm_polarity) * volume",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)"
+    ],
+    "DPM": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dpm_polarity - vnd_polarity) * OBV",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close"
+    ],
+    "GEE": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(gee_polarity + vnd_polarity + gex_polarity + fpt_polarity + lpb_polarity + bid_polarity) / 6"
+    ],
+    "EVE": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "eve_polarity - fpt_polarity",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "GDT": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(gdt_polarity - hcm_polarity)",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)"
+    ],
+    "DIG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(dig_polarity - vnd_polarity) * Momentum_3",
+        "(close - open) / (high - low)",
+        "(MACD - MACD_Signal) / OBV"
+    ],
+    "FIT": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(fit_polarity * 100) + (Momentum_3 * 10)"
+    ],
+    "GIL": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * gil_polarity)",
+        "(high - low) / close",
+        "(MACD - MACD_Signal) / OBV"
+    ],
+    "GEX": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(gex_polarity - vgc_polarity)",
+        "(Momentum_3 * MACD)",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)"
+    ],
+    "FRT": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(close - EMA_10) / EMA_10",
+        "(MACD - MACD_Signal) / close",
+        "(frt_polarity - fpt_polarity)"
+    ],
+    "FPT": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 * fpt_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close"
+    ],
+    "GSP": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 - Momentum_3) / close",
+        "(gas_polarity - gsp_polarity) * volume",
+        "(high - low) / close"
+    ],
+    "FTS": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close",
+        "fts_polarity - fpt_polarity"
+    ],
+    "HAP": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * hap_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close"
+    ],
+    "FCN": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(open - low) / (high - low)",
+        "(fcn_polarity - vnd_polarity) * close",
+        "(close - EMA_10) / EMA_10"
+    ],
+    "FMC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(fmc_polarity - pan_polarity) * volume",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "HAH": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / open",
+        "hah_polarity - vnd_polarity"
+    ],
+    "HAR": [
+        "(close - SMA_5) / SMA_5",
+        "(Momentum_3 * RSI_14)",
+        "(har_polarity - hcm_polarity)",
+        "(BB_Upper - BB_Lower) / close",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "HAG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "hag_polarity * close"
+    ],
+    "HCD": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * hcd_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "GAS": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close",
+        "gas_polarity * (close - SMA_20)"
+    ],
+    "GVR": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * gvr_polarity)",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)",
+        "(MACD - MACD_Signal) / MACD_Signal"
+    ],
+    "HHP": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / MACD_Signal",
+        "(high - low) / close",
+        "(Momentum_3 - Momentum_10) / Momentum_10"
+    ],
+    "EIB": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(eib_polarity - hcm_polarity) * volume",
+        "(high - low) / close",
+        "MACD / MACD_Signal"
+    ],
+    "HHV": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(open - low) / high",
+        "(close - EMA_10) / EMA_10",
+        "(hhv_polarity - 0.5) * RSI_14"
+    ],
+    "HMC": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(open - low) / (high - low)",
+        "(hmc_polarity - hcm_polarity) * volume"
+    ],
+    "GMD": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 - Momentum_10) / Momentum_10",
+        "(gmd_polarity - vsc_polarity) * volume",
+        "(MACD - MACD_Signal) / close"
+    ],
+    "HID": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * hid_polarity)",
+        "(MACD - MACD_Signal) / close",
+        "(BB_Upper - BB_Lower) / close"
+    ],
+    "HDG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(open - BB_Lower) / (BB_Upper - BB_Lower)",
+        "(MACD - MACD_Signal) / close",
+        "hdg_polarity - vci_polarity"
+    ],
+    "HHS": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_3 * MACD_Signal)",
+        "(hhs_polarity - vnm_polarity)",
+        "(high - low) / close"
+    ],
+    "DXG": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(high - low) / close",
+        "MACD - MACD_Signal",
+        "dxg_polarity - vnm_polarity"
+    ],
+    "HDB": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "Momentum_10",
+        "(MACD - MACD_Signal) / close",
+        "hdb_polarity * (close - SMA_5)"
+    ],
+    "HSL": [
+        "(close - SMA_5) / SMA_5",
+        "(Momentum_3 / close) * hsl_polarity",
+        "(MACD - MACD_Signal) / close",
+        "(RSI_14 - 50) / 100",
+        "(high - low) / close"
+    ],
+    "HAX": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(Momentum_10 / close) * 100",
+        "(hax_polarity - vnd_polarity)",
+        "(close - BB_Lower) / (BB_Upper - BB_Lower)"
+    ],
+    "HII": [
+        "(close - SMA_5) / SMA_5",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(hii_polarity - stb_polarity)"
+    ],
+    "HT1": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(ht1_polarity * 100) + (MACD - MACD_Signal)",
+        "(high - low) / close",
+        "(Momentum_3 * EMA_10) / volume"
+    ],
+    "HTG": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(high - low) / close",
+        "(htg_polarity - vcb_polarity) * volume"
+    ],
+    "HPX": [
+        "(close - SMA_20) / SMA_20",
+        "(RSI_14 - 50) / 50",
+        "(MACD - MACD_Signal) / close",
+        "(Momentum_3 * hpx_polarity) + (Momentum_10 * vnd_polarity)",
+        "(BB_Upper - BB_Lower) / OBV"
+    ],
+    "HTI": [
+        "(close - SMA_5) / SMA_5"
