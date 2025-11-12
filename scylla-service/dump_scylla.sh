@@ -1,4 +1,4 @@
-#!/bin/bash
+
 # Script dump toàn bộ bảng trong keyspace stock_data ra CSV
 
 set -e
@@ -11,7 +11,7 @@ TABLES=(
   stock_news
 )
 
-# Create export directory in container if it doesn't exist
+
 echo "Tạo thư mục export trong container..."
 docker exec scylla-node1 mkdir -p /var/lib/scylla/export
 docker exec scylla-node1 chmod 777 /var/lib/scylla/export
@@ -19,15 +19,15 @@ docker exec scylla-node1 chmod 777 /var/lib/scylla/export
 for tbl in "${TABLES[@]}"; do
   echo "Đang export bảng $tbl ..."
   
-  # Try to export the table
+  
   if docker exec scylla-node1 cqlsh -e "COPY stock_data.$tbl TO '/var/lib/scylla/export/$tbl.csv' WITH HEADER = true"; then
     echo "Copy file $tbl.csv ra host ..."
     
-    # Copy file from container to host
+    
     if docker cp scylla-node1:/var/lib/scylla/export/$tbl.csv "./$tbl.csv"; then
       echo "Hoàn thành: $tbl.csv"
       
-      # Clean up file in container
+      
       docker exec scylla-node1 rm -f /var/lib/scylla/export/$tbl.csv
     else
       echo "Lỗi khi copy file $tbl.csv từ container"
@@ -39,7 +39,7 @@ for tbl in "${TABLES[@]}"; do
   echo "---------------------------------------"
 done
 
-# Clean up export directory in container
+
 echo "Dọn dẹp thư mục export trong container..."
 docker exec scylla-node1 rm -rf /var/lib/scylla/export
 

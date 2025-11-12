@@ -2,6 +2,7 @@ from math import log
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
+import pendulum
 from news_stock.newscrawler import NewsCrawler
 import os
 import requests
@@ -341,8 +342,8 @@ default_args = {
 with DAG(
     dag_id='vietstock_news_crawler',
     default_args=default_args,
-    schedule_interval='@daily',
-    start_date=datetime(2025, 1, 1),
+    schedule_interval='@hourly',  # Chạy mỗi 1 tiếng
+    start_date=pendulum.datetime(2025, 1, 1, tz='Asia/Ho_Chi_Minh'),
     catchup=False,
     tags=['vietstock', 'crawler']
 ) as dag:

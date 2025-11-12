@@ -95,7 +95,7 @@ dag = DAG(
     'dump_to_warehouse',
     default_args=default_args,
     description='Daily dump ScyllaDB to Warehouse',
-    schedule_interval='0 15 * * *',  # 15:00 Vietnam time (UTC+7)
+    schedule_interval='0 23 * * *',  # 23:00 Vietnam time (UTC+7)
     start_date=pendulum.datetime(2025, 10, 1, tz=local_tz),
     catchup=False,
     tags=['warehouse', 'etl'],

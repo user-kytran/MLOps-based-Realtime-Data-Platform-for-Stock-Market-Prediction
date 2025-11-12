@@ -7,6 +7,8 @@ import { BarChart3 } from "lucide-react"
 import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts"
 import { getApiUrl, getWsUrl } from "@/lib/config"
 import type { StockInfo } from "@/types/stock"
+import { Icons } from "@/components/icons"
+import { usePredictions } from "@/hooks/usePredictions"
 
 interface IntradayData {
   time: string
@@ -41,6 +43,45 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
   const [chartData, setChartData] = useState<IntradayData[]>([])
   const [isRealtime, setIsRealtime] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
+  const predictions = usePredictions()
+  const trend = predictions[symbol]?.predictionTrend ?? null
+
+  const trendBadge = (() => {
+    if (!trend) {
+      return (
+        <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+          Prediction Trend: —
+        </div>
+      )
+    }
+
+    const map = {
+      up: {
+        label: "Prediction Trend: Bullish",
+        className: "bg-emerald-50 text-emerald-600 border border-emerald-200",
+        Icon: Icons.TrendingUp,
+      },
+      down: {
+        label: "Prediction Trend: Bearish",
+        className: "bg-rose-50 text-rose-600 border border-rose-200",
+        Icon: Icons.TrendingDown,
+      },
+      neutral: {
+        label: "Prediction Trend: Neutral",
+        className: "bg-slate-50 text-slate-500 border border-slate-200",
+        Icon: Icons.Minus,
+      },
+    } as const
+
+    const config = map[trend]
+
+    return (
+      <div className={`flex items-center gap-3 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide shadow-sm ${config.className}`}>
+        <config.Icon className="h-4 w-4" />
+        <span>{config.label}</span>
+      </div>
+    )
+  })()
 
   const getPriceDomain = () => {
     if (chartData.length === 0) return [0, 100]
@@ -232,7 +273,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center gap-3">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-2xl font-extrabold">
             <BarChart3 className="h-5 w-5 text-blue-600 text-2xl font-extrabold" />
             Price chart {symbol} - Today
@@ -242,6 +283,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
               </span>
             )}
           </CardTitle>
+          {trendBadge}
         </div>
       </CardHeader>
       <CardContent>

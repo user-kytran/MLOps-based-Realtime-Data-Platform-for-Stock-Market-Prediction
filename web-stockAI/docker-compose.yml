@@ -26,6 +26,8 @@ services:
       - "3005:3000"
     volumes:
       - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
       - ./frontend/.env.local:/app/.env.local:ro
     environment:
       - NEXT_PUBLIC_API_URL=https://api.kytran.io.vn

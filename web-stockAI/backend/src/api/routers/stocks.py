@@ -364,16 +364,12 @@ async def get_stock_predictions():
         conn = psycopg2.connect(**WAREHOUSE_CONFIG)
         cur = conn.cursor()
         
-        cur.execute("SELECT MAX(prediction_date) FROM fact_predictions")
-        latest_date = cur.fetchone()[0]
-        if latest_date is None:
-            return []
         cur.execute("""
-            SELECT stock_code, prediction_date, predicted_price, confidence_score 
+            SELECT DISTINCT ON (stock_code) 
+                stock_code, prediction_date, predicted_price, confidence_score 
             FROM fact_predictions 
-            WHERE prediction_date = %s
-            ORDER BY stock_code
-        """, (latest_date,))
+            ORDER BY stock_code, prediction_date DESC
+        """)
         
         results = []
         for row in cur.fetchall():
