@@ -41,7 +41,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: webstock-cloudflared
-    command: tunnel --no-autoupdate run --token eyJhIjoiMDZmMzNhZTI4Y2QzMmEwMjAxNzViODE2MzUxNGJjNzMiLCJ0IjoiMmZlYzVmYzgtN2ZiYS00MzY1LTgyZGUtMGRmYjk0ZWMyMDE3IiwicyI6Ik1HTTBNalkxTldVdFpqTXpaUzAwTUdFM0xUZ3hZV0V0WkRnek16TTRORGxoWlRKbSJ9
+    command: tunnel --no-autoupdate run --token ${API_KEY_CLOUDFLARE}
     restart: unless-stopped
     networks:
       - financi-network

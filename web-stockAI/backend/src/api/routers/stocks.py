@@ -392,6 +392,160 @@ async def get_stock_predictions():
             conn.close()
 
 
+# Lấy tất cả dữ liệu dự đoán từ warehouse (có thể filter theo symbol)
+@stock_router.get("/stock_predictions_history")
+async def get_stock_predictions_history(symbol: str = None):
+    WAREHOUSE_CONFIG = {
+        'host': os.getenv('WAREHOUSE_HOST', 'warehouse-db'),
+        'database': os.getenv('WAREHOUSE_DB', 'warehouse'),
+        'user': os.getenv('WAREHOUSE_USER', 'warehouse_user'),
+        'password': os.getenv('WAREHOUSE_PASSWORD', 'warehouse_pass')
+    }
+    
+    try:
+        conn = psycopg2.connect(**WAREHOUSE_CONFIG)
+        cur = conn.cursor()
+        
+        if symbol:
+            cur.execute("""
+                SELECT stock_code, prediction_date, predicted_price, confidence_score 
+                FROM fact_predictions 
+                WHERE stock_code = %s
+                ORDER BY prediction_date DESC
+            """, (symbol,))
+        else:
+            cur.execute("""
+                SELECT stock_code, prediction_date, predicted_price, confidence_score 
+                FROM fact_predictions 
+                ORDER BY stock_code, prediction_date DESC
+            """)
+        
+        results = []
+        for row in cur.fetchall():
+            results.append({
+                "symbol": row[0],
+                "prediction_date": row[1].isoformat(),
+                "predicted_price": float(row[2]),
+                "confidence_score": float(row[3]) if row[3] is not None else None
+            })
+            
+        return results
+            
+    except Exception as e:
+        logger.error(f"Error fetching predictions history from warehouse: {e}")
+        raise
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
+
+
+# Tính Accuracy của mô hình dự đoán
+@stock_router.get("/stock_predictions_accuracy")
+async def get_stock_predictions_accuracy(db=Depends(get_db)):
+    WAREHOUSE_CONFIG = {
+        'host': os.getenv('WAREHOUSE_HOST', 'warehouse-db'),
+        'database': os.getenv('WAREHOUSE_DB', 'warehouse'),
+        'user': os.getenv('WAREHOUSE_USER', 'warehouse_user'),
+        'password': os.getenv('WAREHOUSE_PASSWORD', 'warehouse_pass')
+    }
+    
+    try:
+        conn = psycopg2.connect(**WAREHOUSE_CONFIG)
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT stock_code, prediction_date, predicted_price
+            FROM fact_predictions
+            ORDER BY stock_code, prediction_date
+        """)
+        
+        predictions = cur.fetchall()
+        
+        price_cache = {}
+        symbol_dates_map = {}
+        
+        for pred in predictions:
+            stock_code = pred[0]
+            prediction_date = pred[1]
+            
+            if stock_code not in symbol_dates_map:
+                symbol_dates_map[stock_code] = set()
+            
+            symbol_dates_map[stock_code].add(prediction_date)
+            
+            prev_date = prediction_date - datetime.timedelta(days=1)
+            while prev_date.weekday() >= 5:
+                prev_date = prev_date - datetime.timedelta(days=1)
+            symbol_dates_map[stock_code].add(prev_date)
+        
+        for stock_code, dates in symbol_dates_map.items():
+            symbol_with_exchange = stock_code + ".VN"
+            min_date = min(dates)
+            max_date = max(dates)
+            
+            query = "SELECT trade_date, close FROM stock_daily_summary WHERE symbol = %s AND trade_date >= %s AND trade_date <= %s"
+            rows = db.execute(query, (symbol_with_exchange, min_date, max_date))
+            for row in rows:
+                trade_date = row.trade_date
+                if hasattr(trade_date, 'date'):
+                    trade_date = trade_date.date()
+                price_cache[(stock_code, trade_date)] = float(row.close)
+        
+        results = []
+        accuracy_by_symbol = {}
+        
+        for pred in predictions:
+            stock_code = pred[0]
+            prediction_date = pred[1]
+            predicted_price = float(pred[2])
+            
+            prev_date = prediction_date - datetime.timedelta(days=1)
+            while prev_date.weekday() >= 5:
+                prev_date = prev_date - datetime.timedelta(days=1)
+            
+            prev_close = price_cache.get((stock_code, prev_date))
+            actual_close = price_cache.get((stock_code, prediction_date))
+            
+            if prev_close is None or actual_close is None:
+                continue
+            
+            predicted_trend = "up" if predicted_price > prev_close else ("down" if predicted_price < prev_close else "neutral")
+            actual_trend = "up" if actual_close > prev_close else ("down" if actual_close < prev_close else "neutral")
+            
+            is_correct = predicted_trend == actual_trend
+            
+            if stock_code not in accuracy_by_symbol:
+                accuracy_by_symbol[stock_code] = {"correct": 0, "total": 0}
+            
+            accuracy_by_symbol[stock_code]["total"] += 1
+            if is_correct:
+                accuracy_by_symbol[stock_code]["correct"] += 1
+        
+        for symbol, stats in accuracy_by_symbol.items():
+            accuracy = (stats["correct"] / stats["total"]) * 100 if stats["total"] > 0 else 0
+            results.append({
+                "symbol": symbol,
+                "accuracy": round(accuracy, 2),
+                "correct": stats["correct"],
+                "total": stats["total"]
+            })
+        
+        results.sort(key=lambda x: x["symbol"])
+        return results
+        
+    except Exception as e:
+        logger.error(f"Error calculating predictions accuracy: {e}")
+        raise
+    finally:
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
+    
+
+
 
 @stock_router.get("/stock_prices_week")
 async def get_stock_prices_week(symbol: str, db=Depends(get_db)):

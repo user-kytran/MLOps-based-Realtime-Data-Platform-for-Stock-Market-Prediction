@@ -1,8 +1,7 @@
 "use client"
 
 import { StockChart, HistoricalChart } from "@/components/charts"
-import { AIPrediction } from "@/components/charts/ai-prediction"
-import { FinancialData } from "@/components/market/financial-data"
+import { StockPrediction } from "@/components/charts/stock-prediction"
 import { StockNews } from "@/components/news/stock-news"
 import { Header } from "@/components/layout/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -83,7 +82,7 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
             <TabsTrigger value="statistics" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">Statistics</TabsTrigger>
             <TabsTrigger value="financial" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">Financial</TabsTrigger>
             <TabsTrigger value="company" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">Company</TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">AI</TabsTrigger>
+            <TabsTrigger value="predict" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">Predict</TabsTrigger>
             <TabsTrigger value="news" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-6 py-2">News</TabsTrigger>
           </TabsList>
 
@@ -123,8 +122,8 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
             <StockCompanyInfo stockInfo={stockInfo} />
           </TabsContent>
 
-          <TabsContent value="ai">
-            <AIPrediction symbol={stockInfo.symbol} />
+          <TabsContent value="predict">
+            <StockPrediction symbol={stockInfo.symbol} />
           </TabsContent>
 
           <TabsContent value="news">
