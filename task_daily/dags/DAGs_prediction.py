@@ -5,7 +5,9 @@ from datetime import timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 import pendulum
-
+import dotenv
+dotenv.load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
+TRAINING_API_URL = os.getenv("TRAINING_API_URL")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,12 +17,11 @@ logger = logging.getLogger(__name__)
 
 def run_prediction():
     try:
-        response = requests.get("http://localhost:8006/stock-prediction")
-        response.raise_for_status()
-        data = response.json()
-        logger.info(f"Prediction results: {data}")
+        logger.info(f"Triggering prediction API: {TRAINING_API_URL}")
+        requests.post(TRAINING_API_URL, timeout=5)  # Chỉ trigger, không đợi kết quả
+        logger.info("Prediction API triggered successfully")
     except Exception as e:
-        logger.error(f"Error running prediction: {e}")
+        logger.warning(f"Failed to trigger prediction API: {e}")
 
 
 default_args = {
@@ -40,7 +41,7 @@ with DAG(
 ) as dag:
 
     run_prediction_task = PythonOperator(
-        task_id='run_prediction',
+        task_id='Train_model_and_predict',
         python_callable=run_prediction,
     )
 

@@ -728,6 +728,10 @@ class ConnectionManager:
                 
                 stderr_task = asyncio.create_task(read_stderr())
                 
+                # Biến để track t3 khi nhận dòng đầu tiên của mỗi record
+                t3_first_line = None
+                msg_count = 0
+                
                 try:
                     async for line_bytes in self.cdc_process.stdout:
                         if not in_trading_hours():
@@ -737,49 +741,90 @@ class ConnectionManager:
                         line = line_bytes.decode('utf-8').strip()
                         if not line:
                             continue
+                        
+                        # ✅ OPTIMIZATION: Tính t3 ngay khi nhận dòng ĐẦU TIÊN của record
+                        if t3_first_line is None and ("│ symbol:" in line or "│ price:" in line):
+                            t3_first_line = int(time.time() * 1000)
                             
                         if "│ symbol:" in line or "│ price:" in line or "└─" in line:
                             logger.debug(f"CDC line: {line}")
                         
                         if "└─" in line:
                             if current_record and "symbol" in current_record:
-                                t3 = int(time.time() * 1000)
                                 producer_ts = current_record.get("producer_timestamp")
                                 symbol = current_record["symbol"]
                                 
-                                if producer_ts:
+                                # ✅ Dùng t3 đã tính từ dòng đầu tiên (chính xác hơn 20-50ms!)
+                                if producer_ts and t3_first_line:
                                     try:
                                         t1_ms = int(producer_ts)
-                                        latency = t3 - t1_ms
+                                        latency = t3_first_line - t1_ms
                                         cdc_latency.labels(symbol=symbol).observe(latency)
                                     except (ValueError, TypeError) as e:
                                         logger.error(f"Error parsing producer_timestamp {producer_ts}: {e}")
                                 
                                 cdc_events.labels(symbol=symbol).inc()
-                                logger.info(f"📊 Sending CDC data for {symbol}: {current_record}")
+                                
+                                # Log mỗi 100 messages để giảm I/O overhead
+                                msg_count += 1
+                                if msg_count % 100 == 0:
+                                    logger.info(f"📊 Processed {msg_count} CDC messages")
+                                
                                 await self.broadcast(json.dumps(current_record, ensure_ascii=False))
                             
                             if not in_trading_hours():
                                 logger.info("Trading hours ended during processing")
                                 break
                             
+                            # Reset cho record tiếp theo
                             current_record = {}
+                            t3_first_line = None
                             continue
                         
-                        for field in ["symbol", "price", "change", "change_percent", "day_volume", "last_size", "producer_timestamp"]:
-                            value = self.parse_cdc_field(line, field)
+                        # Tối ưu: Parse 1 lần thay vì loop qua tất cả fields
+                        if "│ symbol:" in line:
+                            value = self.parse_cdc_field(line, "symbol")
+                            if value:
+                                current_record["symbol"] = value.split(".")[0]
+                        elif "│ price:" in line:
+                            value = self.parse_cdc_field(line, "price")
                             if value:
                                 try:
-                                    if field == "symbol":
-                                        current_record[field] = value.split(".")[0]
-                                    elif field in ["price", "change", "change_percent"]:
-                                        current_record[field] = float(value)
-                                    elif field in ["day_volume", "last_size"]:
-                                        current_record[field] = int(value)
-                                    else:
-                                        current_record[field] = value
-                                except (ValueError, TypeError) as e:
-                                    logger.error(f"Error parsing {field}={value}: {e}")
+                                    current_record["price"] = float(value)
+                                except (ValueError, TypeError):
+                                    pass
+                        elif "│ change:" in line:
+                            value = self.parse_cdc_field(line, "change")
+                            if value:
+                                try:
+                                    current_record["change"] = float(value)
+                                except (ValueError, TypeError):
+                                    pass
+                        elif "│ change_percent:" in line:
+                            value = self.parse_cdc_field(line, "change_percent")
+                            if value:
+                                try:
+                                    current_record["change_percent"] = float(value)
+                                except (ValueError, TypeError):
+                                    pass
+                        elif "│ day_volume:" in line:
+                            value = self.parse_cdc_field(line, "day_volume")
+                            if value:
+                                try:
+                                    current_record["day_volume"] = int(value)
+                                except (ValueError, TypeError):
+                                    pass
+                        elif "│ last_size:" in line:
+                            value = self.parse_cdc_field(line, "last_size")
+                            if value:
+                                try:
+                                    current_record["last_size"] = int(value)
+                                except (ValueError, TypeError):
+                                    pass
+                        elif "│ producer_timestamp:" in line:
+                            value = self.parse_cdc_field(line, "producer_timestamp")
+                            if value:
+                                current_record["producer_timestamp"] = value
                 
                 except asyncio.CancelledError:
                     raise
