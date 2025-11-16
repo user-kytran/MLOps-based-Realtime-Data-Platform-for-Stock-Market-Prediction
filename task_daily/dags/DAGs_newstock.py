@@ -11,8 +11,8 @@ import dotenv
 from typing import Optional, Dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.schema import HumanMessage
-from langchain.output_parsers.json import SimpleJsonOutputParser
+from langchain_core.messages import HumanMessage
+from langchain_core.output_parsers import JsonOutputParser
 
 
 dotenv.load_dotenv()

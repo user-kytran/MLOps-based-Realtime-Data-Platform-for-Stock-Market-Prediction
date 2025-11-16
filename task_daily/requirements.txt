@@ -1,7 +1,9 @@
+langchain
+langchain_community
+langchain_core
 requests
 beautifulsoup4
 lxml
 cassandra-driver
 langchain_google_genai
-langchain
-langchain_community
+holidays
