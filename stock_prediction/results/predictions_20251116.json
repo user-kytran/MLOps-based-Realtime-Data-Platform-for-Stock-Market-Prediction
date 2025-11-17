@@ -1,0 +1,2266 @@
+[
+  {
+    "stock_code": "AAA",
+    "predicted_price": 8272.2041015625,
+    "model_name": "StockModel_AAA_20251116_170204_Transformer",
+    "confidence": 0.9994522155466908,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "AAM",
+    "predicted_price": 7232.38037109375,
+    "model_name": "StockModel_AAM_20251116_170406_Transformer",
+    "confidence": 0.9994027276471397,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ABS",
+    "predicted_price": 1248.4361572265625,
+    "model_name": "StockModel_ABS_20251116_170559_Transformer",
+    "confidence": 0.999724349292808,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ABT",
+    "predicted_price": 68519.1640625,
+    "model_name": "StockModel_ABT_20251116_170710_Transformer",
+    "confidence": 0.9995965981600268,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ACB",
+    "predicted_price": 25542.4765625,
+    "model_name": "StockModel_ACB_20251116_170853_Transformer",
+    "confidence": 0.9995435148334281,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ACC",
+    "predicted_price": 14132.8076171875,
+    "model_name": "StockModel_ACC_20251116_171051_Transformer",
+    "confidence": 0.9996864642360682,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ACL",
+    "predicted_price": 12841.2578125,
+    "model_name": "StockModel_ACL_20251116_171240_Transformer",
+    "confidence": 0.9996320316406675,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ADG",
+    "predicted_price": 11683.1630859375,
+    "model_name": "StockModel_ADG_20251116_171429_Transformer",
+    "confidence": 0.9991969718102425,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ADP",
+    "predicted_price": 23863.1640625,
+    "model_name": "StockModel_ADP_20251116_171537_Transformer",
+    "confidence": 0.9993438875946206,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ADS",
+    "predicted_price": 8313.6279296875,
+    "model_name": "StockModel_ADS_20251116_171718_Transformer",
+    "confidence": 0.9997161774777408,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "AGG",
+    "predicted_price": 18435.869140625,
+    "model_name": "StockModel_AGG_20251116_171841_Transformer",
+    "confidence": 0.9994874827593433,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "AGR",
+    "predicted_price": 16224.3974609375,
+    "model_name": "StockModel_AGR_20251116_171952_Transformer",
+    "confidence": 0.9995440315541511,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ANV",
+    "predicted_price": 27795.869140625,
+    "model_name": "StockModel_ANV_20251116_172142_Transformer",
+    "confidence": 0.9996220858180638,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "APG",
+    "predicted_price": 11772.84375,
+    "model_name": "StockModel_APG_20251116_172330_Transformer",
+    "confidence": 0.9996471375083714,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "APH",
+    "predicted_price": 5869.57177734375,
+    "model_name": "StockModel_APH_20251116_172513_Transformer",
+    "confidence": 0.9995285649954679,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ASM",
+    "predicted_price": 6843.51220703125,
+    "model_name": "StockModel_ASM_20251116_172614_Transformer",
+    "confidence": 0.9995991609309642,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ASP",
+    "predicted_price": 4545.353515625,
+    "model_name": "StockModel_ASP_20251116_172807_Transformer",
+    "confidence": 0.9996373144370708,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "AST",
+    "predicted_price": 72625.984375,
+    "model_name": "StockModel_AST_20251116_172952_Transformer",
+    "confidence": 0.9987895824352824,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BAF",
+    "predicted_price": 30528.28515625,
+    "model_name": "StockModel_BAF_20251116_173113_Transformer",
+    "confidence": 0.9982853244003451,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BCE",
+    "predicted_price": 11580.482421875,
+    "model_name": "StockModel_BCE_20251116_173202_Transformer",
+    "confidence": 0.9997611674562065,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BCM",
+    "predicted_price": 70582.2421875,
+    "model_name": "StockModel_BCM_20251116_173345_Transformer",
+    "confidence": 0.9993029857848216,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BFC",
+    "predicted_price": 45146.01171875,
+    "model_name": "StockModel_BFC_20251116_173502_Transformer",
+    "confidence": 0.9994716477100885,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BIC",
+    "predicted_price": 23511.70703125,
+    "model_name": "StockModel_BIC_20251116_173640_Transformer",
+    "confidence": 0.999296336380829,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BID",
+    "predicted_price": 40821.58984375,
+    "model_name": "StockModel_BID_20251116_173828_Transformer",
+    "confidence": 0.9994639519857985,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BKG",
+    "predicted_price": 3095.126953125,
+    "model_name": "StockModel_BKG_20251116_174020_Transformer",
+    "confidence": 0.9993183149104964,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BMC",
+    "predicted_price": 16677.158203125,
+    "model_name": "StockModel_BMC_20251116_174117_Transformer",
+    "confidence": 0.999454847414354,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BMI",
+    "predicted_price": 19166.13671875,
+    "model_name": "StockModel_BMI_20251116_174300_Transformer",
+    "confidence": 0.9997057891757739,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BMP",
+    "predicted_price": 166647.1875,
+    "model_name": "StockModel_BMP_20251116_174440_Transformer",
+    "confidence": 0.9997355265708389,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BRC",
+    "predicted_price": 13222.919921875,
+    "model_name": "StockModel_BRC_20251116_174626_Transformer",
+    "confidence": 0.9994545147423437,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BSI",
+    "predicted_price": 44093.83203125,
+    "model_name": "StockModel_BSI_20251116_174806_Transformer",
+    "confidence": 0.9994755876300705,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BTP",
+    "predicted_price": 10126.443359375,
+    "model_name": "StockModel_BTP_20251116_174952_Transformer",
+    "confidence": 0.9994300575749012,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BVH",
+    "predicted_price": 52971.03515625,
+    "model_name": "StockModel_BVH_20251116_175140_Transformer",
+    "confidence": 0.9994068179385422,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "BWE",
+    "predicted_price": 45895.01953125,
+    "model_name": "StockModel_BWE_20251116_175324_Transformer",
+    "confidence": 0.9992714174314854,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "C32",
+    "predicted_price": 23812.619140625,
+    "model_name": "StockModel_C32_20251116_175440_Transformer",
+    "confidence": 0.9994722366628043,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CCL",
+    "predicted_price": 6693.283203125,
+    "model_name": "StockModel_CCL_20251116_175627_Transformer",
+    "confidence": 0.9995424145799866,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CDC",
+    "predicted_price": 24972.451171875,
+    "model_name": "StockModel_CDC_20251116_175813_Transformer",
+    "confidence": 0.9996648621131429,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CII",
+    "predicted_price": 25020.34375,
+    "model_name": "StockModel_CII_20251116_175959_Transformer",
+    "confidence": 0.9996431889432025,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CLC",
+    "predicted_price": 50385.109375,
+    "model_name": "StockModel_CLC_20251116_180151_Transformer",
+    "confidence": 0.9995647004431389,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CLL",
+    "predicted_price": 30200.029296875,
+    "model_name": "StockModel_CLL_20251116_180342_Transformer",
+    "confidence": 0.9992312809390091,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CMG",
+    "predicted_price": 41425.58203125,
+    "model_name": "StockModel_CMG_20251116_180533_Transformer",
+    "confidence": 0.9994226219006705,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CMX",
+    "predicted_price": 6152.904296875,
+    "model_name": "StockModel_CMX_20251116_180729_Transformer",
+    "confidence": 0.9995394783204583,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CNG",
+    "predicted_price": 24327.94921875,
+    "model_name": "StockModel_CNG_20251116_180911_Transformer",
+    "confidence": 0.9992548773478122,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CRC",
+    "predicted_price": 8522.3662109375,
+    "model_name": "StockModel_CRC_20251116_181053_Transformer",
+    "confidence": 0.9993012980059051,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CRE",
+    "predicted_price": 8566.478515625,
+    "model_name": "StockModel_CRE_20251116_181212_Transformer",
+    "confidence": 0.9995032583602961,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CSM",
+    "predicted_price": 14123.9453125,
+    "model_name": "StockModel_CSM_20251116_181329_Transformer",
+    "confidence": 0.9988241399206002,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CSV",
+    "predicted_price": 33295.90234375,
+    "model_name": "StockModel_CSV_20251116_181509_Transformer",
+    "confidence": 0.999341763138298,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CTD",
+    "predicted_price": 96238.6015625,
+    "model_name": "StockModel_CTD_20251116_181637_Transformer",
+    "confidence": 0.9995933360528692,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CTF",
+    "predicted_price": 21212.859375,
+    "model_name": "StockModel_CTF_20251115_000010_Transformer",
+    "confidence": 0.9995250663031613,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "CTG",
+    "predicted_price": 48774.9140625,
+    "model_name": "StockModel_CTG_20251116_181934_Transformer",
+    "confidence": 0.9995661122178522,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CTI",
+    "predicted_price": 22326.10546875,
+    "model_name": "StockModel_CTI_20251116_182110_Transformer",
+    "confidence": 0.9994705886964909,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CTR",
+    "predicted_price": 100381.375,
+    "model_name": "StockModel_CTR_20251116_182257_Transformer",
+    "confidence": 0.999568832053917,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "CTS",
+    "predicted_price": 36864.15234375,
+    "model_name": "StockModel_CTS_20251115_000417_Transformer",
+    "confidence": 0.9995624264574117,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "D2D",
+    "predicted_price": 35612.4140625,
+    "model_name": "StockModel_D2D_20251115_000527_Transformer",
+    "confidence": 0.9996025366246272,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DAH",
+    "predicted_price": 4185.8857421875,
+    "model_name": "StockModel_DAH_20251115_000639_Transformer",
+    "confidence": 0.9995712481830679,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DBC",
+    "predicted_price": 25654.083984375,
+    "model_name": "StockModel_DBC_20251115_000738_Transformer",
+    "confidence": 0.9995222963935521,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DBD",
+    "predicted_price": 53116.23046875,
+    "model_name": "StockModel_DBD_20251116_183025_Transformer",
+    "confidence": 0.9992725890301536,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DBT",
+    "predicted_price": 11306.3828125,
+    "model_name": "StockModel_DBT_20251116_183146_Transformer",
+    "confidence": 0.9993967892482984,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DC4",
+    "predicted_price": 12012.193359375,
+    "model_name": "StockModel_DC4_20251116_170204_Transformer",
+    "confidence": 0.9996112290143953,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DCL",
+    "predicted_price": 36433.5546875,
+    "model_name": "StockModel_DCL_20251116_170405_Transformer",
+    "confidence": 0.9996581507812559,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DCM",
+    "predicted_price": 35968.19140625,
+    "model_name": "StockModel_DCM_20251115_001302_Transformer",
+    "confidence": 0.9995963174823438,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DGC",
+    "predicted_price": 95423.6875,
+    "model_name": "StockModel_DGC_20251116_170733_Transformer",
+    "confidence": 0.9995420819718038,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DGW",
+    "predicted_price": 32056.638671875,
+    "model_name": "StockModel_DGW_20251116_170914_Transformer",
+    "confidence": 0.9997029134067118,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DHA",
+    "predicted_price": 55194.3203125,
+    "model_name": "StockModel_DHA_20251116_171054_Transformer",
+    "confidence": 0.9995258497530524,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DHC",
+    "predicted_price": 32555.171875,
+    "model_name": "StockModel_DHC_20251116_171247_Transformer",
+    "confidence": 0.9997937540400106,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DHM",
+    "predicted_price": 6266.8505859375,
+    "model_name": "StockModel_DHM_20251116_171436_Transformer",
+    "confidence": 0.9994706724326181,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DIG",
+    "predicted_price": 20832.078125,
+    "model_name": "StockModel_DIG_20251116_171621_Transformer",
+    "confidence": 0.9998254766811426,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DMC",
+    "predicted_price": 63433.70703125,
+    "model_name": "StockModel_DMC_20251115_002109_Transformer",
+    "confidence": 0.999516139424885,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DPG",
+    "predicted_price": 45739.74609375,
+    "model_name": "StockModel_DPG_20251115_002220_Transformer",
+    "confidence": 0.9996214682583637,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DPM",
+    "predicted_price": 22511.830078125,
+    "model_name": "StockModel_DPM_20251115_002338_Transformer",
+    "confidence": 0.9997176382316025,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DPR",
+    "predicted_price": 36648.94140625,
+    "model_name": "StockModel_DPR_20251116_172259_Transformer",
+    "confidence": 0.9996366071108437,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DRC",
+    "predicted_price": 16596.025390625,
+    "model_name": "StockModel_DRC_20251116_172445_Transformer",
+    "confidence": 0.9990576233239319,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DRL",
+    "predicted_price": 50175.33984375,
+    "model_name": "StockModel_DRL_20251116_172626_Transformer",
+    "confidence": 0.9995393516144052,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DSC",
+    "predicted_price": 11386.53125,
+    "model_name": "StockModel_DSC_20251116_172814_Transformer",
+    "confidence": 0.9995421819430435,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DSE",
+    "predicted_price": 25514.271484375,
+    "model_name": "StockModel_DSE_20251116_172938_Transformer",
+    "confidence": 0.9947689434758482,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DSN",
+    "predicted_price": 43738.7109375,
+    "model_name": "StockModel_DSN_20251116_173009_Transformer",
+    "confidence": 0.9993561350223288,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DTA",
+    "predicted_price": 3896.24365234375,
+    "model_name": "StockModel_DTA_20251115_003112_Transformer",
+    "confidence": 0.9997265242079078,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DVP",
+    "predicted_price": 72594.6875,
+    "model_name": "StockModel_DVP_20251115_003218_Transformer",
+    "confidence": 0.9996638891270435,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "DXG",
+    "predicted_price": 18771.27734375,
+    "model_name": "StockModel_DXG_20251116_173504_Transformer",
+    "confidence": 0.9996438179055958,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "DXS",
+    "predicted_price": 6039.30029296875,
+    "model_name": "StockModel_DXS_20251116_173657_Transformer",
+    "confidence": 0.9981370909843948,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "EIB",
+    "predicted_price": 20682.4453125,
+    "model_name": "StockModel_EIB_20251116_173754_Transformer",
+    "confidence": 0.9995527816112644,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ELC",
+    "predicted_price": 21465.494140625,
+    "model_name": "StockModel_ELC_20251116_173951_Transformer",
+    "confidence": 0.9992283423052469,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "EVE",
+    "predicted_price": 11215.9404296875,
+    "model_name": "StockModel_EVE_20251115_003758_Transformer",
+    "confidence": 0.9995089729800138,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "EVF",
+    "predicted_price": 13158.93359375,
+    "model_name": "StockModel_EVF_20251116_174313_Transformer",
+    "confidence": 0.9992907073809758,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FCM",
+    "predicted_price": 3668.957763671875,
+    "model_name": "StockModel_FCM_20251115_003951_Transformer",
+    "confidence": 0.9996208790948632,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "FCN",
+    "predicted_price": 15167.953125,
+    "model_name": "StockModel_FCN_20251115_004102_Transformer",
+    "confidence": 0.9996818534536337,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "FIR",
+    "predicted_price": 10934.1884765625,
+    "model_name": "StockModel_FIR_20251116_174748_Transformer",
+    "confidence": 0.9994118154125308,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FIT",
+    "predicted_price": 4513.26123046875,
+    "model_name": "StockModel_FIT_20251116_174902_Transformer",
+    "confidence": 0.9993892897525751,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FMC",
+    "predicted_price": 37451.98828125,
+    "model_name": "StockModel_FMC_20251116_175044_Transformer",
+    "confidence": 0.9996746814212906,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FPT",
+    "predicted_price": 112552.4453125,
+    "model_name": "StockModel_FPT_20251116_175231_Transformer",
+    "confidence": 0.9995230267723563,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FRT",
+    "predicted_price": 162947.671875,
+    "model_name": "StockModel_FRT_20251116_175418_Transformer",
+    "confidence": 0.9971213243374187,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "FTS",
+    "predicted_price": 34676.5625,
+    "model_name": "StockModel_FTS_20251116_175535_Transformer",
+    "confidence": 0.9995353242419108,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GAS",
+    "predicted_price": 60689.984375,
+    "model_name": "StockModel_GAS_20251116_175702_Transformer",
+    "confidence": 0.9992652018623509,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GDT",
+    "predicted_price": 22247.466796875,
+    "model_name": "StockModel_GDT_20251116_175851_Transformer",
+    "confidence": 0.999720786891178,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GEE",
+    "error": "'GEE'"
+  },
+  {
+    "stock_code": "GEX",
+    "predicted_price": 46103.66015625,
+    "model_name": "StockModel_GEX_20251116_180038_Transformer",
+    "confidence": 0.9996972570337592,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GIL",
+    "predicted_price": 11567.7646484375,
+    "model_name": "StockModel_GIL_20251116_180210_Transformer",
+    "confidence": 0.9995500554000386,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GMD",
+    "predicted_price": 63567.64453125,
+    "model_name": "StockModel_GMD_20251115_005324_Transformer",
+    "confidence": 0.99956370342385,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "GSP",
+    "predicted_price": 11277.9140625,
+    "model_name": "StockModel_GSP_20251116_180540_Transformer",
+    "confidence": 0.9994823797895758,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "GVR",
+    "predicted_price": 28594.52734375,
+    "model_name": "StockModel_GVR_20251115_005551_Transformer",
+    "confidence": 0.9992535113058795,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HAG",
+    "predicted_price": 18427.1875,
+    "model_name": "StockModel_HAG_20251115_005647_Transformer",
+    "confidence": 0.999605253583618,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HAH",
+    "predicted_price": 64518.2421875,
+    "model_name": "StockModel_HAH_20251116_181031_Transformer",
+    "confidence": 0.9996125397002251,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HAP",
+    "predicted_price": 8117.81201171875,
+    "model_name": "StockModel_HAP_20251116_181219_Transformer",
+    "confidence": 0.9996152549454423,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HAR",
+    "predicted_price": 3735.728271484375,
+    "model_name": "StockModel_HAR_20251116_181413_Transformer",
+    "confidence": 0.9993876374263111,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HAX",
+    "predicted_price": 10450.2998046875,
+    "model_name": "StockModel_HAX_20251116_181602_Transformer",
+    "confidence": 0.9996840020195437,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HCD",
+    "predicted_price": 7824.7939453125,
+    "model_name": "StockModel_HCD_20251115_010239_Transformer",
+    "confidence": 0.9994782926693713,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HCM",
+    "predicted_price": 23100.501953125,
+    "model_name": "StockModel_HCM_20251115_010342_Transformer",
+    "confidence": 0.9996291027300696,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HDB",
+    "predicted_price": 29251.673828125,
+    "model_name": "StockModel_HDB_20251115_010501_Transformer",
+    "confidence": 0.9991732111005118,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HDC",
+    "predicted_price": 25589.830078125,
+    "model_name": "StockModel_HDC_20251115_010557_Transformer",
+    "confidence": 0.9997319185965297,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HDG",
+    "predicted_price": 29456.37890625,
+    "model_name": "StockModel_HDG_20251116_182351_Transformer",
+    "confidence": 0.9995784205182692,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HHP",
+    "predicted_price": 12054.6337890625,
+    "model_name": "StockModel_HHP_20251116_182543_Transformer",
+    "confidence": 0.9987582110903854,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HHS",
+    "predicted_price": 13878.3701171875,
+    "model_name": "StockModel_HHS_20251115_010904_Transformer",
+    "confidence": 0.9995973463457536,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HHV",
+    "predicted_price": 13467.02734375,
+    "model_name": "StockModel_HHV_20251115_011020_Transformer",
+    "confidence": 0.9990427370008351,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HID",
+    "predicted_price": 4544.6416015625,
+    "model_name": "StockModel_HID_20251115_011127_Transformer",
+    "confidence": 0.9998547508185981,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HII",
+    "predicted_price": 4746.84033203125,
+    "model_name": "StockModel_HII_20251116_183126_Transformer",
+    "confidence": 0.9991537616882418,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HMC",
+    "predicted_price": 11743.677734375,
+    "model_name": "StockModel_HMC_20251115_011325_Transformer",
+    "confidence": 0.9997629969252666,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HPG",
+    "predicted_price": 27576.646484375,
+    "model_name": "StockModel_HPG_20251115_011451_Transformer",
+    "confidence": 0.9997120828023159,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HPX",
+    "predicted_price": 5512.3076171875,
+    "model_name": "StockModel_HPX_20251115_011614_Transformer",
+    "confidence": 0.99949287562884,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HQC",
+    "predicted_price": 2983.37451171875,
+    "model_name": "StockModel_HQC_20251116_170648_Transformer",
+    "confidence": 0.9995105260662983,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HSG",
+    "predicted_price": 17145.115234375,
+    "model_name": "StockModel_HSG_20251115_011838_Transformer",
+    "confidence": 0.9996841245536083,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HSL",
+    "predicted_price": 10136.751953125,
+    "model_name": "StockModel_HSL_20251116_171015_Transformer",
+    "confidence": 0.9994748611078729,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HT1",
+    "predicted_price": 15803.3349609375,
+    "model_name": "StockModel_HT1_20251116_171123_Transformer",
+    "confidence": 0.9994569331272537,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HTG",
+    "predicted_price": 48588.0,
+    "model_name": "StockModel_HTG_20251115_012243_Transformer",
+    "confidence": 0.9994549871261983,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HTI",
+    "predicted_price": 22597.720703125,
+    "model_name": "StockModel_HTI_20251116_171416_Transformer",
+    "confidence": 0.999691841636689,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "HTN",
+    "predicted_price": 14876.29296875,
+    "model_name": "StockModel_HTN_20251115_012459_Transformer",
+    "confidence": 0.9995711228603841,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HUB",
+    "predicted_price": 12636.625,
+    "model_name": "StockModel_HUB_20251115_012559_Transformer",
+    "confidence": 0.9995130771262484,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "HVH",
+    "predicted_price": 12749.5478515625,
+    "model_name": "StockModel_HVH_20251115_012652_Transformer",
+    "confidence": 0.9994531167897045,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "ICT",
+    "predicted_price": 20421.841796875,
+    "model_name": "StockModel_ICT_20251116_171903_Transformer",
+    "confidence": 0.998561868422578,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "IDI",
+    "predicted_price": 7286.2783203125,
+    "model_name": "StockModel_IDI_20251115_012837_Transformer",
+    "confidence": 0.9997158895468838,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "IJC",
+    "predicted_price": 11622.580078125,
+    "model_name": "StockModel_IJC_20251116_172141_Transformer",
+    "confidence": 0.9996357224862371,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ILB",
+    "predicted_price": 27376.833984375,
+    "model_name": "StockModel_ILB_20251116_172332_Transformer",
+    "confidence": 0.9990359166610018,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "IMP",
+    "predicted_price": 50438.984375,
+    "model_name": "StockModel_IMP_20251115_013154_Transformer",
+    "confidence": 0.9996323950314017,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "ITC",
+    "predicted_price": 14994.482421875,
+    "model_name": "StockModel_ITC_20251116_172617_Transformer",
+    "confidence": 0.9995673121643576,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ITD",
+    "predicted_price": 13252.1474609375,
+    "model_name": "StockModel_ITD_20251115_013414_Transformer",
+    "confidence": 0.9997037571650557,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "JVC",
+    "predicted_price": 6154.18115234375,
+    "model_name": "StockModel_JVC_20251115_013550_Transformer",
+    "confidence": 0.9997551434363007,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "KBC",
+    "predicted_price": 33939.23046875,
+    "model_name": "StockModel_KBC_20251115_013724_Transformer",
+    "confidence": 0.9996118011118279,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "KDC",
+    "predicted_price": 54852.91796875,
+    "model_name": "StockModel_KDC_20251115_013838_Transformer",
+    "confidence": 0.9994318223592429,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "KDH",
+    "predicted_price": 34178.81640625,
+    "model_name": "StockModel_KDH_20251116_173451_Transformer",
+    "confidence": 0.999632666818482,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "KHG",
+    "predicted_price": 7164.78515625,
+    "model_name": "StockModel_KHG_20251115_014103_Transformer",
+    "confidence": 0.9987376812402702,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "KHP",
+    "predicted_price": 12640.2177734375,
+    "model_name": "StockModel_KHP_20251116_173730_Transformer",
+    "confidence": 0.9997434233413206,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "KMR",
+    "predicted_price": 3184.684326171875,
+    "model_name": "StockModel_KMR_20251116_173912_Transformer",
+    "confidence": 0.9995630673217442,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "KOS",
+    "predicted_price": 40510.12109375,
+    "model_name": "StockModel_KOS_20251115_014406_Transformer",
+    "confidence": 0.9994718719842276,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "KSB",
+    "predicted_price": 17384.01953125,
+    "model_name": "StockModel_KSB_20251115_014501_Transformer",
+    "confidence": 0.999614970971081,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "LAF",
+    "predicted_price": 18434.416015625,
+    "model_name": "StockModel_LAF_20251115_014614_Transformer",
+    "confidence": 0.9993619853600553,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "LBM",
+    "predicted_price": 41654.203125,
+    "model_name": "StockModel_LBM_20251115_014723_Transformer",
+    "confidence": 0.9997404765835881,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "LCG",
+    "predicted_price": 10694.24609375,
+    "model_name": "StockModel_LCG_20251116_174641_Transformer",
+    "confidence": 0.9996086167554163,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "LHG",
+    "predicted_price": 33002.14453125,
+    "model_name": "StockModel_LHG_20251115_014943_Transformer",
+    "confidence": 0.9994763898332139,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "LIX",
+    "predicted_price": 34151.5,
+    "model_name": "StockModel_LIX_20251116_174956_Transformer",
+    "confidence": 0.9995710131690757,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "LPB",
+    "predicted_price": 44252.875,
+    "model_name": "StockModel_LPB_20251115_015201_Transformer",
+    "confidence": 0.9996786241797295,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "LSS",
+    "predicted_price": 9226.03515625,
+    "model_name": "StockModel_LSS_20251115_015300_Transformer",
+    "confidence": 0.9993015676928652,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "MBB",
+    "predicted_price": 23290.734375,
+    "model_name": "StockModel_MBB_20251115_015411_Transformer",
+    "confidence": 0.9995252291618482,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "MCM",
+    "error": "\"['Alpha4'] not in index\""
+  },
+  {
+    "stock_code": "MCP",
+    "predicted_price": 27544.0625,
+    "model_name": "StockModel_MCP_20251116_175657_Transformer",
+    "confidence": 0.9991839884887582,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "MHC",
+    "predicted_price": 12729.1376953125,
+    "model_name": "StockModel_MHC_20251115_015719_Transformer",
+    "confidence": 0.9994533391208298,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "MIG",
+    "predicted_price": 17328.265625,
+    "model_name": "StockModel_MIG_20251115_015826_Transformer",
+    "confidence": 0.999371395448499,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "MSB",
+    "predicted_price": 11332.9853515625,
+    "model_name": "StockModel_MSB_20251115_015922_Transformer",
+    "confidence": 0.9988904478222829,
+    "new_model_used": false,
+    "saved": true
+  },
+  {
+    "stock_code": "MSH",
+    "predicted_price": 40451.7421875,
+    "model_name": "StockModel_MSH_20251116_180228_Transformer",
+    "confidence": 0.9991593680408417,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "MSN",
+    "predicted_price": 78411.8359375,
+    "model_name": "StockModel_MSN_20251116_180344_Transformer",
+    "confidence": 0.99956027531432,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "MWG",
+    "predicted_price": 78709.8359375,
+    "model_name": "StockModel_MWG_20251116_180541_Transformer",
+    "confidence": 0.99974596115046,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NAB",
+    "predicted_price": 15674.349609375,
+    "model_name": "StockModel_NAB_20251116_180733_Transformer",
+    "confidence": 0.9979445376182825,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NAF",
+    "predicted_price": 33130.71484375,
+    "model_name": "StockModel_NAF_20251116_180842_Transformer",
+    "confidence": 0.9995363785455863,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NBB",
+    "predicted_price": 18313.99609375,
+    "model_name": "StockModel_NBB_20251116_181022_Transformer",
+    "confidence": 0.9996062845476172,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NCT",
+    "predicted_price": 107491.3671875,
+    "model_name": "StockModel_NCT_20251116_181214_Transformer",
+    "confidence": 0.9996513742643782,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NHA",
+    "predicted_price": 17810.533203125,
+    "model_name": "StockModel_NHA_20251116_181400_Transformer",
+    "confidence": 0.9997219723307437,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NHH",
+    "predicted_price": 12936.216796875,
+    "model_name": "StockModel_NHH_20251116_181548_Transformer",
+    "confidence": 0.9993035944984923,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NKG",
+    "predicted_price": 15031.943359375,
+    "model_name": "StockModel_NKG_20251116_181704_Transformer",
+    "confidence": 0.9996860940058176,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NLG",
+    "predicted_price": 35250.421875,
+    "model_name": "StockModel_NLG_20251116_181851_Transformer",
+    "confidence": 0.9996156822392179,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NNC",
+    "predicted_price": 53143.578125,
+    "model_name": "StockModel_NNC_20251116_182052_Transformer",
+    "confidence": 0.9995918769926508,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NO1",
+    "predicted_price": 7897.794921875,
+    "model_name": "StockModel_NO1_20251116_182243_Transformer",
+    "confidence": 0.9977625622113252,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NSC",
+    "predicted_price": 79658.765625,
+    "model_name": "StockModel_NSC_20251116_182329_Transformer",
+    "confidence": 0.9987452012969265,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NT2",
+    "predicted_price": 24038.55859375,
+    "model_name": "StockModel_NT2_20251116_182522_Transformer",
+    "confidence": 0.9993264789441066,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "NTL",
+    "predicted_price": 19342.169921875,
+    "model_name": "StockModel_NTL_20251116_182714_Transformer",
+    "confidence": 0.9993939865015783,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "OCB",
+    "predicted_price": 13199.5478515625,
+    "model_name": "StockModel_OCB_20251116_170204_Transformer",
+    "confidence": 0.998760684820549,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "OGC",
+    "predicted_price": 3743.830322265625,
+    "model_name": "StockModel_OGC_20251116_170319_Transformer",
+    "confidence": 0.9988169236239434,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ORS",
+    "error": "'ORS'"
+  },
+  {
+    "stock_code": "PAC",
+    "predicted_price": 23481.923828125,
+    "model_name": "StockModel_PAC_20251116_170407_Transformer",
+    "confidence": 0.9993579836232868,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PAN",
+    "predicted_price": 29274.134765625,
+    "model_name": "StockModel_PAN_20251116_170600_Transformer",
+    "confidence": 0.9992590882167265,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PC1",
+    "predicted_price": 22233.904296875,
+    "model_name": "StockModel_PC1_20251116_170748_Transformer",
+    "confidence": 0.9993902022783521,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PDR",
+    "predicted_price": 21862.80078125,
+    "model_name": "StockModel_PDR_20251116_170913_Transformer",
+    "confidence": 0.9997152481113486,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PET",
+    "predicted_price": 31014.146484375,
+    "model_name": "StockModel_PET_20251116_171109_Transformer",
+    "confidence": 0.9997567839807459,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PGC",
+    "predicted_price": 13587.6943359375,
+    "model_name": "StockModel_PGC_20251116_171255_Transformer",
+    "confidence": 0.9996530491766948,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PHC",
+    "predicted_price": 5100.7109375,
+    "model_name": "StockModel_PHC_20251116_171444_Transformer",
+    "confidence": 0.999708478505094,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PHR",
+    "predicted_price": 57942.89453125,
+    "model_name": "StockModel_PHR_20251116_171627_Transformer",
+    "confidence": 0.9994506777822391,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PIT",
+    "predicted_price": 6627.08349609375,
+    "model_name": "StockModel_PIT_20251116_171812_Transformer",
+    "confidence": 0.9992070563359182,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PLP",
+    "predicted_price": 5808.6611328125,
+    "model_name": "StockModel_PLP_20251116_171959_Transformer",
+    "confidence": 0.9993511493765127,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PLX",
+    "predicted_price": 33742.26171875,
+    "model_name": "StockModel_PLX_20251116_172129_Transformer",
+    "confidence": 0.9992826484226233,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PNJ",
+    "predicted_price": 91564.53125,
+    "model_name": "StockModel_PNJ_20251116_172302_Transformer",
+    "confidence": 0.999523320074427,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "POW",
+    "predicted_price": 14941.720703125,
+    "model_name": "StockModel_POW_20251116_172450_Transformer",
+    "confidence": 0.9990308831970673,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PPC",
+    "predicted_price": 10138.5078125,
+    "model_name": "StockModel_PPC_20251116_172608_Transformer",
+    "confidence": 0.9993013234458715,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PTB",
+    "predicted_price": 53883.23828125,
+    "model_name": "StockModel_PTB_20251116_172800_Transformer",
+    "confidence": 0.9995415491327238,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PTC",
+    "predicted_price": 7965.87890625,
+    "model_name": "StockModel_PTC_20251116_172948_Transformer",
+    "confidence": 0.9997509803944367,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PTL",
+    "predicted_price": 3521.728271484375,
+    "model_name": "StockModel_PTL_20251116_173133_Transformer",
+    "confidence": 0.9997301542967968,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PVD",
+    "predicted_price": 26058.0703125,
+    "model_name": "StockModel_PVD_20251116_173321_Transformer",
+    "confidence": 0.9997100855336518,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PVP",
+    "predicted_price": 14989.775390625,
+    "model_name": "StockModel_PVP_20251116_173510_Transformer",
+    "confidence": 0.999298631098596,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "PVT",
+    "predicted_price": 19120.8203125,
+    "model_name": "StockModel_PVT_20251116_173642_Transformer",
+    "confidence": 0.9994324866150948,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "QCG",
+    "predicted_price": 13762.0048828125,
+    "model_name": "StockModel_QCG_20251116_173831_Transformer",
+    "confidence": 0.9994952526539342,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "RAL",
+    "predicted_price": 91252.0234375,
+    "model_name": "StockModel_RAL_20251116_174024_Transformer",
+    "confidence": 0.9996120108981115,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "REE",
+    "predicted_price": 65448.61328125,
+    "model_name": "StockModel_REE_20251116_174212_Transformer",
+    "confidence": 0.9995691725617,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "RYG",
+    "predicted_price": 11471.0244140625,
+    "model_name": "StockModel_RYG_20251116_174406_Transformer",
+    "confidence": 0.9927103404870032,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SAB",
+    "predicted_price": 41866.3984375,
+    "model_name": "StockModel_SAB_20251116_174439_Transformer",
+    "confidence": 0.9991667648486589,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SAM",
+    "predicted_price": 7885.6376953125,
+    "model_name": "StockModel_SAM_20251116_174608_Transformer",
+    "confidence": 0.9996904102170852,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SAV",
+    "predicted_price": 14423.494140625,
+    "model_name": "StockModel_SAV_20251116_174758_Transformer",
+    "confidence": 0.9996522064208049,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SBG",
+    "predicted_price": 16291.0498046875,
+    "model_name": "StockModel_SBG_20251116_174946_Transformer",
+    "confidence": 0.9940918613190697,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SBT",
+    "predicted_price": 25192.4453125,
+    "model_name": "StockModel_SBT_20251116_175023_Transformer",
+    "confidence": 0.9996091160948014,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SCR",
+    "predicted_price": 8284.162109375,
+    "model_name": "StockModel_SCR_20251116_175205_Transformer",
+    "confidence": 0.9997322824729434,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SCS",
+    "predicted_price": 59812.890625,
+    "model_name": "StockModel_SCS_20251116_175352_Transformer",
+    "confidence": 0.9991091753216849,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SFC",
+    "predicted_price": 23647.8125,
+    "model_name": "StockModel_SFC_20251116_175504_Transformer",
+    "confidence": 0.9990046878885696,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SFG",
+    "predicted_price": 10391.150390625,
+    "model_name": "StockModel_SFG_20251116_175650_Transformer",
+    "confidence": 0.9995391919059723,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SGN",
+    "predicted_price": 59000.2109375,
+    "model_name": "StockModel_SGN_20251116_175829_Transformer",
+    "confidence": 0.9993620081076591,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SGR",
+    "predicted_price": 20261.359375,
+    "model_name": "StockModel_SGR_20251116_180003_Transformer",
+    "confidence": 0.9993501163969006,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SGT",
+    "predicted_price": 17889.662109375,
+    "model_name": "StockModel_SGT_20251116_180146_Transformer",
+    "confidence": 0.9996333466910761,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SHB",
+    "predicted_price": 17964.29296875,
+    "model_name": "StockModel_SHB_20251116_180341_Transformer",
+    "confidence": 0.9995035780081686,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SHI",
+    "predicted_price": 14920.2099609375,
+    "model_name": "StockModel_SHI_20251116_180534_Transformer",
+    "confidence": 0.9996247800917677,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SIP",
+    "predicted_price": 65658.015625,
+    "model_name": "StockModel_SIP_20251116_180727_Transformer",
+    "confidence": 0.9979497112284588,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SJD",
+    "predicted_price": 13575.3447265625,
+    "model_name": "StockModel_SJD_20251116_180844_Transformer",
+    "confidence": 0.9995354175318896,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SJS",
+    "predicted_price": 63158.6015625,
+    "model_name": "StockModel_SJS_20251116_181033_Transformer",
+    "confidence": 0.9997720979482727,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SKG",
+    "predicted_price": 10884.8984375,
+    "model_name": "StockModel_SKG_20251116_181224_Transformer",
+    "confidence": 0.9996135326466765,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SMB",
+    "predicted_price": 42527.33984375,
+    "model_name": "StockModel_SMB_20251116_181414_Transformer",
+    "confidence": 0.9995512292834379,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SSB",
+    "predicted_price": 15309.9873046875,
+    "model_name": "StockModel_SSB_20251116_181602_Transformer",
+    "confidence": 0.9984122977391747,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SSI",
+    "predicted_price": 35005.88671875,
+    "model_name": "StockModel_SSI_20251116_181703_Transformer",
+    "confidence": 0.9995739146143545,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "ST8",
+    "predicted_price": 6186.24365234375,
+    "model_name": "StockModel_ST8_20251116_181858_Transformer",
+    "confidence": 0.999285641632151,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "STB",
+    "predicted_price": 48669.75,
+    "model_name": "StockModel_STB_20251116_182050_Transformer",
+    "confidence": 0.9996888908899707,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "STK",
+    "error": "ufunc 'isnan' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+  },
+  {
+    "stock_code": "SVT",
+    "predicted_price": 11205.6416015625,
+    "model_name": "StockModel_SVT_20251116_182255_Transformer",
+    "confidence": 0.9994202220424734,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SZC",
+    "predicted_price": 29099.435546875,
+    "model_name": "StockModel_SZC_20251116_182446_Transformer",
+    "confidence": 0.9994742693217844,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "SZL",
+    "predicted_price": 44774.39453125,
+    "model_name": "StockModel_SZL_20251116_182553_Transformer",
+    "confidence": 0.9994656772695156,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCB",
+    "predicted_price": 34464.484375,
+    "model_name": "StockModel_TCB_20251116_182738_Transformer",
+    "confidence": 0.9993915182065479,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCH",
+    "predicted_price": 22106.375,
+    "model_name": "StockModel_TCH_20251116_182857_Transformer",
+    "confidence": 0.9993657898167242,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCI",
+    "predicted_price": 10657.728515625,
+    "model_name": "StockModel_TCI_20251116_183023_Transformer",
+    "confidence": 0.9994679516698011,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCL",
+    "predicted_price": 34912.77734375,
+    "model_name": "StockModel_TCL_20251116_170204_Transformer",
+    "confidence": 0.9996304666310751,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCM",
+    "predicted_price": 23996.255859375,
+    "model_name": "StockModel_TCM_20251116_170401_Transformer",
+    "confidence": 0.9995668627365744,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCO",
+    "predicted_price": 9926.265625,
+    "model_name": "StockModel_TCO_20251116_170553_Transformer",
+    "confidence": 0.9995693048816998,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TCT",
+    "predicted_price": 20375.58984375,
+    "model_name": "StockModel_TCT_20251116_170746_Transformer",
+    "confidence": 0.9993295806623139,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TDC",
+    "predicted_price": 11943.7724609375,
+    "model_name": "StockModel_TDC_20251116_170927_Transformer",
+    "confidence": 0.9997246524593975,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TDG",
+    "predicted_price": 3116.744873046875,
+    "model_name": "StockModel_TDG_20251116_171112_Transformer",
+    "confidence": 0.9996087125615019,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TDP",
+    "predicted_price": 30726.98046875,
+    "model_name": "StockModel_TDP_20251116_171241_Transformer",
+    "confidence": 0.9987412256518249,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TEG",
+    "predicted_price": 5939.53369140625,
+    "model_name": "StockModel_TEG_20251116_171358_Transformer",
+    "confidence": 0.9992919210591257,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "THG",
+    "predicted_price": 47104.33984375,
+    "model_name": "StockModel_THG_20251116_171527_Transformer",
+    "confidence": 0.9997174991444148,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TIP",
+    "predicted_price": 15958.2099609375,
+    "model_name": "StockModel_TIP_20251116_171708_Transformer",
+    "confidence": 0.999617524156427,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TLD",
+    "predicted_price": 8593.16015625,
+    "model_name": "StockModel_TLD_20251116_171831_Transformer",
+    "confidence": 0.9995533197054176,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TLG",
+    "predicted_price": 52043.32421875,
+    "model_name": "StockModel_TLG_20251116_171959_Transformer",
+    "confidence": 0.9993627337933884,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TLH",
+    "predicted_price": 4874.8798828125,
+    "model_name": "StockModel_TLH_20251116_172148_Transformer",
+    "confidence": 0.9995203064048702,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TMT",
+    "predicted_price": 11828.1904296875,
+    "model_name": "StockModel_TMT_20251116_172334_Transformer",
+    "confidence": 0.999549633855765,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TNH",
+    "predicted_price": 14210.9541015625,
+    "model_name": "StockModel_TNH_20251116_172515_Transformer",
+    "confidence": 0.99917559467322,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TNI",
+    "predicted_price": 6240.03662109375,
+    "model_name": "StockModel_TNI_20251116_172614_Transformer",
+    "confidence": 0.9989116717194851,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TNT",
+    "predicted_price": 7782.65771484375,
+    "model_name": "StockModel_TNT_20251116_172748_Transformer",
+    "confidence": 0.9996489906033751,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TPB",
+    "predicted_price": 17482.064453125,
+    "model_name": "StockModel_TPB_20251116_172934_Transformer",
+    "confidence": 0.9993513512913075,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TRC",
+    "predicted_price": 72167.8671875,
+    "model_name": "StockModel_TRC_20251116_173055_Transformer",
+    "confidence": 0.9996991856147085,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TSC",
+    "predicted_price": 3774.19873046875,
+    "model_name": "StockModel_TSC_20251116_173238_Transformer",
+    "confidence": 0.9994416044426769,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TTA",
+    "predicted_price": 12200.669921875,
+    "model_name": "StockModel_TTA_20251116_173426_Transformer",
+    "confidence": 0.9985956156411095,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TTF",
+    "predicted_price": 2314.8935546875,
+    "model_name": "StockModel_TTF_20251116_173518_Transformer",
+    "confidence": 0.9997369619564226,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TV2",
+    "predicted_price": 33266.80078125,
+    "model_name": "StockModel_TV2_20251116_173700_Transformer",
+    "confidence": 0.9995757620553449,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TVS",
+    "predicted_price": 15303.361328125,
+    "model_name": "StockModel_TVS_20251116_173845_Transformer",
+    "confidence": 0.9998012711365127,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "TYA",
+    "predicted_price": 17851.71875,
+    "model_name": "StockModel_TYA_20251116_174027_Transformer",
+    "confidence": 0.9996164252362907,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "UIC",
+    "predicted_price": 53014.55078125,
+    "model_name": "StockModel_UIC_20251116_174212_Transformer",
+    "confidence": 0.9995584472442717,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VCA",
+    "predicted_price": 9322.830078125,
+    "model_name": "StockModel_VCA_20251116_174400_Transformer",
+    "confidence": 0.9995168562395929,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VCB",
+    "predicted_price": 62194.8828125,
+    "model_name": "StockModel_VCB_20251116_174548_Transformer",
+    "confidence": 0.9995144434495787,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VCG",
+    "predicted_price": 26737.564453125,
+    "model_name": "StockModel_VCG_20251116_174746_Transformer",
+    "confidence": 0.9995449780326516,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VCI",
+    "predicted_price": 40030.4765625,
+    "model_name": "StockModel_VCI_20251116_174936_Transformer",
+    "confidence": 0.999412370908741,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VDS",
+    "predicted_price": 22132.474609375,
+    "model_name": "StockModel_VDS_20251116_175059_Transformer",
+    "confidence": 0.9996424212264914,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VFG",
+    "predicted_price": 56963.28515625,
+    "model_name": "StockModel_VFG_20251116_175243_Transformer",
+    "confidence": 0.999438781850618,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VGC",
+    "predicted_price": 49148.27734375,
+    "model_name": "StockModel_VGC_20251116_175431_Transformer",
+    "confidence": 0.9994054184594752,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VHC",
+    "predicted_price": 63635.99609375,
+    "model_name": "StockModel_VHC_20251116_175605_Transformer",
+    "confidence": 0.9996105269945897,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VHM",
+    "predicted_price": 96433.7578125,
+    "model_name": "StockModel_VHM_20251116_175754_Transformer",
+    "confidence": 0.9993973540753501,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VIB",
+    "predicted_price": 17556.076171875,
+    "model_name": "StockModel_VIB_20251116_175907_Transformer",
+    "confidence": 0.9993047101602246,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VIC",
+    "predicted_price": 180711.15625,
+    "model_name": "StockModel_VIC_20251116_180033_Transformer",
+    "confidence": 0.999724743230811,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VIP",
+    "predicted_price": 13028.9150390625,
+    "model_name": "StockModel_VIP_20251116_180221_Transformer",
+    "confidence": 0.999486680844639,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VIX",
+    "predicted_price": 24357.7890625,
+    "model_name": "StockModel_VIX_20251116_180401_Transformer",
+    "confidence": 0.9996404314458152,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VJC",
+    "predicted_price": 177476.765625,
+    "model_name": "StockModel_VJC_20251116_180548_Transformer",
+    "confidence": 0.9990881466042997,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VMD",
+    "predicted_price": 17411.865234375,
+    "model_name": "StockModel_VMD_20251116_180721_Transformer",
+    "confidence": 0.9997921468122684,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VND",
+    "predicted_price": 21342.525390625,
+    "model_name": "StockModel_VND_20251116_180901_Transformer",
+    "confidence": 0.9995035324070315,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VNL",
+    "predicted_price": 23453.4765625,
+    "model_name": "StockModel_VNL_20251116_181049_Transformer",
+    "confidence": 0.9992869654432877,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VNM",
+    "predicted_price": 61941.390625,
+    "model_name": "StockModel_VNM_20251116_181230_Transformer",
+    "confidence": 0.9994411565000946,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VNS",
+    "predicted_price": 10089.248046875,
+    "model_name": "StockModel_VNS_20251116_181428_Transformer",
+    "confidence": 0.9993598356725668,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VOS",
+    "predicted_price": 13004.4228515625,
+    "model_name": "StockModel_VOS_20251116_181613_Transformer",
+    "confidence": 0.9996034030557432,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VPB",
+    "predicted_price": 29555.140625,
+    "model_name": "StockModel_VPB_20251116_181801_Transformer",
+    "confidence": 0.9992565584961999,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VPG",
+    "predicted_price": 815.2159423828125,
+    "model_name": "StockModel_VPG_20251116_181917_Transformer",
+    "confidence": 0.9996210291451703,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VPH",
+    "predicted_price": 4651.6181640625,
+    "model_name": "StockModel_VPH_20251116_182040_Transformer",
+    "confidence": 0.9996620875168489,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VPI",
+    "predicted_price": 53203.5390625,
+    "model_name": "StockModel_VPI_20251116_182225_Transformer",
+    "confidence": 0.9986067306066962,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VRC",
+    "predicted_price": 13357.677734375,
+    "model_name": "StockModel_VRC_20251116_182340_Transformer",
+    "confidence": 0.9995443341442122,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VRE",
+    "predicted_price": 30814.833984375,
+    "model_name": "StockModel_VRE_20251116_182531_Transformer",
+    "confidence": 0.9969993966257629,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VSC",
+    "predicted_price": 20735.5703125,
+    "model_name": "StockModel_VSC_20251116_182659_Transformer",
+    "confidence": 0.9994674975576018,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VTO",
+    "predicted_price": 12546.4990234375,
+    "model_name": "StockModel_VTO_20251116_182848_Transformer",
+    "confidence": 0.9994426327434259,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "VTP",
+    "predicted_price": 102356.8125,
+    "model_name": "StockModel_VTP_20251116_183028_Transformer",
+    "confidence": 0.9994264639555641,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "YBM",
+    "predicted_price": 14041.24609375,
+    "model_name": "StockModel_YBM_20251116_183137_Transformer",
+    "confidence": 0.9994282278570361,
+    "new_model_used": true,
+    "saved": true
+  },
+  {
+    "stock_code": "YEG",
+    "predicted_price": 1400.745361328125,
+    "model_name": "StockModel_YEG_20251116_183238_Transformer",
+    "confidence": 0.9996621621138588,
+    "new_model_used": true,
+    "saved": true
+  }
+]

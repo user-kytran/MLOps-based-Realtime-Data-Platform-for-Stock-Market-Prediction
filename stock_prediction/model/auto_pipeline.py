@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', message='.*google.api_core.*')
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -9,56 +13,73 @@ from torch.utils.data import DataLoader
 import sqlite3
 import json
 import os
+import sys
 import threading
 import wandb
-import weave
-from .db_manager import ModelTrainingDB
-from .utils import (collect_data, generate_stock_alphas, apply_generated_alphas,
-                   push_checkpoint_to_ggdrive, pull_checkpoint_from_ggdrive,
-                   save_checkpoint_to_temp, create_temp_file)
-from .dataset import StockDataset
-from .gen_alpha import gen_all_alpha_formulas
-from .models import StockTransformer, StockLSTM
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import dotenv
 
+# Thêm thư mục cha vào sys.path để import được các module
+if __name__ == "__main__":
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    sys.path.insert(0, parent_dir)
+
+from model.db_manager import ModelTrainingDB
+from model.utils import (collect_data, generate_stock_alphas, apply_generated_alphas,
+                   push_checkpoint_to_ggdrive, pull_checkpoint_from_ggdrive,
+                   save_checkpoint_to_temp, create_temp_file, select_best_alphas)
+from model.dataset import StockDataset
+from model.gen_alpha import gen_all_alpha_formulas
+from model.models import StockTransformer, StockLSTM
+
 dotenv.load_dotenv()
-WANDB_API_KEY = os.getenv('WANDB_API_KEY')
-POSTGRES_URL = os.getenv('POSTGRES_URL')
+WANDB_API_KEY = os.getenv('WANDB_API_KEY', '').strip('"\'')
+POSTGRES_URL = os.getenv('POSTGRES_URL', '').strip('"\'')
+
+db_lock = threading.Lock()
+
 class AutoPipeline:
-    def __init__(self, stock_code, db_path=None):
+    def __init__(self, stock_code, db_path=None, enable_wandb=True, prediction_date=None):
         self.stock_code = stock_code
         self.db = ModelTrainingDB(db_path)
-        self.warehouse_engine = create_engine(
-            POSTGRES_URL
-        )
+        self.warehouse_engine = create_engine(POSTGRES_URL)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.timestamp = datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")).strftime("%Y%m%d_%H%M%S")
+        self.enable_wandb = enable_wandb
+        self.prediction_date = prediction_date
         
-        os.environ['WANDB_API_KEY'] = WANDB_API_KEY
-        wandb.init(
-            project='graduation-stock-prediction',
-            name=f'{stock_code}_{self.timestamp}',
-            config={
-                'stock_code': stock_code
-            },
-            tags=['auto-pipeline', stock_code],
-            reinit=True  # Cho phép tạo run mới khi xử lý nhiều stock
-        )
+        if self.enable_wandb:
+            os.environ['WANDB_API_KEY'] = WANDB_API_KEY
+            wandb.init(
+                project=f'stock-training-{stock_code}',
+                name=f'train_{self.timestamp}',
+                config={
+                    'stock_code': stock_code,
+                    'window_size': 5,
+                    'batch_size': 128,
+                    'epochs': 30,
+                    'learning_rate': 1e-4
+                },
+                tags=['auto-pipeline', 'production'],
+                reinit=True
+            )
         
     def get_yesterday_best_model(self):
         yesterday = (datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")) - timedelta(days=1)).strftime("%d/%m/%Y")
-        conn = sqlite3.connect(self.db.db_path)
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT model_name, mse_loss, alphas
-            FROM train_stock_model
-            WHERE model_name LIKE ? AND date_train = ?
-            ORDER BY mse_loss ASC LIMIT 1
-        """, (f"%_{self.stock_code}_%", yesterday))
-        
-        row = cursor.fetchone()
-        conn.close()
+        with db_lock:  # Đồng bộ truy cập database
+            conn = sqlite3.connect(self.db.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT model_name, mse_loss, alphas
+                FROM train_stock_model
+                WHERE model_name LIKE ? AND date_train = ?
+                ORDER BY mse_loss ASC LIMIT 1
+            """, (f"%_{self.stock_code}_%", yesterday))
+            
+            row = cursor.fetchone()
+            conn.close()
         
         if not row:
             return None
@@ -70,7 +91,7 @@ class AutoPipeline:
         }
     
     def train_models(self, alpha_formulas):
-        data = collect_data([self.stock_code])
+        data = collect_data([self.stock_code], end_date=self.prediction_date)
         if data[self.stock_code].empty:
             return None, None, None, None
         
@@ -79,8 +100,13 @@ class AutoPipeline:
         # result = generate_stock_alphas(data, stock_key=self.stock_code)
         # print(result)
         # alpha_formulas = [alpha.strip() for alpha in result]
-        df_with_alphas, _ = apply_generated_alphas(data[self.stock_code], self.stock_code, alpha_formulas)
+        df_with_alphas, best_alphas = select_best_alphas(data[self.stock_code], self.stock_code, alpha_formulas)
+        
+        if df_with_alphas is None:
+            return None, None, None, None
+        
         df_with_alphas = df_with_alphas.drop(columns=['stock_code'])
+        df_with_alphas = df_with_alphas.replace([np.inf, -np.inf], np.nan).ffill().bfill().fillna(0)
         
         dataset = StockDataset(df_with_alphas, window_size=5)
         
@@ -114,15 +140,17 @@ class AutoPipeline:
         results = {}
         
         def train_transformer():
-            wandb.watch(transformer_model, log="all", log_freq=10)
+            if self.enable_wandb:
+                wandb.watch(transformer_model, log="all", log_freq=10)
             results['transformer'] = self._train_single_model(
-                transformer_model, "Transformer", train_loader, val_loader, alpha_formulas
+                transformer_model, "Transformer", train_loader, val_loader, best_alphas
             )
         
         def train_lstm():
-            wandb.watch(lstm_model, log="all", log_freq=10)
+            if self.enable_wandb:
+                wandb.watch(lstm_model, log="all", log_freq=10)
             results['lstm'] = self._train_single_model(
-                lstm_model, "LSTM", train_loader, val_loader, alpha_formulas
+                lstm_model, "LSTM", train_loader, val_loader, best_alphas
             )
         
         t1 = threading.Thread(target=train_transformer)
@@ -136,9 +164,9 @@ class AutoPipeline:
         lstm_checkpoint, lstm_loss = results['lstm']
         
         if trans_loss < lstm_loss:
-            return trans_checkpoint, trans_loss, alpha_formulas, "Transformer"
+            return trans_checkpoint, trans_loss, best_alphas, "Transformer"
         else:
-            return lstm_checkpoint, lstm_loss, alpha_formulas, "LSTM"
+            return lstm_checkpoint, lstm_loss, best_alphas, "LSTM"
     
     def _train_single_model(self, model, model_type, train_loader, val_loader, alphas):
         criterion = nn.MSELoss()
@@ -146,7 +174,8 @@ class AutoPipeline:
         best_val_loss = float("inf")
         best_checkpoint = None
         
-        wandb.watch(model, log="all", log_freq=10)
+        if self.enable_wandb:
+            wandb.watch(model, log="all", log_freq=10)
         
         for epoch in range(30):
             model.train()
@@ -179,11 +208,12 @@ class AutoPipeline:
             avg_train_loss = train_loss / len(train_loader)
             avg_val_loss = val_loss / len(val_loader)
             
-            wandb.log({
-                f"{model_type}_epoch": epoch + 1,
-                f"{model_type}_train_loss": avg_train_loss,
-                f"{model_type}_val_loss": avg_val_loss,
-            })
+            if self.enable_wandb:
+                wandb.log({
+                    f"{model_type}_epoch": epoch + 1,
+                    f"{model_type}_train_loss": avg_train_loss,
+                    f"{model_type}_val_loss": avg_val_loss,
+                })
             
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
@@ -204,8 +234,9 @@ class AutoPipeline:
                     'decoder_features': dataset_obj.decoder_features,
                     'alphas': alphas
                 }
-                wandb.run.summary[f"{model_type}_best_val_loss"] = best_val_loss
-                wandb.run.summary[f"{model_type}_best_epoch"] = epoch + 1
+                if self.enable_wandb:
+                    wandb.run.summary[f"{model_type}_best_val_loss"] = best_val_loss
+                    wandb.run.summary[f"{model_type}_best_epoch"] = epoch + 1
         
         return best_checkpoint, best_val_loss
     
@@ -222,20 +253,25 @@ class AutoPipeline:
         return model
     
     def prepare_predict_input(self, checkpoint):
-        data = collect_data([self.stock_code])
+        data = collect_data([self.stock_code], end_date=self.prediction_date)
         if data[self.stock_code].empty:
             return None
         
         df = data[self.stock_code].sort_values(by='trade_date')
         alphas = checkpoint.get('alphas', checkpoint.get('alpha_formulas', []))
         df_with_alphas, _ = apply_generated_alphas(df, self.stock_code, alphas)
+        
+        if df_with_alphas is None:
+            return None
+        
         df_with_alphas = df_with_alphas.drop(columns=['stock_code'])
+        df_with_alphas = df_with_alphas.replace([np.inf, -np.inf], np.nan).ffill().bfill().fillna(0)
         
         window_size = checkpoint['window_size']
         if len(df_with_alphas) < window_size:
             return None
         
-        last_window = df_with_alphas.tail(window_size)
+        last_window = df_with_alphas.tail(window_size).copy()
         
         enc_data = checkpoint['scaler_encoder'].transform(last_window[checkpoint['encoder_features']].values)
         close_data = checkpoint['scaler_close'].transform(last_window[['close']].values)
@@ -266,18 +302,31 @@ class AutoPipeline:
         return float(prediction)
     
     def save_prediction_to_warehouse(self, predicted_price, model_name, confidence):
-        df = pd.DataFrame([{
-            'stock_code': self.stock_code,
-            'prediction_date': (datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")) + timedelta(days=1)).strftime("%Y-%m-%d"),
-            'predicted_price': predicted_price,
-            'model_version': model_name,
-            'confidence_score': confidence
-        }])
-        
         try:
-            df.to_sql('fact_predictions', self.warehouse_engine, if_exists='append', index=False)
+            from sqlalchemy import text
+            
+            sql = text("""
+                INSERT INTO fact_predictions 
+                (stock_code, prediction_date, predicted_price, model_version, confidence_score)
+                VALUES (:stock_code, :prediction_date, :predicted_price, :model_version, :confidence_score)
+                ON CONFLICT (stock_code, prediction_date) 
+                DO UPDATE SET 
+                    predicted_price = EXCLUDED.predicted_price,
+                    model_version = EXCLUDED.model_version,
+                    confidence_score = EXCLUDED.confidence_score
+            """)
+            
+            with self.warehouse_engine.begin() as conn:
+                conn.execute(sql, {
+                    'stock_code': self.stock_code,
+                    'prediction_date': self.prediction_date,
+                    'predicted_price': predicted_price,
+                    'model_version': model_name,
+                    'confidence_score': confidence
+                })
             return True
-        except:
+        except Exception as e:
+            print(f"Lỗi lưu warehouse cho {self.stock_code}: {e}")
             return False
     
     def run(self, alpha_formulas):
@@ -305,7 +354,8 @@ class AutoPipeline:
             save_checkpoint_to_temp(new_checkpoint, tmp_path)
             push_checkpoint_to_ggdrive(tmp_path)
             
-            self.db.save_training_info(model_name, new_loss, alphas)
+            with db_lock:  # Đồng bộ khi ghi database
+                self.db.save_training_info(model_name, new_loss, alphas)
             
             checkpoint = new_checkpoint
             confidence = 1 / (1 + new_loss)
@@ -315,20 +365,33 @@ class AutoPipeline:
         if inputs is None:
             return None
         
-        predicted_price = self.predict(model, checkpoint, inputs)
-        saved = self.save_prediction_to_warehouse(predicted_price, model_name, confidence)
+        max_retries = 5
+        predicted_price = None
+        for attempt in range(max_retries):
+            predicted_price = self.predict(model, checkpoint, inputs)
+            try:
+                price_float = float(predicted_price)
+                if not np.isnan(price_float) and np.isfinite(price_float):
+                    break
+            except: pass
+        try:
+            price_float = float(predicted_price)
+            is_valid = not np.isnan(price_float) and np.isfinite(price_float)
+        except: is_valid = False
+        if is_valid: saved = self.save_prediction_to_warehouse(predicted_price, model_name, confidence)
+        else: saved = False
         
-        wandb.run.summary.update({
-            'best_model_type': model_type,
-            'best_val_loss': new_loss,
-            'final_predicted_price': predicted_price,
-            'final_confidence': confidence,
-            'model_used': model_name,
-            'new_model_used': use_new_model,
-            'saved_to_warehouse': saved
-        })
-        
-        wandb.finish()
+        if self.enable_wandb:
+            wandb.run.summary.update({
+                'best_model_type': model_type,
+                'best_val_loss': new_loss,
+                'final_predicted_price': predicted_price,
+                'final_confidence': confidence,
+                'model_used': model_name,
+                'new_model_used': use_new_model,
+                'saved_to_warehouse': saved
+            })
+            wandb.finish()
         
         return {
             'stock_code': self.stock_code,
@@ -340,25 +403,36 @@ class AutoPipeline:
         }
 
 
-if __name__ == "__main__":
-
-    stock_codes = ["AAA","AAM","ABS","ABT","ACB","ACC","ACL","ADG","ADP","ADS","AGG","AGR","ANV","APG","APH","ASM","ASP","AST","BAF","BCE","BCM","BFC","BIC","BID","BKG","BMC","BMI","BMP","BRC","BSI","BTP","BVH","BWE","C32","CCL","CDC","CII","CLC","CLL","CMG","CMX","CNG","CRC","CRE","CSM","CSV","CTD","CTF","CTG","CTI","CTR","CTS","D2D","DAH","DBC","DBD","DBT","DC4","DCL","DCM","DGC","DGW","DHA","DHC","DHM","DIG","DMC","DPG","DPM","DPR","DRC","DRL","DSC","DSE","DSN","DTA","DVP","DXG","DXS","EIB","ELC","EVE","EVF","FCM","FCN","FIR","FIT","FMC","FPT","FRT","FTS","GAS","GDT","GEE","GEX","GIL","GMD","GSP","GVR","HAG","HAH","HAP","HAR","HAX","HCD","HCM","HDB","HDC","HDG","HHP","HHS","HHV","HID","HII","HMC","HPG","HPX","HQC","HSG","HSL","HT1","HTG","HTI","HTN","HUB","HVH","ICT","IDI","IJC","ILB","IMP","ITC","ITD","JVC","KBC","KDC","KDH","KHG","KHP","KMR","KOS","KSB","LAF","LBM","LCG","LHG","LIX","LPB","LSS","MBB","MCM","MCP","MHC","MIG","MSB","MSH","MSN","MWG","NAB","NAF","NBB","NCT","NHA","NHH","NKG","NLG","NNC","NO1","NSC","NT2","NTL","OCB","OGC","ORS","PAC","PAN","PC1","PDR","PET","PGC","PHC","PHR","PIT","PLP","PLX","PNJ","POW","PPC","PTB","PTC","PTL","PVD","PVP","PVT","QCG","RAL","REE","RYG","SAB","SAM","SAV","SBG","SBT","SCR","SCS","SFC","SFG","SGN","SGR","SGT","SHB","SHI","SIP","SJD","SJS","SKG","SMB","SSB","SSI","ST8","STB","STK","SVT","SZC","SZL","TCB","TCH","TCI","TCL","TCM","TCO","TCT","TDC","TDG","TDP","TEG","THG","TIP","TLD","TLG","TLH","TMT","TNH","TNI","TNT","TPB","TRC","TSC","TTA","TTF","TV2","TVS","TYA","UIC","VCA","VCB","VCG","VCI","VDS","VFG","VGC","VHC","VHM","VIB","VIC","VIP","VIX","VJC","VMD","VND","VNL","VNM","VNS","VOS","VPB","VPG","VPH","VPI","VRC","VRE","VSC","VTO","VTP","YBM","YEG"]
-    # list_alpha_formulas = gen_all_alpha_formulas(stock_codes, max_workers=20, max_retries=3)
-    with open('alpha_formulas_gen.json', 'r', encoding='utf-8') as f:
-        list_alpha_formulas = json.load(f)
+def train_batch(stock_codes, alpha_formulas_dict, output_file, enable_wandb=False, prediction_date=None):
+    results = []
     for stock_code in stock_codes:
-        pipeline = None
         try:
-            pipeline = AutoPipeline(stock_code)
-            result = pipeline.run(list_alpha_formulas[stock_code])
-                
+            pipeline = AutoPipeline(stock_code, enable_wandb=enable_wandb, prediction_date=prediction_date)
+            result = pipeline.run(alpha_formulas_dict.get(stock_code, []))
             if result:
-                status = "NEW" if result['new_model_used'] else "OLD"
-                saved = "✓" if result['saved'] else "✗"
-                print(f"{saved} {stock_code}: {result['predicted_price']:.2f} [{status}] conf={result['confidence']:.3f}")
+                results.append(result)
+            else:
+                results.append({'stock_code': stock_code, 'error': 'No result'})
         except Exception as e:
-            print(f"✗ {stock_code}: Error - {str(e)}")
-        finally:
-            # Đảm bảo đóng wandb run khi có lỗi hoặc hoàn thành
-            if pipeline is not None and wandb.run is not None:
-                wandb.finish()
+            results.append({'stock_code': stock_code, 'error': str(e)})
+    
+    with open(output_file, 'w') as f:
+        json.dump(results, f, indent=2)
+    return results
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        batch_file = sys.argv[1]
+        output_file = sys.argv[2]
+        enable_wandb = sys.argv[3].lower() == 'true' if len(sys.argv) > 3 else False
+        with open(batch_file, 'r') as f:
+            data = json.load(f)
+        prediction_date = data.get('prediction_date')
+        train_batch(data['stocks'], data['alphas'], output_file, enable_wandb, prediction_date)
+    else:
+        stock_codes = ["AAA","AAM","ABS"]
+        with open('/home/bbsw/obito/model/alphas/alpha_formulas_gen_20251115.json', 'r') as f:
+            alphas = json.load(f)
+        train_batch(stock_codes, alphas, 'test_output.json', enable_wandb=True, prediction_date='2025-11-16')

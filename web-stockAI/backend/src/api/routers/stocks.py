@@ -76,14 +76,18 @@ async def read_stocks(db=Depends(get_db)):
     vn_tz = ZoneInfo("Asia/Ho_Chi_Minh")
     now = datetime.datetime.now(vn_tz)
     # Xác định ngày giao dịch gần nhất (tránh cuối tuần)
-    trading_date = now.date() - datetime.timedelta(days=1)
-    while trading_date.weekday() >= 5:
-        trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 3))
-    # Nếu ngoài giờ giao dịch (trước 9h), lấy phiên giao dịch trước đó
-    if now.hour < 9:
-        trading_date = trading_date - datetime.timedelta(days=2)
-        while trading_date.weekday() >= 5:
+    trading_date = now.date()
+    if now.hour < 9 :
+        trading_date = trading_date - datetime.timedelta(days=1)
+        while trading_date.weekday() >= 4:
             trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 3))
+    else:
+        if trading_date.weekday() >= 5:
+            trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 3))
+        elif trading_date.weekday() == 0:
+            trading_date = trading_date - datetime.timedelta(days=3)
+        else:
+            trading_date = trading_date - datetime.timedelta(days=1)
     rows = db.execute(query, (trading_date,))
     results = []
     for row in rows:
@@ -108,12 +112,15 @@ async def read_stocks(db=Depends(get_db)):
     now = datetime.datetime.now(vn_tz)
     # Xác định ngày giao dịch gần nhất (tránh cuối tuần)
     trading_date = now.date()
-    while trading_date.weekday() >= 5:
-        trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
-    # Nếu ngoài giờ giao dịch (trước 9h), lấy phiên giao dịch trước đó
     if now.hour < 9:
-        trading_date = trading_date - datetime.timedelta(days=2)
-        while trading_date.weekday() >= 5:
+        if trading_date.weekday() >= 5:
+            trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
+        elif trading_date.weekday() == 0:
+            trading_date = trading_date - datetime.timedelta(days=3)
+        else:
+            trading_date = trading_date - datetime.timedelta(days=1)
+    else:
+        if trading_date.weekday() >= 5:
             trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
     rows = db.execute(query, (trading_date,))
     results = []
@@ -200,12 +207,15 @@ async def read_stock_price_by_symbol(symbol: str, db=Depends(get_db)):
     now = datetime.datetime.now(vn_tz)
     # Xác định ngày giao dịch gần nhất (tránh cuối tuần)
     trading_date = now.date()
-    while trading_date.weekday() >= 5:
-        trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
-    # Nếu ngoài giờ giao dịch (trước 9h), lấy phiên giao dịch trước đó
     if now.hour < 9:
-        trading_date = trading_date - datetime.timedelta(days=1)
-        while trading_date.weekday() >= 5:
+        if trading_date.weekday() >= 5:
+            trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
+        elif trading_date.weekday() == 0:
+            trading_date = trading_date - datetime.timedelta(days=3)
+        else:
+            trading_date = trading_date - datetime.timedelta(days=1)
+    else:
+        if trading_date.weekday() >= 5:
             trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
     # Lấy dữ liệu từ 9h đến 15h của ngày giao dịch (dùng VN timezone)
     start_dt = datetime.datetime.combine(trading_date, datetime.time(9, 0, 0), tzinfo=vn_tz)

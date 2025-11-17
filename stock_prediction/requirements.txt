@@ -1,0 +1,23 @@
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch
+torchvision
+scikit-learn
+ta
+SQLAlchemy
+psycopg2-binary
+matplotlib
+seaborn
+langchain_google_genai
+langchain
+langchain_community
+pydantic
+openai
+fastapi
+uvicorn
+joblib
+python-dotenv
+tensorflow
+sqlite-utils
+PyDrive
+wandb
+weave

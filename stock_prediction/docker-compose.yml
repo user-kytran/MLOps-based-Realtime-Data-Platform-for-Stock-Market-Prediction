@@ -15,6 +15,7 @@ services:
       - WANDB_API_KEY=${WANDB_API_KEY}
       - POSTGRES_URL=${POSTGRES_URL}
       - symbols=${symbols}
+      - ENABLE_WANDB=${ENABLE_WANDB}
       - CUDA_VISIBLE_DEVICES=0
     deploy:
       resources:
@@ -25,8 +26,16 @@ services:
               capabilities: [gpu]
     restart: unless-stopped
     networks:
-      - stock-network
+      - financi-network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: kytran_prediction-cloudflared
+    command: tunnel --no-autoupdate run --token ${API_KEY_CLOUDFLARE}
+    restart: unless-stopped
+    networks:
+      - financi-network
 
 networks:
-  stock-network:
+  financi-network:
     driver: bridge

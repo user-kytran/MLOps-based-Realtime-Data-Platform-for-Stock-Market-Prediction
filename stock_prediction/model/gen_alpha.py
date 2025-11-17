@@ -130,7 +130,8 @@ def gen_all_alpha_formulas(stock_codes: list, max_workers=10, max_retries=3):
         print(f"Các mã thất bại sau {max_retries} lần retry: {retry_queue}")
     print(f"{'='*60}\n")
     
-    return list_alpha_formulas
+    file_path = f'alphas/alpha_formulas_gen_{datetime.now().strftime("%Y%m%d")}.json'
+    return file_path
 
 
 if __name__ == "__main__":

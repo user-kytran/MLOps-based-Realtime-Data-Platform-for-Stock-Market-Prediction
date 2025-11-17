@@ -16,23 +16,26 @@ import re
 import pandas as pd
 import numpy as np
 from typing import Tuple, List, Optional
+from .db_manager import ModelTrainingDB
 
 dotenv.load_dotenv()
-POSTGRES_URL = os.getenv('POSTGRES_URL')
+POSTGRES_URL = os.getenv('POSTGRES_URL', '').strip('"\'')
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-engine = create_engine(POSTGRES_URL)
+engine = create_engine(POSTGRES_URL) if POSTGRES_URL else None
 
-def collect_data(tickers):
+def collect_data(tickers, end_date=None):
     tickers = [tickers] if isinstance(tickers, str) else tickers
     data = {}
     
     for ticker in tickers:
+        date_filter = f"AND p.trade_date < '{end_date}'" if end_date else ""
+        
         df = pd.read_sql(f"""
             SELECT p.stock_code, p.trade_date, p.open, p.high, p.low, p.close, p.volume,
                    AVG(n.sentiment_score) AS {ticker}_polarity
             FROM fact_daily_prices AS p
             LEFT JOIN fact_news AS n ON p.stock_code = n.stock_code AND p.trade_date = n.news_date
-            WHERE p.stock_code = '{ticker}'
+            WHERE p.stock_code = '{ticker}' {date_filter}
             GROUP BY p.stock_code, p.trade_date, p.open, p.high, p.low, p.close, p.volume
             ORDER BY p.trade_date;
         """, engine)
@@ -57,7 +60,7 @@ def collect_data(tickers):
                 SELECT p.trade_date, AVG(n.sentiment_score) AS {rel}_polarity
                 FROM fact_daily_prices AS p
                 LEFT JOIN fact_news AS n ON n.stock_code = '{rel}' AND p.trade_date = n.news_date
-                WHERE p.stock_code = '{ticker}'
+                WHERE p.stock_code = '{ticker}' {date_filter}
                 GROUP BY p.trade_date ORDER BY p.trade_date;
             """, engine).set_index('trade_date')
             df = df.join(rel_df, how='left')
@@ -228,12 +231,25 @@ Alpha1 = (close - SMA_20) / SMA_20, Alpha2 = (RSI_14 - 50) / 50, Alpha3 = ..., A
     })
 
 
-def apply_generated_alphas(df: pd.DataFrame, stock_code: str, alpha_formulas: list):
-    """Tạo các cột Alpha mới trong DataFrame dựa trên danh sách công thức."""
+def apply_generated_alphas(df: pd.DataFrame, stock_code: str, alpha_formulas: list, ensure_count: int = None):
+    """Tạo các cột Alpha mới trong DataFrame dựa trên danh sách công thức.
+    
+    Args:
+        df: DataFrame chứa dữ liệu
+        stock_code: Mã cổ phiếu
+        alpha_formulas: Danh sách công thức alpha
+        ensure_count: Nếu không None, đảm bảo trả về đúng số công thức này
+    
+    Returns:
+        df_new: DataFrame với các cột Alpha
+        valid_formulas: Danh sách công thức hợp lệ
+    """
     df_new = df.copy()
     available_columns = df.columns.tolist()
+    valid_formulas = []
     
-    for i, formula in enumerate(alpha_formulas, 1):
+    for i, formula in enumerate(alpha_formulas[:ensure_count] if ensure_count else alpha_formulas):
+        alpha_col = f"Alpha{i+1}"
         try:
             # Extract expression after "="
             if "=" in formula:
@@ -243,24 +259,156 @@ def apply_generated_alphas(df: pd.DataFrame, stock_code: str, alpha_formulas: li
             
             # Skip empty expressions
             if not expr or expr == "":
-                print(f"Cảnh báo: Công thức {i} rỗng, bỏ qua")
-                return None, alpha_formulas
+                print(f"Cảnh báo: Công thức {i+1} rỗng, bỏ qua")
+                continue
             
             # Validate expression has valid columns
             is_valid, cleaned_expr = validate_and_clean_formula(expr, available_columns)
             if not is_valid:
-                print(f"Cảnh báo: Công thức {i} không hợp lệ: {expr}")
-                return None, alpha_formulas
+                print(f"Cảnh báo: Công thức {i+1} không hợp lệ: {expr}")
+                continue
             
             # Apply the formula
-            df_new[f"Alpha{i}"] = df_new.eval(cleaned_expr)
+            df_new[alpha_col] = df_new.eval(cleaned_expr)
+            valid_formulas.append(formula)
             
         except Exception as e:
-            print(f"Lỗi áp dụng công thức {i} cho {stock_code}: {e}")
+            print(f"Lỗi áp dụng công thức {i+1} cho {stock_code}: {e}")
             print(f"  Formula: {formula}")
-            return None, alpha_formulas
+            continue
     
-    return df_new, alpha_formulas
+    if len(valid_formulas) == 0:
+        print(f"Không có công thức nào hợp lệ cho {stock_code}")
+        return None, []
+    
+    return df_new, valid_formulas
+
+
+def calculate_ic_from_column(df: pd.DataFrame, alpha_col: str) -> tuple[float, float, int]:
+    """
+    Tính RankIC từ cột alpha đã có sẵn
+    Returns: (rank_ic, pvalue, n_samples)
+    """
+    from scipy.stats import spearmanr
+    
+    if alpha_col not in df.columns or 'close' not in df.columns:
+        return np.nan, np.nan, 0
+    
+    try:
+        df_temp = df[[alpha_col, 'close']].copy()
+        df_temp['future_return'] = ((df_temp['close'].shift(-1) - df_temp['close']) / df_temp['close']) * 100
+        df_temp = df_temp.replace([float('inf'), -float('inf')], float('nan')).dropna()
+        
+        if len(df_temp) < 10:
+            return np.nan, np.nan, 0
+        
+        corr, pvalue = spearmanr(df_temp[alpha_col], df_temp['future_return'])
+        return corr, pvalue, len(df_temp)
+    
+    except Exception:
+        return np.nan, np.nan, 0
+
+
+def select_best_alphas(df: pd.DataFrame, stock_code: str, alpha_formulas: list, top_n: int = 5, max_retries: int = 2):
+    """Chọn top N alpha formula tốt nhất dựa vào RankIC. Luôn sinh thêm công thức mới để có nhiều lựa chọn."""
+    
+    # Bước 1: Load công thức từ DB
+    db_formulas = []
+    try:
+        history_alphas = ModelTrainingDB().get_alpha_metrics(stock_code)
+        for row in history_alphas:
+            if len(row) == 5:
+                _, formula, ic, pval, n = row
+                db_formulas.append((formula, ic, pval, n))
+        if db_formulas:
+            print(f"{stock_code}: Đã tìm thấy {len(db_formulas)} công thức trong DB")
+    except:
+        pass
+    
+    # Bước 2: Kết hợp tất cả công thức (input + DB + sinh mới)
+    all_formulas = list(set(alpha_formulas))
+    
+    # Thêm công thức từ DB vào pool
+    for formula, _, _, _ in db_formulas:
+        if formula not in all_formulas:
+            all_formulas.append(formula)
+    
+    # Bước 3: Sinh thêm công thức mới (luôn chạy đủ max_retries lần)
+    for retry in range(max_retries):
+        print(f"{stock_code}: Sinh công thức lần {retry + 1}/{max_retries}...")
+        try:
+            result = generate_stock_alphas({stock_code: df}, stock_key=stock_code)
+            new_formulas = [alpha.strip() for alpha in result if alpha.strip()]
+            for formula in new_formulas:
+                if formula not in all_formulas:
+                    all_formulas.append(formula)
+        except Exception as e:
+            print(f"{stock_code}: Lỗi sinh công thức lần {retry + 1}: {e}")
+    
+    print(f"{stock_code}: Tổng cộng có {len(all_formulas)} công thức để đánh giá")
+    
+    # Bước 4: Apply và tính RankIC cho TẤT CẢ công thức
+    df_with_all_alphas, valid_formulas = apply_generated_alphas(df, stock_code, all_formulas)
+    
+    if df_with_all_alphas is None or len(valid_formulas) == 0:
+        print(f"{stock_code}: Không có công thức nào hợp lệ")
+        return None, None
+    
+    print(f"{stock_code}: Có {len(valid_formulas)} công thức hợp lệ")
+    
+    # Tính RankIC cho tất cả
+    list_alphas = []
+    for idx, alpha_formula in enumerate(valid_formulas):
+        alpha_col = f"Alpha{idx+1}"
+        if alpha_col in df_with_all_alphas.columns:
+            rank_ic, pvalue, n_samples = calculate_ic_from_column(df_with_all_alphas, alpha_col)
+            list_alphas.append((alpha_formula, rank_ic, pvalue, n_samples))
+    
+    if len(list_alphas) == 0:
+        print(f"{stock_code}: Không tính được IC cho công thức nào")
+        return None, None
+    
+    # Bước 5: Sort và chọn top N công thức tốt nhất
+    def safe_sort_key(x):
+        val = x[1]
+        if isinstance(val, (int, float)):
+            return val if not np.isnan(val) else -999
+        return -999
+    
+    best_alphas_with_ic = sorted(list_alphas, key=safe_sort_key, reverse=True)
+    
+    if len(best_alphas_with_ic) < top_n:
+        print(f"{stock_code}: Chỉ có {len(best_alphas_with_ic)}/{top_n} công thức")
+        return None, None
+    
+    # Chọn top N
+    top_alphas = best_alphas_with_ic[:top_n]
+    best_formulas = [alpha[0] for alpha in top_alphas]
+    
+    # Bước 6: Apply lại với đúng top N công thức
+    df_final, final_valid = apply_generated_alphas(df, stock_code, best_formulas, ensure_count=top_n)
+    
+    if df_final is None or len(final_valid) != top_n:
+        print(f"{stock_code}: Không apply được {top_n} công thức tốt nhất")
+        return None, None
+    
+    # Lưu vào DB (xóa cũ, chỉ giữ 5 công thức tốt nhất)
+    try:
+        db = ModelTrainingDB()
+        deleted = db.delete_alpha_metrics(stock_code)
+        if deleted > 0:
+            print(f"{stock_code}: Đã xóa {deleted} công thức cũ trong DB")
+        for i in range(top_n):
+            db.save_alpha_metrics(stock_code, top_alphas[i][0], 
+                                top_alphas[i][1], 
+                                top_alphas[i][2], 
+                                top_alphas[i][3])
+        print(f"{stock_code}: Đã lưu {top_n} công thức mới vào DB")
+    except Exception as e:
+        print(f"{stock_code}: Lỗi lưu DB: {e}")
+    
+    print(f"{stock_code}: ✓ Chọn được {top_n} công thức tốt nhất (RankIC: {top_alphas[0][1]:.4f} - {top_alphas[-1][1]:.4f})")
+    return df_final, final_valid
 
 
 
@@ -276,9 +424,19 @@ def save_checkpoint_to_temp(checkpoint: dict, tmp_path: str):
 def push_checkpoint_to_ggdrive(tmp_path: str, remote_folder: str = "Checkpoints_DATN"):
     """Push checkpoint to Google Drive and remove local temp file"""
     try:
-        subprocess.run(["rclone", "copy", tmp_path, f"gdrive_model:/{remote_folder}/"], check=True)
+        # Chạy rclone với stderr bị suppress để tránh spam log
+        subprocess.run(
+            ["rclone", "copy", tmp_path, f"gdrive_model:/{remote_folder}/"], 
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
     except subprocess.CalledProcessError:
+        # Nếu rclone fail, không làm gì (checkpoint vẫn ở local)
         pass
+    except FileNotFoundError:
+        # Nếu rclone không được cài đặt
+        print(f"Warning: rclone not found, checkpoint saved locally only: {tmp_path}")
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
@@ -288,8 +446,20 @@ def pull_checkpoint_from_ggdrive(filename: str, remote_folder: str = "Checkpoint
     """Pull checkpoint from Google Drive and load it"""
     tmp_dir = tempfile.gettempdir()
     tmp_path_download = os.path.join(tmp_dir, filename)
-    subprocess.run(["rclone", "copyto", f"gdrive_model:/{remote_folder}/{filename}", tmp_path_download], check=True)
-    checkpoint = torch.load(tmp_path_download, weights_only=False)
+    
+    try:
+        subprocess.run(
+            ["rclone", "copyto", f"gdrive_model:/{remote_folder}/{filename}", tmp_path_download], 
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        raise Exception(f"Failed to download checkpoint from Google Drive: {e}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    checkpoint = torch.load(tmp_path_download, map_location=device, weights_only=False)
+    
     if os.path.exists(tmp_path_download):
         os.remove(tmp_path_download)
     return checkpoint

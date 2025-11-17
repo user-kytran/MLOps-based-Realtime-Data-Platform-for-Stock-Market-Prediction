@@ -106,6 +106,46 @@ class ModelTrainingDB:
         conn.close()
         return deleted_count > 0
 
+    def get_alpha_metrics(self, stock_code):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT stock_code, alpha_formula, rank_ic, pvalue, n_samples FROM stock_alpha_metrics WHERE stock_code = ?
+        ''', (stock_code,))
+        results = cursor.fetchall()
+        conn.close()
+        return results
+
+    def delete_alpha_metrics(self, stock_code):
+        """Xóa tất cả công thức alpha của một mã cổ phiếu"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''
+                DELETE FROM stock_alpha_metrics WHERE stock_code = ?
+            ''', (stock_code,))
+            conn.commit()
+            deleted_count = cursor.rowcount
+            return deleted_count
+        finally:
+            conn.close()
+    
+    def save_alpha_metrics(self, stock_code, alpha_formula, rank_ic, pvalue, n_samples):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        date_calculated = datetime.now(pytz.timezone("Asia/Ho_Chi_Minh")).strftime("%d/%m/%Y")
+        
+        try:
+            cursor.execute('''
+                INSERT OR REPLACE INTO stock_alpha_metrics 
+                (stock_code, alpha_formula, rank_ic, pvalue, n_samples, date_calculated)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (stock_code, alpha_formula, rank_ic, pvalue, n_samples, date_calculated))
+            conn.commit()
+        finally:
+            conn.close()
+    
+
 if __name__ == "__main__":
     db = ModelTrainingDB()
     # db.save_training_info("LSMT_AAA", 0.1234, ["alpha1", "alpha2"])
