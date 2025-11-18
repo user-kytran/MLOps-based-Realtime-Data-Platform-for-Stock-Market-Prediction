@@ -1,345 +1,296 @@
-# Web StockAI - Real-time Stock Trading Platform
+# Web StockAI
 
-Full-stack web application: FastAPI backend + Next.js frontend với real-time WebSocket streaming và CDC monitoring.
+## Mục đích
+Web application stock trading với real-time data, charts, predictions, và news sentiment analysis. Frontend Next.js kết nối với FastAPI backend qua REST API và WebSocket để stream dữ liệu từ ScyllaDB CDC.
 
-## Tổng quan
-
-**Features:**
-- ✅ Real-time stock prices qua WebSocket
-- ✅ Historical charts (OHLCV) multiple timeframes
-- ✅ CDC latency monitoring với Prometheus
-- ✅ Production-ready với Cloudflare Tunnel
-
-## Kiến trúc
-
+## Cấu trúc
 ```
-Frontend (Next.js 14)
-      ↓ HTTP/WS
-Backend (FastAPI)
-      ↓
-ScyllaDB (CDC)
+web-stockAI/
+├── docker-compose.yml         # 3 services: backend, frontend, cloudflared
+├── backend/
+│   ├── main.py                # FastAPI entry point
+│   ├── src/
+│   │   ├── api/routers/       # API endpoints
+│   │   │   ├── stocks.py      # Stock data, WebSocket, CDC
+│   │   │   ├── news.py        # News endpoints
+│   │   │   └── auth.py        # Authentication
+│   │   └── db.py              # ScyllaDB connection
+│   ├── requirements.txt       # FastAPI, cassandra-driver, yfinance
+│   └── Dockerfile
+├── frontend/
+│   ├── app/                   # Next.js 14 App Router
+│   │   ├── page.tsx           # Home/Landing page
+│   │   ├── dashboard/         # Dashboard overview
+│   │   ├── stocks/            # Stock list page
+│   │   ├── stock/[symbol]/    # Stock detail page
+│   │   ├── analysis/          # Market analysis
+│   │   ├── news/              # News page
+│   │   └── settings/          # User settings
+│   ├── components/
+│   │   ├── charts/            # Stock charts (historical, intraday, prediction)
+│   │   ├── market/            # Stock table, widgets, top movers
+│   │   ├── news/              # News list, filters
+│   │   ├── analysis/          # Analysis charts
+│   │   ├── ui/                # shadcn/ui components
+│   │   └── layout/            # Header, theme provider
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useStockData.ts    # Fetch stock data
+│   │   ├── useStocksWS.ts     # WebSocket real-time
+│   │   ├── usePredictions.ts  # Predictions data
+│   │   └── useStockChartData.ts
+│   ├── lib/
+│   │   ├── api.ts             # API client
+│   │   ├── config.ts          # Config (API URLs)
+│   │   └── utils.ts           # Utilities
+│   ├── types/stock.ts         # TypeScript types
+│   ├── package.json           # Next.js, React, Recharts
+│   └── Dockerfile
+├── QUICK-DEPLOY.md            # Quick deployment guide
+└── DEPLOY.md                  # Deployment instructions
 ```
 
-**Components:**
-- **Backend:** FastAPI + WebSocket server (port 8005)
-- **Frontend:** Next.js 14 + React 18 (port 3005)
-- **Cloudflared:** Tunnel cho production
+### Services
+- **backend**: FastAPI (port 8005)
+- **frontend**: Next.js (port 3005)
+- **cloudflared**: Cloudflare tunnel (expose qua internet)
 
-## Cài đặt
+## Chức năng
 
-### Khởi động services
+### Frontend Pages
+1. **Dashboard**: Market overview, portfolio summary, alerts
+2. **Stocks**: Real-time stock table với WebSocket streaming
+3. **Stock Detail**: Charts (intraday, historical, predictions), company info, matched orders
+4. **Analysis**: Market summary, sector distribution, top volume, price trends
+5. **News**: Market news với sentiment scores, filters
+6. **Settings**: User profile, watchlist, notifications
 
+### Backend APIs
+**Stocks** (`/stocks/*`):
+- `GET /get_reference`: Danh sách stocks
+- `GET /historical/{symbol}`: Historical OHLCV data
+- `GET /intraday/{symbol}`: Intraday chart data
+- `GET /daily_summary/{symbol}`: Daily summary
+- `GET /predictions/{symbol}`: Price predictions
+- `GET /metrics`: Prometheus metrics (CDC latency)
+- `WS /ws/stocks_realtime`: WebSocket stream real-time prices
+
+**News** (`/news/*`):
+- `GET /`: News list với filters
+- `GET /stats`: News statistics
+- `GET /{symbol}`: News theo symbol
+
+### Real-time Features
+- **WebSocket Streaming**: Live stock prices từ ScyllaDB CDC
+- **CDC Integration**: Scylla CDC printer binary chạy trong backend container
+- **Latency Tracking**: Producer timestamp → consumer timestamp
+- **Prometheus Metrics**: Export CDC metrics
+
+### Charts
+- **Historical Chart**: Candlestick OHLCV với volume
+- **Intraday Chart**: Line chart giá trong ngày
+- **Prediction Chart**: Future price predictions
+- **Analysis Charts**: Market summary, sector distribution, top movers
+
+## Cách sử dụng
+
+### Quick Start
 ```bash
-cd web-stockAI
-docker compose up -d
+cd /home/obito/main/web-stockAI
+docker compose up -d --build
 ```
 
-### Verify
+### Truy cập
+- **Frontend**: http://localhost:3005
+- **Backend API**: http://localhost:8005/docs
+- **Prometheus Metrics**: http://localhost:8005/stocks/metrics
 
-```bash
-# Backend health
-curl http://localhost:8005/stocks/get_reference
-
-# Frontend
-curl http://localhost:3005
-```
-
-### Access
-
-**Local:**
-- Frontend: http://localhost:3005
-- Backend API: http://localhost:8005/docs
-- Metrics: http://localhost:8005/stocks/metrics
-
-**Production:**
-- https://api.kytran.io.vn
-
-## API Endpoints
-
-### REST API
-
-#### GET /stocks/get_reference
-
-Latest prices tất cả symbols:
-
-```bash
-curl http://localhost:8005/stocks/get_reference
-```
-
-#### GET /stocks/daily_prices
-
-Daily OHLCV summary:
-
-```bash
-curl http://localhost:8005/stocks/daily_prices?symbol=VCB.VN
-```
-
-#### GET /stocks/aggregated
-
-Historical data với timeframes:
-
-```bash
-curl "http://localhost:8005/stocks/aggregated?symbol=VCB.VN&interval=1m&limit=100"
-```
-
-**Params:**
-- `symbol`: Stock code (VCB.VN, HPG.VN, ...)
-- `interval`: 1m, 5m, 1h, 1d
-- `limit`: Number of records
-
-#### GET /stocks/metrics
-
-Prometheus metrics:
-
-```bash
-curl http://localhost:8005/stocks/metrics
-```
-
-**Metrics:**
-- `cdc_latency_ms`: CDC latency histogram
-- `cdc_events_total`: Events counter
-- `cdc_active_connections`: Active WebSocket connections
-
-### WebSocket API
-
-#### WS /stocks/ws/stocks_realtime
-
-Real-time updates via CDC:
-
-```javascript
-const ws = new WebSocket('ws://localhost:8005/stocks/ws/stocks_realtime');
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  // {symbol: "VCB.VN", price: 95.5, change_percent: 1.2, ...}
-};
-```
-
-## Configuration
-
-### Backend Environment
-
+### Với Cloudflare Tunnel
+Thêm env variable trong docker-compose:
 ```yaml
-CASSANDRA_HOST: ["scylla-node1","scylla-node2","scylla-node3"]
-CASSANDRA_PORT: 9042
-CASSANDRA_KEYSPACE: stock_data
-SCHEMA_REGISTRY_URL: http://schema-registry:8081
+environment:
+  - API_KEY_CLOUDFLARE=your_token
 ```
 
-### Frontend Environment
+Access qua public URL thay vì localhost.
 
-```yaml
-NEXT_PUBLIC_API_URL: https://api.kytran.io.vn
-NEXT_PUBLIC_WS_URL: https://api.kytran.io.vn
+### Deploy từ máy khác
+Xem file `QUICK-DEPLOY.md` để config API URLs:
+
+**Option 1 - Auto detect**:
+```bash
+cd frontend
+bash fix-api-urls.sh
+docker compose up -d --build
 ```
 
-**Auto-detect:** Frontend tự động detect hostname từ browser.
+**Option 2 - Manual config**:
+```bash
+# Tạo .env.local trong frontend/
+NEXT_PUBLIC_API_URL=http://192.168.1.100:8005
+NEXT_PUBLIC_WS_URL=ws://192.168.1.100:8005
+```
 
-## Development
+### Stop services
+```bash
+docker compose down
+```
 
-### Backend
+### Xem logs
+```bash
+docker logs -f webstock-frontend
+docker logs -f webstock-backend
+```
 
+### Development mode
+**Backend**:
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn src:app --host 0.0.0.0 --port 8005 --reload
+python main.py
 ```
 
-### Frontend
-
+**Frontend**:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Deployment
+## Quy ước
 
-### Quick Deploy (LAN)
+### API URLs
+- Auto-detect từ browser hostname (production)
+- Environment variables: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_WS_URL`
+- Config file: `frontend/lib/config.ts`
 
-**Bước 1:** Lấy server IP:
-```bash
-hostname -I
-# Output: 192.168.1.100
-```
+### WebSocket Protocol
+- Endpoint: `/ws/stocks_realtime`
+- Format: JSON messages với stock updates
+- Auto reconnect on disconnect
 
-**Bước 2:** Set environment:
-```bash
-cd web-stockAI
+### Data Sources
+- **Real-time**: ScyllaDB CDC → Backend WebSocket → Frontend
+- **Historical**: ScyllaDB `stock_prices_agg` table
+- **Predictions**: ScyllaDB `fact_predictions` hoặc API
+- **News**: ScyllaDB `stock_news` table
 
-# Create .env.local
-cat > frontend/.env.local << EOF
-NEXT_PUBLIC_API_URL=http://192.168.1.100:8005
-NEXT_PUBLIC_WS_URL=ws://192.168.1.100:8005
-EOF
-```
-
-**Bước 3:** Deploy:
-```bash
-docker compose down
-docker compose up -d --build
-```
-
-**Bước 4:** Access từ máy khác:
-```
-http://192.168.1.100:3005
-```
-
-### Production Deploy
-
-**Cloudflare Tunnel** đã configured trong docker-compose.yml:
-
-```yaml
-cloudflared:
-  command: tunnel --no-autoupdate run --token <YOUR_TOKEN>
-```
-
-**Access:** https://api.kytran.io.vn
-
-## Monitoring
-
-### Logs
-
-```bash
-docker logs -f webstock-backend
-docker logs -f webstock-frontend
-docker logs -f webstock-cloudflared
-```
-
-### Metrics
-
-```bash
-# CDC latency
-curl http://localhost:8005/stocks/metrics | grep cdc_latency
-
-# WebSocket connections
-curl http://localhost:8005/stocks/metrics | grep cdc_active_connections
-
-# Container stats
-docker stats webstock-backend webstock-frontend
-```
-
-## Troubleshooting
-
-### Backend không start
-
-```bash
-# Check logs
-docker logs webstock-backend
-
-# Test ScyllaDB connection
-docker exec webstock-backend python -c "from cassandra.cluster import Cluster; Cluster(['scylla-node1']).connect()"
-```
-
-### Frontend không hiển thị data
-
-```bash
-# Check API
-curl http://localhost:8005/stocks/get_reference
-
-# Verify env variables
-docker exec webstock-frontend env | grep NEXT_PUBLIC
-
-# Check browser console (F12)
-```
-
-### WebSocket không connect
-
-```bash
-# Test WebSocket
-python backend/test_websocket.py
-
-# Check firewall
-sudo ufw allow 8005/tcp
-
-# Browser DevTools → Network → WS
-```
-
-### CORS errors
-
-```python
-# src/__init__.py
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://yourdomain.com"],  # Specific domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
-
-## Frontend Pages
-
-- `/`: Dashboard chính với latest prices table
-- `/chart/[symbol]`: Detailed chart với multiple timeframes
-
-**Key components:**
-- `components/charts/stock-chart.tsx`: Real-time chart
-- `components/charts/historical-chart.tsx`: Historical OHLCV
-- `hooks/useStockData.ts`: WebSocket hook
-
-## Tech Stack
-
-### Backend
-- FastAPI + Uvicorn
-- cassandra-driver
-- confluent-kafka
-- prometheus-client
-- WebSockets
-
-### Frontend
-- Next.js 14
-- React 18 + TypeScript
-- Recharts (charts)
-- shadcn/ui (components)
+### Styling
 - Tailwind CSS 4
-- Axios
+- shadcn/ui components
+- Dark mode support (next-themes)
+- Responsive design
 
-## Security
+### Type Safety
+- TypeScript strict mode
+- Zod validation
+- Type definitions trong `types/stock.ts`
 
-### Production Checklist
+## Ghi chú phát triển
 
-- [ ] CORS `allow_origins` specific domains
-- [ ] Rate limiting
-- [ ] Firewall rules
-- [ ] SSL/TLS (Cloudflare auto)
-- [ ] Environment variables secure
-- [ ] API authentication
+### Thêm page mới
+1. Tạo folder trong `frontend/app/`
+2. Tạo `page.tsx` với React component
+3. Update navigation trong `components/layout/header.tsx`
 
-### Firewall
+### Thêm API endpoint mới
+1. Thêm route trong `backend/src/api/routers/`
+2. Register router trong `router.py`
+3. Update API client trong `frontend/lib/api.ts`
 
+### Thêm chart mới
+1. Tạo component trong `frontend/components/charts/`
+2. Sử dụng Recharts library
+3. Fetch data với custom hook trong `hooks/`
+
+### WebSocket debugging
 ```bash
-sudo ufw allow 8005/tcp
-sudo ufw allow 3005/tcp
-sudo ufw enable
+# Test WebSocket từ CLI
+wscat -c ws://localhost:8005/stocks/ws/stocks_realtime
+
+# Hoặc dùng test script
+python backend/test_websocket.py
 ```
 
-## Performance
+### CDC Integration
+Backend mount CDC printer binary:
+```yaml
+volumes:
+  - ../scylla-cdc-printer:/cdc-printer:ro
+```
 
-**Backend:**
-- Response time: <50ms
-- WebSocket latency: <100ms
-- Throughput: ~1000 req/s
+Start CDC printer subprocess khi có WebSocket connection:
+```python
+subprocess.Popen([CDC_PRINTER_PATH, '-k', 'stock_data', ...])
+```
 
-**Frontend:**
-- First load: ~2s
-- Bundle size: ~500KB gzipped
+### Environment Variables
 
-## Ports
+**Backend**:
+```bash
+CASSANDRA_HOST=["scylla-node1","scylla-node2","scylla-node3"]
+CASSANDRA_PORT=9042
+CASSANDRA_KEYSPACE=stock_data
+SCHEMA_REGISTRY_URL=http://schema-registry:8081
+CDC_PRINTER_PATH=/cdc-printer/target/release/scylla-cdc-printer
+```
 
-| Service | External | Internal | Purpose |
-|---------|----------|----------|---------|
-| Backend | 8005 | 8005 | API & WebSocket |
-| Frontend | 3005 | 3000 | Next.js app |
+**Frontend**:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8005
+NEXT_PUBLIC_WS_URL=ws://localhost:8005
+```
 
-## Dependencies
+### Troubleshooting
 
-- Docker 20.10+
-- Docker Compose v2+
+**Frontend không load data**:
+- Check API URL trong browser console (F12)
+- Verify backend running: `curl http://localhost:8005/stocks/get_reference`
+- Check CORS settings trong backend
+
+**WebSocket disconnect**:
+- Verify CDC printer binary exists
+- Check ScyllaDB connection
+- Monitor backend logs cho CDC errors
+
+**Build errors**:
+- Clear Next.js cache: `rm -rf frontend/.next`
+- Reinstall deps: `cd frontend && npm install`
+- Check TypeScript errors: `npm run lint`
+
+**Slow charts**:
+- Reduce data points trong query
+- Implement data pagination
+- Use memoization cho heavy computations
+
+### Performance Tips
+- Lazy load components với `React.lazy()`
+- Debounce search inputs
+- Optimize re-renders với `React.memo()`
+- Use server components khi có thể (Next.js 14)
+- Cache API responses
+
+### Security Notes
+- Enable CORS properly trong production
+- Use HTTPS với SSL certificates
+- Validate all user inputs
+- Sanitize data trước khi render
+- Implement rate limiting
+
+### Network
 - Network: `financi-network` (external)
-- ScyllaDB cluster
-- Schema Registry
+- Backend connect: ScyllaDB, Schema Registry
+- Frontend connect: Backend API, WebSocket
 
-## License
+### Dependencies
+**Frontend**:
+- Next.js 14, React 18, TypeScript
+- Recharts (charts)
+- shadcn/ui (UI components)
+- Tailwind CSS 4
 
-Proprietary - Stock AI Project
+**Backend**:
+- FastAPI, Uvicorn
+- cassandra-driver (ScyllaDB)
+- yfinance (market data)
+- prometheus-client (metrics)
+

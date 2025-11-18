@@ -92,7 +92,7 @@ default_args = {
 }
 
 dag = DAG(
-    'dump_to_warehouse',
+    'DAGs_warehouse',
     default_args=default_args,
     description='Daily dump ScyllaDB to Warehouse',
     schedule_interval='0 23 * * *',  # 23:00 Vietnam time (UTC+7)

@@ -1,294 +1,193 @@
-# ScyllaDB Monitoring Stack
+# Scylla Monitoring
 
-Prometheus + Grafana monitoring stack cho ScyllaDB cluster và Stock Backend với CDC latency monitoring.
+## Mục đích
+Monitoring stack cho ScyllaDB và Stock Backend sử dụng Prometheus + Grafana. Theo dõi performance, latency và CDC metrics từ ScyllaDB cluster và Stock CDC processing.
 
-## Tổng quan
+## Cấu trúc
+```
+scylla-monitoring/
+├── docker-compose.yml               # Prometheus + Grafana setup
+├── prometheus/
+│   ├── build/prometheus.yml         # Prometheus config
+│   ├── scylla_servers.yml           # ScyllaDB targets
+│   ├── stock_backend_servers.yml    # Stock backend targets
+│   └── prom_rules/                  # Alert rules
+├── grafana/
+│   ├── build/                       # Dashboards
+│   │   ├── ver_5.2/                 # ScyllaDB dashboards v5.2
+│   │   └── stock-cdc-latency.json   # Stock CDC monitoring
+│   ├── provisioning/                # Auto-provision config
+│   └── plugins/                     # Grafana plugins
+├── prometheus_data/                 # Persistent data
+├── start-all.sh                     # Khởi động monitoring stack
+├── restart-with-stock.sh            # Restart với Stock CDC config
+├── setup-stock-monitoring.sh        # Setup Stock CDC monitoring
+├── test-cdc-latency.sh              # Test CDC monitoring
+└── update_dashboard_timezone.py     # Update timezone dashboards
+```
 
-Stack monitoring tích hợp sẵn dashboards của ScyllaDB, bổ sung thêm monitoring cho Stock CDC pipeline latency (producer → ScyllaDB → consumer).
+## Chức năng
 
-## Thành phần
+### ScyllaDB Monitoring
+- **Overview**: CPU, Memory, Disk, Network
+- **Advanced**: Query latency, cache hit rate
+- **CQL**: Query stats, prepared statements
+- **OS**: System metrics per node
+- **Keyspace**: Per-keyspace metrics
 
-- **Prometheus 3.5.0**: Time-series database
-- **Grafana 12.1.0**: Visualization dashboards
-- **ScyllaDB Dashboards**: 30+ dashboards monitoring cluster
-- **Stock CDC Dashboard**: Latency monitoring custom
+### Stock CDC Monitoring
+- **CDC Events**: Số lượng CDC events theo symbol
+- **CDC Latency**: Thời gian từ producer đến consumer (ms)
+- **Active Connections**: WebSocket connections đang active
+- **Event Rate**: Events/s theo thời gian
 
-## Cài đặt
+## Cách sử dụng
 
-### 1. Khởi động monitoring stack
-
+### Khởi động lần đầu
 ```bash
-cd scylla-monitoring
+./restart-with-stock.sh
+```
 
+### Khởi động thủ công
+```bash
 ./start-all.sh \
   -v 5.2 \
   -d prometheus_data \
   -D "--network=financi-network -e TZ=Asia/Ho_Chi_Minh" \
   -s ./prometheus/scylla_servers.yml \
-  -c "TZ=Asia/Ho_Chi_Minh" \
   --auto-restart \
   --no-alertmanager \
   --no-loki \
   --no-renderer
 ```
 
-**Tham số:**
-- `-v 5.2`: ScyllaDB version dashboards
-- `-d prometheus_data`: Data persistence directory
-- `-D`: Docker options (network, timezone)
-- `-s`: ScyllaDB servers config
-- `--no-alertmanager`: Disable alerting
-- `--no-loki`: Disable log aggregation
-
-### 2. Verify services
-
-```bash
-# Prometheus
-curl http://localhost:9090/-/healthy
-
-# Grafana
-curl http://localhost:1020/api/health
-```
-
-### 3. Access dashboards
-
-- **Grafana**: http://localhost:1020
-  - Username: admin / Password: admin (auto-login enabled)
-- **Prometheus**: http://localhost:9090
-
-## Cấu hình
-
-### ScyllaDB Targets
-
-File: `prometheus/scylla_servers.yml`
-
-```yaml
-- targets:
-    - scylla-node1:9180
-    - scylla-node2:9180
-    - scylla-node3:9180
-  labels:
-    cluster: scylla-cluster
-    dc: datacenter1
-```
-
-### Stock Backend Target
-
-File: `prometheus/stock_backend_servers.yml`
-
-```yaml
-- targets:
-    - webstock-backend:8005
-  labels:
-    job: stock_backend
-    service: api
-```
-
-## Dashboards
-
-### ScyllaDB Dashboards (30+)
-
-**Core dashboards:**
-- `scylla-overview.5.2.json`: Tổng quan cluster
-- `scylla-cql.5.2.json`: CQL metrics
-- `scylla-io.5.2.json`: Disk I/O
-- `scylla-latency.5.2.json`: Query latency
-- `scylla-cache.5.2.json`: Cache hit/miss
-
-**Location:** `grafana/build/ver_5.2/`
-
-### Stock CDC Latency Dashboard
-
-**Metrics monitored:**
-- CDC Latency P50/P95/P99
-- CDC Events throughput (events/sec)
-- Active WebSocket connections
-- Latency by symbol
-- Event stats by symbol
-
-**Panels:**
-1. **CDC Latency Percentiles**: Line chart P50/P95/P99 theo thời gian
-2. **CDC Latency by Symbol**: Top symbols có latency cao
-3. **Current P95 Latency**: Gauge hiện tại
-4. **Active Connections**: WebSocket connections
-5. **CDC Events Rate**: Throughput
-6. **Stats Table**: Bảng tổng hợp theo symbol
-
-## Prometheus Queries
-
-### CDC Latency P95
-
-```promql
-histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le))
-```
-
-### CDC Latency P95 by Symbol
-
-```promql
-histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le, symbol))
-```
-
-### CDC Events Rate
-
-```promql
-sum(rate(cdc_events_total[1m]))
-```
-
-### Average Latency by Symbol
-
-```promql
-sum(rate(cdc_latency_ms_sum[1m])) by (symbol) / sum(rate(cdc_latency_ms_count[1m])) by (symbol)
-```
-
-## CDC Metrics Endpoint
-
-**Backend metrics:** http://localhost:8005/stocks/metrics
-
-**Metrics exposed:**
-- `cdc_latency_ms`: Histogram (latency distribution)
-- `cdc_events_total`: Counter (số events theo symbol)
-- `cdc_active_connections`: Gauge (số WebSocket connections)
-
-## Monitoring Flow
-
-```
-Producer (t1) → Kafka → Flink → ScyllaDB → CDC → Backend (t2)
-   ↓                                                    ↓
-producer_timestamp                              time.time()*1000
-
-Latency = t2 - t1 (ms)
-```
-
-**Measurement point:** Backend WebSocket handler trước khi broadcast
-
-## Scripts
-
-### restart-with-stock.sh
-
-Restart toàn bộ monitoring stack với stock backend:
-
-```bash
-./restart-with-stock.sh
-```
-
-### kill-all.sh
-
-Dừng tất cả monitoring containers:
-
+### Dừng services
 ```bash
 ./kill-all.sh
 ```
 
-### setup-stock-monitoring.sh
-
-Setup ban đầu cho stock CDC monitoring:
-
+### Test CDC monitoring
 ```bash
-./setup-stock-monitoring.sh
+./test-cdc-latency.sh
 ```
 
-## Ports
+### Truy cập
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| Grafana | 1020 | Web UI |
-| Prometheus | 9090 | Web UI & API |
+**Prometheus**: http://localhost:9090
+- Query metrics
+- Xem targets và health status
+- Alert rules
 
-## Troubleshooting
+**Grafana**: http://localhost:1020
+- User: admin (anonymous)
+- Dashboards auto-loaded
+- Timezone: Asia/Ho_Chi_Minh
 
-### Prometheus không scrape được ScyllaDB
+### Dashboards
 
-```bash
-# Kiểm tra targets
-curl http://localhost:9090/targets
+**ScyllaDB**:
+- Scylla Overview (default home)
+- Scylla Advanced
+- Scylla CQL
+- Scylla OS
+- Scylla Keyspace
 
-# Verify ScyllaDB metrics endpoint
-curl http://scylla-node1:9180/metrics
-```
+**Stock Backend**:
+- Stock CDC Latency Monitoring
 
-### Grafana không hiển thị data
+## Quy ước
 
-```bash
-# Kiểm tra datasource
-curl http://localhost:1020/api/datasources
+### Timezone
+- Tất cả dashboards: Asia/Ho_Chi_Minh
+- Prometheus: Asia/Ho_Chi_Minh
+- Grafana: Asia/Ho_Chi_Minh
 
-# Test query trực tiếp Prometheus
-curl 'http://localhost:9090/api/v1/query?query=up'
-```
+### Scrape Intervals
+- ScyllaDB: 5s
+- Stock Backend: 5s
 
-### CDC metrics không có data
+### Data Retention
+- Prometheus: Default (15 days)
+- Data path: `./prometheus_data`
 
-```bash
-# Kiểm tra backend metrics
-curl http://localhost:8005/stocks/metrics | grep cdc
-
-# Verify WebSocket connection
-# Mở frontend để trigger CDC consumer
-```
-
-### Dashboard không load
-
-```bash
-# Re-provision dashboards
-docker restart agraf
-
-# Check logs
-docker logs agraf
-```
-
-## Disk Space Management
-
-```bash
-# Check Prometheus data size
-du -sh prometheus_data/
-
-# Retention policy (mặc định: 15 days)
-# Thay đổi trong start-all.sh:
---storage.tsdb.retention.time=15d
-```
-
-## Performance Tuning
-
-### Prometheus
-
-```yaml
-# prometheus.yml
-global:
-  scrape_interval: 15s  # Giảm xuống để realtime hơn
-  evaluation_interval: 15s
-```
-
-### Grafana
-
-```yaml
-# grafana.ini
-[server]
-enable_gzip: true
-
-[dashboards]
-min_refresh_interval: 5s  # Minimum refresh rate
-```
-
-## Backup Dashboards
-
-```bash
-# Backup tất cả dashboards
-curl -H "Authorization: Bearer <API_KEY>" \
-  http://localhost:1020/api/search?type=dash-db | \
-  jq -r '.[] | .uid' | \
-  xargs -I {} curl -H "Authorization: Bearer <API_KEY>" \
-    http://localhost:1020/api/dashboards/uid/{} > {}.json
-```
-
-## Dependencies
-
-- Docker 20.10+
-- Docker Compose v2+
+### Network
 - Network: `financi-network` (external)
-- ScyllaDB cluster running
-- Stock Backend với Prometheus client
+- Prometheus: port 9090
+- Grafana: port 1020
 
-## License
+### Targets
+**ScyllaDB nodes** (`prometheus/scylla_servers.yml`):
+```yaml
+- targets:
+  - scylla-node1:9180
+  - scylla-node2:9180
+  - scylla-node3:9180
+```
 
-Proprietary - Stock AI Project
+**Stock Backend** (`prometheus/stock_backend_servers.yml`):
+```yaml
+- targets:
+  - localhost:8005
+```
+
+## Ghi chú phát triển
+
+### Thêm metrics mới
+1. Backend expose metrics tại `/stocks/metrics` (Prometheus format)
+2. Thêm metric names vào dashboard JSON
+3. Restart Grafana hoặc reload dashboard
+
+### Update dashboards
+```bash
+python3 update_dashboard_timezone.py
+```
+
+### Xem metrics từ Backend
+```bash
+curl http://localhost:8005/stocks/metrics | grep cdc
+```
+
+### Query metrics trong Prometheus
+```bash
+curl 'http://localhost:9090/api/v1/query?query=cdc_latency_ms'
+```
+
+### Troubleshooting
+
+**Không có data trong dashboard**:
+- Kiểm tra targets: http://localhost:9090/targets
+- Verify backend metrics: `curl localhost:8005/stocks/metrics`
+- Check CDC consumer: `docker logs webstock-backend | grep CDC`
+
+**CDC metrics = 0**:
+- CDC consumer chỉ start khi có WebSocket connection
+- Mở frontend: http://localhost:3005
+- Hoặc trigger: `curl -N http://localhost:8005/stocks/ws/stocks_realtime`
+
+**Dashboard không load**:
+- Check Grafana logs: `docker logs agraf`
+- Verify provisioning: `ls grafana/provisioning/dashboards/`
+- Reload dashboard: Grafana UI → Dashboards → Browse
+
+**Prometheus không scrape**:
+- Check config: `cat prometheus/build/prometheus.yml`
+- Verify targets file exists
+- Restart: `docker-compose restart prometheus`
+
+### Auto-start behavior
+- `restart: unless-stopped` cho Prometheus và Grafana
+- Tự động restart khi reboot server
+- Stop manual: `./kill-all.sh`
+
+### Grafana features
+- Anonymous access enabled (role: Admin)
+- Unsigned plugins allowed (scylladb-scylla-datasource)
+- GZIP compression enabled
+- Auto provisioning datasources và dashboards
+
+### Custom scripts
+- `start-all.sh`: Official Scylla monitoring script (904 lines)
+- `restart-with-stock.sh`: Wrapper với stock config
+- `setup-stock-monitoring.sh`: Thêm stock backend job
+- `test-cdc-latency.sh`: Health check toàn bộ pipeline
 

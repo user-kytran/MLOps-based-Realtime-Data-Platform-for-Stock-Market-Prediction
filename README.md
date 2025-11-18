@@ -1,912 +1,899 @@
-# MLOps based Realtime Data Platform for Stock Market Prediction
+# Hệ thống Stock Trading Real-time với AI Prediction
 
-Hệ thống streaming dữ liệu thời gian thực tích hợp quy trình MLOps nhằm dự đoán biến động giá của chỉ số VNIndex.
-## Tổng quan hệ thống
+Hệ thống phân tích và dự đoán chứng khoán real-time sử dụng streaming architecture với Apache Flink, ScyllaDB CDC, và Machine Learning models. Thu thập dữ liệu từ Yahoo Finance WebSocket, xử lý stream, lưu trữ phân tán, và cung cấp predictions với Transformer/LSTM models.
 
-Platform streaming và phân tích dữ liệu chứng khoán Việt Nam từ sàn yfanance real-time với khả năng xử lý 100+ msg/s, latency p95 <195ms.
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python)
+![Java](https://img.shields.io/badge/Java-11-007396?logo=java)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+![Rust](https://img.shields.io/badge/Rust-Latest-000000?logo=rust)
 
-**Tech Stack chính:**
-- Stream Processing: Apache Flink, Kafka
-- Database: ScyllaDB (time-series), PostgreSQL (warehouse)
-- Backend: FastAPI + WebSocket
-- Frontend: Next.js 14 + TypeScript
-- Orchestration: Apache Airflow
-- Monitoring: Prometheus, Grafana
+---
+
+## Mục lục
+
+- [Giới thiệu](#giới-thiệu)
+- [Kiến trúc hệ thống](#kiến-trúc-hệ-thống)
+- [Tính năng](#tính-năng)
+- [Công nghệ](#công-nghệ)
+- [Cài đặt](#cài-đặt)
+- [Cấu hình](#cấu-hình)
+- [Chạy hệ thống](#chạy-hệ-thống)
+- [Services](#services)
+- [Monitoring](#monitoring)
+- [Database Schema](#database-schema)
+- [API Documentation](#api-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Triển khai](#triển-khai)
+- [License](#license)
+
+---
+
+## Giới thiệu
+
+Hệ thống xử lý và phân tích dữ liệu chứng khoán real-time cho thị trường Việt Nam (300+ symbols). Giải quyết bài toán:
+
+- **Latency thấp**: Streaming data từ source đến UI < 100ms
+- **High throughput**: Xử lý 10K+ events/s
+- **Scalability**: Architecture phân tán, dễ scale horizontal
+- **AI/ML Integration**: Dự đoán giá với Transformer và LSTM
+- **Real-time Analytics**: Dashboard với CDC streaming từ ScyllaDB
+
+**Đối tượng sử dụng**: Traders, nhà đầu tư, analysts cần theo dõi thị trường real-time và predictions.
+
+---
 
 ## Kiến trúc hệ thống
-![Alt text](image/pipeline.svg)
 
-## Components
+![Architecture](image/pipeline.svg)
 
-### 1. stock-websocket-service
-**Chức năng:** Producer service streaming stock prices từ Yahoo Finance vào Kafka
 
-**Tech:** Python + yfinance + confluent-kafka
+### Components
 
-**Đặc điểm:**
-- 3 producer instances (load balancing)
-- Avro serialization với Schema Registry
-- Auto-reconnect khi WebSocket drop
-- Producer timestamp tracking cho latency measurement
-
-**Ports:** None (internal only)
-
-**Data output:** Kafka topic `yfinance` với 285 mã chứng khoán VN
+1. **Data Ingestion**: WebSocket producers → Kafka (Avro schema)
+2. **Stream Processing**: Flink jobs (filtering, aggregation, windowing)
+3. **Storage Layer**: 
+   - ScyllaDB: Real-time OLTP, CDC enabled
+   - PostgreSQL: Data warehouse, star schema
+4. **CDC Streaming**: Rust-based CDC printer → WebSocket → UI
+5. **ML Pipeline**: Airflow DAGs → Feature engineering → PyTorch training
+6. **Web Application**: FastAPI backend + Next.js frontend
 
 ---
 
-### 2. kafka-service
-**Chức năng:** Event streaming infrastructure với KRaft mode
+## Tính năng
 
-**Tech:** Apache Kafka 3.x (KRaft), Schema Registry, Kafka UI
+### Real-time Features
+- Live stock prices streaming qua WebSocket
+- CDC latency tracking (producer → consumer)
+- Real-time charts (candlestick, line, area)
+- Price alerts và notifications
 
-**Đặc điểm:**
-- 3 controllers + 3 brokers (high availability)
-- Schema Registry cho Avro schemas
-- Kafka UI cho monitoring
+### Analytics & Aggregation
+- OHLCV aggregation (1m, 5m, 1h, 1d intervals)
+- Daily summary (open, close, high, low, volume, VWAP)
+- Market hours filtering
+- Top movers, volume leaders
 
-**Ports:**
-- Brokers: 29092, 39092, 49092
-- Schema Registry: 8082
-- Kafka UI: 8080
+### AI/ML Predictions
+- Alpha formula generation với Google Gemini LLM
+- Transformer và LSTM models
+- Multi-stock parallel training (GPU accelerated)
+- Confidence scoring
+- Weights & Biases tracking
 
-**Topics:**
-- `yfinance`: Real-time stock prices
+### News & Sentiment
+- News crawling từ nguồn tin VN
+- PDF analysis với Gemini AI
+- Sentiment scoring (-1 to 1)
+- Stock-news correlation
 
----
-
-### 3. flink-service
-**Chức năng:** Stream processing và real-time aggregation
-
-**Tech:** Apache Flink 1.17.1 + Python
-
-**Đặc điểm:**
-- Stateful processing với RocksDB
-- Tumbling window aggregations
-- Multi-sink architecture (4 tables)
-- Parallelism: 12, Task slots: 16
-
-**Ports:**
-- Flink Web UI: 8088
-- Prometheus metrics: 9091
-
-**Processing:**
-- Raw prices → `stock_prices`
-- Latest prices → `stock_latest_prices`
-- 1-minute OHLCV → `stock_prices_agg`
-- Daily summary → `stock_daily_summary`
+### Monitoring & Observability
+- Prometheus metrics
+- Grafana dashboards (ScyllaDB + Stock CDC)
+- Airflow DAG monitoring
+- Flink UI (jobs, metrics, backpressure)
 
 ---
 
-### 4. scylla-service
-**Chức năng:** Time-series database với CDC enabled
+## Công nghệ
 
-**Tech:** ScyllaDB/Cassandra
+### Core Stack
+- **Languages**: Python 3.11, Java 11, TypeScript, Rust
+- **Stream Processing**: Apache Flink 1.17.1
+- **Message Queue**: Kafka 3.x (KRaft mode), Schema Registry
+- **Databases**: 
+  - ScyllaDB 5.2 (CDC enabled)
+  - PostgreSQL 14 + TimescaleDB
+- **Orchestration**: Apache Airflow 2.10.0
 
-**Đặc điểm:**
-- 3-node cluster (RF=3)
-- CDC enabled cho real-time streaming
-- Auto-setup với Python script
-- NetworkTopologyStrategy replication
+### Backend & API
+- **Python**: FastAPI, Uvicorn, cassandra-driver, yfinance
+- **Java**: Flink connector, Cassandra connector
+- **Rust**: scylla-cdc, tokio
 
-**Ports:**
-- Node1: 9042, 9180
-- Node2: 9043, 9181
-- Node3: 9044, 9182
+### Frontend
+- **Framework**: Next.js 14 (App Router), React 18
+- **Styling**: Tailwind CSS 4, shadcn/ui
+- **Charts**: Recharts
+- **State**: React hooks, WebSocket API
 
-**Tables:**
-- `stock_prices`: Raw ticks (CDC enabled)
-- `stock_latest_prices`: Latest per symbol (CDC enabled)
-- `stock_prices_agg`: OHLCV aggregated
-- `stock_daily_summary`: Daily summary
-- `stock_news`: News content
+### ML/AI
+- **Frameworks**: PyTorch 2.x (CUDA 12.1), TensorFlow
+- **LLM**: Google Gemini (LangChain)
+- **Tracking**: Weights & Biases
+- **Models**: Transformer, LSTM (custom architectures)
 
----
-
-### 5. scylla-cdc-printer
-**Chức năng:** CDC logs real-time cho websocket backend
-
-**Tech:** Rust + scylla-cdc
-
-**Đặc điểm:**
-- Ultra-realtime mode (latency ~30ms)
-- Latency calculation từ producer_timestamp
-- Performance cao với async tokio
-- Multiple operational modes
-
-**Sử dụng:**
-```bash
-./run_ultra_realtime.sh stock_data stock_prices localhost
-```
+### Infrastructure
+- **Containerization**: Docker, Docker Compose
+- **Monitoring**: Prometheus, Grafana
+- **Networking**: Cloudflare Tunnel
+- **CI/CD**: Docker multi-stage builds
 
 ---
 
-### 6. warehouse
-**Chức năng:** PostgreSQL data warehouse cho analytics và ML training
-
-**Tech:** TimescaleDB (PostgreSQL 14)
-
-**Đặc điểm:**
-- Snowflake schema (1 dim + 3 facts)
-- Optimized cho ML training data
-- Historical data storage
-- Analytics-ready structure
-
-**Ports:** 5433 (external), 5432 (internal)
-
-**Schema:**
-- `dim_stock`: Dimension table
-- `fact_daily_prices`: OHLCV training data
-- `fact_news`: News content + sentiment
-- `fact_predictions`: ML predictions
-
----
-
-### 7. task_daily
-**Chức năng:** Airflow ETL pipeline cho batch processing
-
-**Tech:** Apache Airflow 2.7 + LocalExecutor
-
-**Đặc điểm:**
-- Daily dump ScyllaDB → Warehouse
-- News crawling + sentiment analysis
-- Scheduled DAGs với retry logic
-- Web UI monitoring
-
-**Ports:** 8087 (Airflow Web UI)
-
-**DAGs:**
-- `dump_to_warehouse`: Daily @ 00:00 UTC
-- `DAGs_newstock`: News crawl @ every 6h
-
----
-
-### 8. scylla-monitoring
-**Chức năng:** Monitoring stack cho ScyllaDB cluster và Latency monitoring
-
-**Tech:** Prometheus + Grafana
-
-**Đặc điểm:**
-- Pre-configured dashboards
-- CDC latency monitoring
-- Cluster health metrics
-- Custom stock-specific dashboards
-
-**Ports:**
-- Prometheus: 9090
-- Grafana: 3000
-
----
-
-### 9. stock_prediction
-**Chức năng:** ML-based stock price prediction service với automated pipeline
-
-**Tech:** PyTorch + FastAPI + WandB + Google Gemini
-
-**Đặc điểm:**
-- Auto-generate alpha factors với Gemini AI
-- Automated training pipeline với hyperparameter tuning
-- Model versioning và checkpoint management (Google Drive)
-- GPU acceleration (CUDA 12.1)
-- WandB experiment tracking
-- SQLite database cho model history
-
-**Ports:** 8006 (Prediction API)
-
-**Pipeline:**
-1. **Alpha Generation**: Gemini AI tạo 101 alpha formulas
-2. **Data Collection**: Pull từ PostgreSQL warehouse
-3. **Feature Engineering**: Apply alpha factors + technical indicators
-4. **Model Training**: LSTM/GRU/Transformer với early stopping
-5. **Validation**: MSE-based model selection
-6. **Prediction**: Daily price prediction với confidence score
-7. **Storage**: Save predictions to warehouse
-
-**Models:**
-- LSTM: Long Short-Term Memory
-- GRU: Gated Recurrent Unit
-- Transformer: Multi-head attention
-
-**API Endpoints:**
-- `POST /stock-prediction`: Trigger full prediction pipeline
-
-**Files:**
-- `api.py`: FastAPI service
-- `model/auto_pipeline.py`: Automated ML pipeline
-- `model/gen_alpha.py`: AI-powered alpha generation
-- `model/models.py`: Neural network architectures
-- `model/dataset.py`: PyTorch data loaders
-- `model/db_manager.py`: Training history management
-
----
-
-### 10. web-stockAI
-**Chức năng:** Full-stack web application với real-time UI
-
-**Tech:** FastAPI (backend) + Next.js 14 (frontend)
-
-**Đặc điểm:**
-- Real-time WebSocket streaming
-- CDC latency monitoring
-- Prometheus metrics export
-- Cloudflare Tunnel cho production
-- Beautiful UI với shadcn/ui
-
-**Ports:**
-- Backend: 8005
-- Frontend: 3005
-
-**Features:**
-- Real-time stock table
-- Historical charts (multiple timeframes)
-- Top movers, top volume
-- News aggregation
-- AI predictions display
-
----
-
-## Quick Start
+## Cài đặt
 
 ### Prerequisites
+
 ```bash
-docker --version  # 20.10+
-docker compose version  # v2+
+# Required
+- Docker >= 20.10
+- Docker Compose >= v2
+- 16GB RAM minimum
+- 50GB disk space
+- NVIDIA GPU (optional, cho training)
+
+# Network
+docker network create financi-network
 ```
 
-### 1. Tạo network
+### Clone Project
+
+```bash
+git clone <repository-url>
+cd main
+```
+
+### Environment Setup
+
+Mỗi service cần file `.env` riêng. Tham khảo `.env.example` trong từng folder.
+
+**Kafka & Schema Registry**: Không cần config (auto-setup)
+
+**ScyllaDB**: Auto-setup với `scylla-service/scylla_setup.py`
+
+**Backend**: `web-stockAI/backend/.env`
+```bash
+CASSANDRA_HOST=["scylla-node1","scylla-node2","scylla-node3"]
+CASSANDRA_PORT=9042
+CASSANDRA_KEYSPACE=stock_data
+```
+
+**Prediction API**: `stock-prediction/.env`
+```bash
+GOOGLE_API_KEY=your_gemini_key
+POSTGRES_URL=postgresql://warehouse_user:warehouse_pass@warehouse-db:5432/warehouse
+symbols=VCB.VN,HPG.VN,FPT.VN,...
+```
+
+**Airflow**: `task-daily-service/dags/.env`
+```bash
+SCYLLA_NODE1=scylla-node1
+TRAINING_API_URL=http://kytran_prediction_api:8006/stock-prediction
+GOOGLE_API_KEY=your_gemini_key
+```
+
+---
+
+## Cấu hình
+
+### Network Setup
+
 ```bash
 docker network create financi-network
 ```
 
-### 2. Khởi động từng service theo thứ tự
+### Kafka Topics
 
-**Step 1: ScyllaDB**
+Topics tự động tạo khi producers start. Manual create:
+
 ```bash
-cd scylla-service
-docker compose up -d
+docker exec broker-1 kafka-topics \
+  --bootstrap-server broker-1:19092 \
+  --create --topic yfinance \
+  --partitions 12 --replication-factor 3
 ```
 
-**Step 2: Kafka**
+### ScyllaDB Schema
+
+Schema tự động tạo qua `scylla-setup` container. Manual run:
+
 ```bash
+docker compose -f scylla-service/docker-compose.yml restart scylla-setup
+```
+
+---
+
+## Chạy hệ thống
+
+### Khởi động đầy đủ (recommended order)
+
+```bash
+# 1. Kafka cluster
 cd kafka-service
 docker compose up -d
-# Chờ brokers ready (~1 phút)
-docker logs broker-1 | grep "Started"
+
+# 2. ScyllaDB cluster
+cd ../scylla-service
+docker compose up -d
+
+# 3. Stock producers
+cd ../stock-websocket-service
+docker compose up -d
+
+# 4. Flink processing
+cd ../flink-service
+docker compose up -d
+
+# 5. Warehouse
+cd ../warehouse
+docker compose up -d
+
+# 6. Airflow
+cd ../task-daily-service
+docker compose up -d
+
+# 7. Prediction API
+cd ../stock-prediction
+docker compose up -d
+
+# 8. Web application
+cd ../web-stockAI
+docker compose up -d --build
+
+# 9. Monitoring
+cd ../scylla-monitoring
+./restart-with-stock.sh
 ```
 
-**Step 3: Stock Producers**
+### Khởi động nhanh (parallel)
+
+```bash
+# Script tự động (tạo file này nếu cần)
+./start-all-services.sh
+```
+
+### Kiểm tra services
+
+```bash
+docker ps
+docker compose ps
+```
+
+### Truy cập
+
+- **Frontend**: http://localhost:3005
+- **Backend API**: http://localhost:8005/docs
+- **Flink UI**: http://localhost:8088
+- **Kafka UI**: http://localhost:8080
+- **Airflow**: http://localhost:8087 (admin/admin)
+- **Grafana**: http://localhost:1020
+- **Prometheus**: http://localhost:9090
+- **Prediction API**: http://localhost:8006/docs
+
+---
+
+## Services
+
+### 1. Stock WebSocket Service
+
+**Producer** lấy dữ liệu real-time từ Yahoo Finance, gửi vào Kafka.
+
 ```bash
 cd stock-websocket-service
 docker compose up -d
 docker logs -f stock-producer-1
 ```
 
-**Step 4: Flink**
+- 3 producers: 100 symbols/producer
+- Topic: `yfinance` (Avro format)
+- Latency: < 10ms
+
+[Chi tiết →](stock-websocket-service/README.md)
+
+---
+
+### 2. Kafka Service
+
+**Message broker** với KRaft mode (không cần Zookeeper).
+
 ```bash
-cd flink-service
+cd kafka-service
 docker compose up -d
-# Submit job
-docker exec jobmanager flink run -c com.stock.StockProcessingJob /opt/flink/usrlib/jars/flink-consumer-1.0.jar
 ```
 
-**Step 5: Warehouse**
+- 3 controllers, 3 brokers
+- Schema Registry: http://localhost:8082
+- Kafka UI: http://localhost:8080
+
+[Chi tiết →](kafka-service/README.md)
+
+---
+
+### 3. Flink Service
+
+**Stream processing** đọc từ Kafka, xử lý và ghi vào ScyllaDB.
+
+```bash
+cd flink-service
+mvn clean package
+docker compose up -d
+```
+
+- Flink UI: http://localhost:8088
+- Parallelism: 12
+- 4 sinks: stock_prices, stock_latest_prices, stock_daily_summary, stock_prices_agg
+
+[Chi tiết →](flink-service/README.md)
+
+---
+
+### 4. ScyllaDB Service
+
+**NoSQL database** cluster 3 nodes với CDC enabled.
+
+```bash
+cd scylla-service
+docker compose up -d
+docker exec scylla-node1 nodetool status
+```
+
+- Keyspace: `stock_data` (RF=3)
+- CDC TTL: 120s
+- Tables: stock_prices, stock_latest_prices, stock_daily_summary, stock_prices_agg, stock_news
+
+[Chi tiết →](scylla-service/README.md)
+
+---
+
+### 5. Scylla CDC Printer
+
+**Rust tool** đọc CDC logs từ ScyllaDB để stream real-time.
+
+```bash
+cd scylla-cdc-printer
+cargo build --release
+./run_ultra_realtime.sh stock_data stock_prices localhost
+```
+
+- Ultra low latency mode: < 100ms
+- Latency tracking với producer_timestamp
+
+[Chi tiết →](scylla-cdc-printer/README.md)
+
+---
+
+### 6. Warehouse
+
+**PostgreSQL** data warehouse với star schema cho ML training.
+
 ```bash
 cd warehouse
 docker compose up -d
+docker exec -it warehouse-db psql -U warehouse_user -d warehouse
 ```
 
-**Step 6: Airflow**
+- TimescaleDB extension
+- Star schema: dim_stock, fact_daily_prices, fact_news, fact_predictions
+
+[Chi tiết →](warehouse/README.md)
+
+---
+
+### 7. Task Daily Service
+
+**Airflow** chạy scheduled tasks: ETL, news crawling, trigger predictions.
+
 ```bash
-cd task_daily
+cd task-daily-service
 docker compose up -d
-# Access: http://localhost:8087 (admin/admin)
 ```
 
-**Step 7: Stock Prediction (ML)**
+- Airflow UI: http://localhost:8087
+- 3 DAGs: warehouse ETL, prediction trigger, news crawler
+
+[Chi tiết →](task-daily-service/README.md)
+
+---
+
+### 8. Stock Prediction
+
+**ML API** dự đoán giá với PyTorch models (Transformer/LSTM).
+
 ```bash
-cd stock_prediction
-# Tạo file .env với:
-# POSTGRES_URL=postgresql://warehouse_user:warehouse_password@warehouse-db:5432/warehouse
-# GOOGLE_API_KEY=your_gemini_api_key
-# WANDB_API_KEY=your_wandb_key
-# symbols=AAA,ACB,VNM,VIC,...
+cd stock-prediction
 docker compose up -d
-# API: http://localhost:8006
-# Trigger prediction: curl -X POST http://localhost:8006/stock-prediction
+docker logs -f kytran_prediction_api
 ```
 
-**Step 8: Web UI**
+- API: http://localhost:8006
+- GPU accelerated (CUDA 12.1)
+- Alpha generation với Google Gemini
+
+[Chi tiết →](stock-prediction/README.md)
+
+---
+
+### 9. Web StockAI
+
+**Frontend + Backend** cho real-time dashboard.
+
 ```bash
 cd web-stockAI
-docker compose up -d
-# Access: http://localhost:3005
+docker compose up -d --build
 ```
 
-**Step 9: Monitoring**
+- Frontend: http://localhost:3005
+- Backend: http://localhost:8005
+- WebSocket streaming với CDC integration
+
+[Chi tiết →](web-stockAI/README.md)
+
+---
+
+### 10. Scylla Monitoring
+
+**Prometheus + Grafana** monitoring stack.
+
 ```bash
-cd scylla-monitoring&& \
-python3 update_dashboard_timezone.py && \
-./kill-all.sh && \
-./start-all.sh \
--v 5.2 \
--d prometheus_data \
--D "--network=financi-network -e TZ=Asia/Ho_Chi_Minh" \
--s ./prometheus/scylla_servers.yml \
--c "TZ=Asia/Ho_Chi_Minh" \
--c "GF_DATE_FORMATS_DEFAULT_TIMEZONE=Asia/Ho_Chi_Minh" \
---auto-restart \
---no-alertmanager \
---no-loki \
---no-renderer
-# Grafana: http://localhost:3000
-# Prometheus: http://localhost:9090
+cd scylla-monitoring
+./restart-with-stock.sh
 ```
 
-### Metrics
+- Grafana: http://localhost:1020
+- Prometheus: http://localhost:9090
+- Dashboards: ScyllaDB + Stock CDC Latency
+
+[Chi tiết →](scylla-monitoring/README.md)
+
+---
+
+## Monitoring
+
+### Prometheus Metrics
+
 ```bash
-# Prometheus targets
-curl http://localhost:9090/api/v1/targets
+# ScyllaDB metrics
+curl http://localhost:9090/api/v1/query?query=scylla_transport_requests
+
+# Stock CDC latency
+curl http://localhost:8005/stocks/metrics | grep cdc_latency_ms
 
 # Flink metrics
 curl http://localhost:9091/metrics
-
-# Backend metrics
-curl http://localhost:8005/stocks/metrics
-
-# Grafana dashboards
-open http://localhost:3000
 ```
 
----
+### Grafana Dashboards
 
-## Performance Metrics
+- **Scylla Overview**: CPU, memory, disk, network
+- **Scylla Advanced**: Query latency, cache hit rate
+- **Stock CDC Latency**: Real-time CDC processing latency
+- **Flink Jobs**: Task metrics, backpressure
 
-**Throughput:**
-- Stock producers: ~500-1000 msg/s (3 instances)
-- Kafka: ~10K msg/s per broker
-- Flink: ~5K records/s processing
-- ScyllaDB: ~20K writes/s
+### Logs
 
-**Latency:**
-- Producer → Kafka: <50ms
-- Kafka → Flink: <100ms
-- Flink → ScyllaDB: <200ms
-- End-to-end: <500ms (P95)
-- CDC → WebSocket: <100ms
-
-**Availability:**
-- ScyllaDB: 99.9% (RF=3)
-- Kafka: 99.9% (3 brokers)
-- Flink: Single point (có thể scale)
-
-## Backup & Recovery
-
-### ScyllaDB
 ```bash
-# Export
-scylla-service/dump_scylla.sh
+# Backend
+docker logs -f webstock-backend
+
+# Flink JobManager
+docker logs -f jobmanager
+
+# Airflow Scheduler
+docker logs -f airflow-scheduler
+
+# Kafka Broker
+docker logs -f broker-1
+
+# ScyllaDB
+docker logs -f scylla-node1
 ```
 
-### Warehouse
-```bash
-# Dump
-docker exec warehouse-db pg_dump -U warehouse_user warehouse > backup.sql
+---
 
-# Restore
-docker exec -i warehouse-db psql -U warehouse_user warehouse < backup.sql
+## Database Schema
+
+### ScyllaDB Tables
+
+**stock_prices** (CDC enabled)
+```sql
+PRIMARY KEY (symbol, timestamp)
+Columns: price, volume, change, change_percent, market_hours, producer_timestamp
+CDC: enabled, TTL 120s
 ```
 
----
+**stock_latest_prices** (CDC enabled)
+```sql
+PRIMARY KEY (symbol)
+Columns: price, timestamp, change, change_percent
+CDC: enabled, TTL 120s
+```
 
-## Scaling
+**stock_daily_summary**
+```sql
+PRIMARY KEY (symbol, trade_date)
+Columns: open, high, low, close, volume, vwap, change, change_percent
+```
 
-### Horizontal Scaling
-**Kafka:** Thêm brokers vào cluster
-**Flink:** Scale taskmanager: `docker compose up -d --scale taskmanager=3`
-**Stock Producers:** Thêm producer instances với symbol list khác
-**ScyllaDB:** Thêm nodes vào cluster
+**stock_prices_agg**
+```sql
+PRIMARY KEY ((symbol, bucket_date, interval), ts)
+Columns: open, high, low, close, volume
+Intervals: 1m, 5m, 1h, 1d
+```
 
-### Vertical Scaling
-**ScyllaDB:** Tăng `--memory` và `--smp`
-**Flink:** Tăng task slots và parallelism
-**Airflow:** Tăng workers và parallelism
+**stock_news**
+```sql
+PRIMARY KEY (stock_code, date, article_id)
+Columns: content, sentiment_score, source_url
+```
 
----
+### PostgreSQL Warehouse (Star Schema)
 
-## Resource Requirements
+**dim_stock**
+```sql
+PRIMARY KEY (stock_code)
+Columns: exchange, quote_type
+```
 
-### Minimum (Development)
-- RAM: 16GB
-- CPU: 8 cores
-- Disk: 50GB SSD
+**fact_daily_prices**
+```sql
+PRIMARY KEY (stock_code, trade_date)
+Columns: open, high, low, close, volume, vwap
+FOREIGN KEY (stock_code) REFERENCES dim_stock
+```
 
-### Recommended (Production)
-- RAM: 32GB+
-- CPU: 16 cores+
-- Disk: 200GB+ NVMe SSD
-- Network: 1Gbps+
+**fact_news**
+```sql
+PRIMARY KEY (stock_code, news_date, article_id)
+Columns: content, sentiment_score
+```
 
-### Per Service
-- ScyllaDB: 3GB RAM, 3 cores per node
-- Kafka: 2GB RAM, 2 cores per broker
-- Flink: 4GB RAM, 4 cores
-- PostgreSQL: 2GB RAM, 2 cores
-- Airflow: 2GB RAM, 2 cores
-- Web Backend: 1GB RAM, 2 cores
-- Web Frontend: 1GB RAM, 2 cores
-- **Stock Prediction: 4GB RAM, 4 cores, 1 GPU (Optional but recommended)**
-
-### GPU Requirements (For ML)
-- **Minimum**: NVIDIA GPU with 4GB VRAM (GTX 1650+)
-- **Recommended**: NVIDIA GPU with 8GB+ VRAM (RTX 3060+)
-- **CUDA**: 12.1 or higher
-- **Without GPU**: CPU training possible but 10-20x slower
-
-
-## Tech Stack Summary
-
-| Layer | Technology |
-|-------|-----------|
-| Data Source | Yahoo Finance WebSocket API |
-| Message Queue | Apache Kafka (KRaft) |
-| Stream Processing | Apache Flink 1.17.1 |
-| Database (Time-series) | ScyllaDB |
-| Database (Warehouse) | PostgreSQL/TimescaleDB |
-| ETL Orchestration | Apache Airflow 2.7 |
-| ML Framework | PyTorch + CUDA 12.1 |
-| AI Alpha Generation | Google Gemini API |
-| Experiment Tracking | Weights & Biases (WandB) |
-| Backend API | FastAPI + Uvicorn |
-| Frontend | Next.js 14 + React 18 |
-| Monitoring | Prometheus + Grafana |
-| Deployment | Docker + Docker Compose |
-| Language | Python, TypeScript, Rust |
-
----
-
-## MLOps Pipeline Details
-
-### Alpha Factor Generation
-- **AI-Powered**: Google Gemini generates 101 unique alpha formulas
-- **Technical Indicators**: RSI, MACD, Bollinger Bands, ATR, OBV, Stochastic
-- **Custom Alphas**: Price momentum, volume patterns, volatility metrics
-- **Validation**: Automatic correlation check & redundancy removal
-
-### Model Training Workflow
-1. **Data Preparation**
-   - Pull 60 days historical OHLCV from warehouse
-   - Apply generated alpha factors
-   - Normalize features using MinMaxScaler
-   - Create sequences (window_size=30)
-
-2. **Model Architecture**
-   - Input: 30 timesteps × (101 alphas + 6 base features)
-   - Hidden layers: Configurable (64-256 units)
-   - Dropout: 0.2-0.5 for regularization
-   - Output: Next day close price
-
-3. **Training**
-   - Loss: MSE (Mean Squared Error)
-   - Optimizer: Adam (lr=0.001)
-   - Early stopping: patience=10
-   - Max epochs: 100
-   - Validation split: 80/20
-
-4. **Model Selection**
-   - Compare MSE across LSTM/GRU/Transformer
-   - Select best performer
-   - Save checkpoint to Google Drive
-   - Log to WandB for experiment tracking
-
-5. **Prediction**
-   - Load best model
-   - Apply same alpha factors
-   - Generate next-day price prediction
-   - Calculate confidence score
-   - Save to warehouse `fact_predictions`
-
-### Model Versioning
-- **Checkpoint Format**: `{stock_code}_{model_type}_{timestamp}.pth`
-- **Storage**: Google Drive (via rclone)
-- **Metadata**: SQLite database tracks MSE, alphas, training date
-- **Auto-Update**: Retrain if MSE degrades > 5%
+**fact_predictions**
+```sql
+PRIMARY KEY (stock_code, prediction_date)
+Columns: predicted_price, model_version, confidence_score
+```
 
 ---
 
 ## API Documentation
 
-### Stock Prediction API (Port 8006)
+### Stock Backend API
 
-**POST /stock-prediction**
-- **Description**: Trigger full ML pipeline for all configured symbols
-- **Response**: 
+**Base URL**: http://localhost:8005
+
+#### Endpoints
+
+**GET** `/stocks/get_reference`
 ```json
-[
+Response: [
   {
-    "stock_code": "AAA",
-    "predicted_price": 15.23,
-    "confidence": 0.892,
-    "model_name": "AAA_LSTM_20251113",
-    "new_model": false,
-    "saved": true,
-    "total_time": 3.45
+    "symbol": "VCB.VN",
+    "exchange": "HOSE",
+    "quote_type": 1
   }
 ]
 ```
 
-### Web Backend API (Port 8005)
-- **GET /stocks/latest**: Latest prices for all symbols
-- **GET /stocks/historical/{symbol}**: OHLCV data
-- **GET /stocks/predictions/{symbol}**: AI predictions
-- **GET /stocks/news/{symbol}**: Latest news
-- **WebSocket /ws/stocks**: Real-time price stream
-- **GET /stocks/metrics**: Prometheus metrics
+**GET** `/stocks/historical/{symbol}?days=30`
+```json
+Response: {
+  "symbol": "VCB.VN",
+  "data": [
+    {
+      "trade_date": "2025-11-17",
+      "open": 85.0,
+      "high": 86.5,
+      "low": 84.5,
+      "close": 86.0,
+      "volume": 1000000
+    }
+  ]
+}
+```
+
+**GET** `/stocks/intraday/{symbol}`
+
+**GET** `/stocks/daily_summary/{symbol}`
+
+**GET** `/stocks/predictions/{symbol}`
+
+**GET** `/stocks/metrics` - Prometheus metrics
+
+**WS** `/stocks/ws/stocks_realtime` - WebSocket stream
+
+[Swagger UI →](http://localhost:8005/docs)
 
 ---
 
-## Monitoring & Observability
+### Prediction API
 
-### Grafana Dashboards
-1. **ScyllaDB Cluster Overview**
-   - Node health, CPU, memory
-   - Disk I/O, network throughput
-   - Read/write latencies
+**Base URL**: http://localhost:8006
 
-2. **CDC Latency Monitoring**
-   - Producer → ScyllaDB latency
-   - CDC → WebSocket latency
-   - End-to-end latency percentiles (p50, p95, p99)
+**POST** `/stock-prediction`
+```json
+Request: {
+  "prediction_date": "2025-11-20"
+}
 
-3. **Stock Trading Dashboard** (Custom)
-   - Real-time price charts
-   - Volume analysis
-   - Top gainers/losers
-   - News sentiment timeline
+Response: {
+  "status": "success",
+  "total_stocks": 200,
+  "success_count": 195,
+  "results_file": "results/predictions_20251117.json"
+}
+```
 
-### Prometheus Metrics
-**Flink Metrics:**
-- `flink_taskmanager_job_task_numRecordsInPerSecond`
-- `flink_taskmanager_job_task_numRecordsOutPerSecond`
-- `flink_taskmanager_Status_JVM_Memory_Heap_Used`
-
-**Backend Metrics:**
-- `stock_websocket_connections`: Active WebSocket clients
-- `stock_api_request_duration_seconds`: API response time
-- `stock_cdc_latency_seconds`: CDC processing latency
-
-**ML Metrics (WandB):**
-- Training loss curve
-- Validation MSE
-- Prediction accuracy
-- Model comparison matrix
+[Swagger UI →](http://localhost:8006/docs)
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
+### Kafka không start
 
-**1. Kafka brokers not starting**
 ```bash
 # Check logs
 docker logs broker-1
 
-# Reset Kafka data
+# Verify network
+docker network inspect financi-network
+
+# Restart
 cd kafka-service
-docker compose down -v
+docker compose restart
+```
+
+### ScyllaDB cluster không form
+
+```bash
+# Check status
+docker exec scylla-node1 nodetool status
+
+# Check gossip
+docker exec scylla-node1 nodetool gossipinfo
+
+# Restart cluster
+cd scylla-service
+docker compose restart
+```
+
+### Flink job failed
+
+```bash
+# Check Flink UI
+http://localhost:8088
+
+# Check logs
+docker logs jobmanager
+docker logs taskmanager-1
+
+# Resubmit job
+docker exec jobmanager flink run /opt/flink/usrlib/target/flink-consumer-1.0.jar
+```
+
+### Frontend không load data
+
+```bash
+# Verify backend API
+curl http://localhost:8005/stocks/get_reference
+
+# Check browser console (F12)
+# Verify API URL in frontend/lib/config.ts
+
+# Rebuild
+cd web-stockAI
+docker compose down
+docker compose up -d --build
+```
+
+### WebSocket disconnect
+
+```bash
+# Check CDC printer
+docker exec webstock-backend ps aux | grep scylla-cdc-printer
+
+# Check ScyllaDB CDC
+docker exec scylla-node1 cqlsh -e "DESCRIBE TABLE stock_data.stock_prices;"
+
+# Verify: cdc = {'enabled': true}
+
+# Check backend logs
+docker logs webstock-backend | grep CDC
+```
+
+### Prediction API timeout
+
+```bash
+# Check GPU
+nvidia-smi
+
+# Check logs
+docker logs kytran_prediction_api
+
+# Verify Gemini API key
+echo $GOOGLE_API_KEY
+
+# Test API
+curl -X POST http://localhost:8006/stock-prediction \
+  -H "Content-Type: application/json" \
+  -d '{"prediction_date":"2025-11-18"}'
+```
+
+### Airflow DAG không chạy
+
+```bash
+# Check scheduler
+docker logs airflow-scheduler
+
+# Verify DAG syntax
+docker exec airflow-scheduler python /opt/airflow/dags/DAGs_warehouse.py
+
+# Check timezone
+docker exec airflow-scheduler date
+
+# Unpause DAG
+# Airflow UI → DAGs → Toggle ON
+```
+
+### High memory usage
+
+```bash
+# Monitor
+docker stats
+
+# Giảm parallelism
+# Flink: Sửa parallelism trong docker-compose.yml
+# Airflow: Giảm AIRFLOW__CORE__PARALLELISM
+
+# Restart services
+docker compose restart
+```
+
+---
+
+## Triển khai
+
+### Development
+
+```bash
+# Local development với Docker
 docker compose up -d
 ```
 
-**2. Flink job failed**
+**4. Monitoring & Alerting**
+
+- Prometheus alert rules
+- Grafana notifications
+- PagerDuty/Slack integration
+
+**5. Backup Strategy**
+
 ```bash
-# Check jobmanager logs
-docker logs jobmanager
+# ScyllaDB snapshot
+docker exec scylla-node1 nodetool snapshot stock_data
 
-# Restart job
-docker exec jobmanager flink run -c com.stock.StockProcessingJob /opt/flink/usrlib/jars/flink-consumer-1.0.jar
-```
+# PostgreSQL backup
+docker exec warehouse-db pg_dump -U warehouse_user warehouse > backup.sql
 
-**3. ScyllaDB node down**
-```bash
-# Check node status
-docker exec scylla-node1 nodetool status
-
-# Repair node
-docker exec scylla-node1 nodetool repair
-```
-
-**4. CDC latency spike**
-```bash
-# Check scylla-cdc-printer logs
-docker logs scylla-cdc-printer
-
-# Restart CDC printer
-cd scylla-cdc-printer
-./run_ultra_realtime.sh stock_data stock_prices localhost
-```
-
-**5. ML prediction errors**
-```bash
-# Check API logs
-docker logs kytran_prediction_api
-
-# Verify warehouse connection
-docker exec kytran_prediction_api python3 -c "from sqlalchemy import create_engine; import os; engine=create_engine(os.getenv('POSTGRES_URL')); print(engine.connect())"
-
-# Check WandB login
-docker exec kytran_prediction_api wandb login --verify
-```
-
-**6. Out of memory**
-```bash
-# Check memory usage
-docker stats
-
-# Increase memory limits in docker-compose.yml
-# For Flink:
-deploy:
-  resources:
-    limits:
-      memory: 8G
+# Kafka topic backup
+kafka-consumer-groups --bootstrap-server broker-1:19092 --describe --all-groups
 ```
 
 ---
 
-## Development Guide
+## Performance Tips
 
-### Adding New Symbols
-1. Update environment variables in `stock-websocket-service/.env`
-2. Restart producers: `docker compose restart`
-3. Add to prediction list in `stock_prediction/.env`
+### Kafka
+- Tăng partitions cho high throughput: `--partitions 24`
+- Tune producer: `linger.ms=100`, `batch.size=32768`
+- Compression: `compression.type=lz4`
 
-### Creating Custom Alpha Factors
-Edit `stock_prediction/model/gen_alpha.py`:
-```python
-def gen_all_alpha_formulas(symbols):
-    prompt = """
-    Generate 101 alpha formulas for stocks: {symbols}
-    Include: momentum, mean reversion, volatility, volume
-    Format: {"alpha_1": "formula", ...}
-    """
-    # Your custom logic
-```
+### Flink
+- Tăng parallelism: `--parallelism 16`
+- Tune checkpointing: `checkpointing.interval=60000`
+- Memory: `taskmanager.memory.process.size=4g`
 
-### Adding New ML Models
-1. Define model in `stock_prediction/model/models.py`
-2. Register in `auto_pipeline.py`:
-```python
-from models import YourNewModel
+### ScyllaDB
+- Tăng memory: `--memory 4096M`
+- Tăng CPU: `--smp 6`
+- Disable overprovisioned (production): `--overprovisioned 0`
 
-model = YourNewModel(input_size, hidden_size, num_layers)
-```
-
-### Custom Airflow DAGs
-1. Add DAG file to `task_daily/dags/`
-2. Restart scheduler: `docker compose restart airflow-scheduler`
-3. View in UI: http://localhost:8087
-
----
-
-## Performance Tuning
-
-### ScyllaDB Optimization
-```bash
-# Increase concurrent writes
-ALTER TABLE stock_prices WITH compaction = {'class': 'TimeWindowCompactionStrategy'};
-
-# Enable compression
-ALTER TABLE stock_prices WITH compression = {'sstable_compression': 'LZ4Compressor'};
-```
-
-### Flink Tuning
-Edit `flink-service/docker-compose.yml`:
-```yaml
-environment:
-  - JOB_MANAGER_MEMORY: 2048m
-  - TASK_MANAGER_MEMORY: 4096m
-  - TASK_MANAGER_NUM_TASK_SLOTS: 16
-  - PARALLELISM_DEFAULT: 12
-```
-
-### Kafka Performance
-```bash
-# Increase partition count
-kafka-topics --alter --topic yfinance --partitions 12 --bootstrap-server localhost:29092
-
-# Tune producer batch size
-linger.ms=10
-batch.size=32768
-compression.type=lz4
-```
-
-### ML Training Speedup
-```python
-# Use mixed precision training
-from torch.cuda.amp import autocast, GradScaler
-
-scaler = GradScaler()
-with autocast():
-    output = model(x)
-    loss = criterion(output, y)
-```
-
----
-
-## Security Best Practices
-
-### Production Checklist
-- [ ] Change default passwords (Kafka, PostgreSQL, Grafana)
-- [ ] Enable SSL/TLS for Kafka
-- [ ] Use Cloudflare Tunnel for web UI
-- [ ] Implement API authentication (JWT)
-- [ ] Enable ScyllaDB authentication
-- [ ] Restrict Prometheus/Grafana access
-- [ ] Use secrets management (Vault, AWS Secrets Manager)
-- [ ] Enable audit logging
-- [ ] Regular backup schedule
-- [ ] Network segmentation with firewall rules
-
-### Environment Variables
-Never commit `.env` files. Use template:
-```bash
-# .env.template
-POSTGRES_URL=postgresql://user:password@host:port/db
-GOOGLE_API_KEY=your_key_here
-WANDB_API_KEY=your_key_here
-KAFKA_BOOTSTRAP_SERVERS=broker-1:29092
-```
-
----
-
-**Version:** 1.0.0  
-**Last Updated:** November 2025
+### Frontend
+- Lazy loading: `React.lazy()`
+- Memoization: `React.memo()`
+- Server components (Next.js 14)
+- CDN cho static assets
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
+### Quy tắc đóng góp
 
-### How to Contribute
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/your-feature-name`
-3. Make changes and test thoroughly
-4. Commit with clear messages: `git commit -m "Add feature: description"`
-5. Push to branch: `git push origin feature/your-feature-name`
-6. Open Pull Request with detailed description
+1. Fork repository
+2. Tạo branch: `git checkout -b feature/amazing-feature`
+3. Commit: `git commit -m 'feat: add amazing feature'` (Conventional Commits)
+4. Push: `git push origin feature/amazing-feature`
+5. Tạo Pull Request
 
 ### Code Style
-- **Python**: Follow PEP 8, use `black` formatter
-- **TypeScript**: Follow ESLint rules, use Prettier
-- **SQL**: Uppercase keywords, lowercase identifiers
-- **Docker**: Use multi-stage builds, minimize layers
 
-### Testing
-- Add unit tests for new features
-- Ensure existing tests pass: `pytest tests/`
-- Test Docker builds locally
-- Verify integration with other services
+- **Python**: Black formatter, isort, flake8
+- **TypeScript**: Prettier, ESLint
+- **Java**: Google Java Style Guide
+- **Rust**: rustfmt
 
-### Documentation
-- Update README for new features
-- Add docstrings to functions/classes
-- Include usage examples
-- Update API documentation
+### Commit Convention
 
----
-
-## Roadmap
-
-### Phase 1 (Current - Q4 2024)
-- [x] Real-time stock price streaming
-- [x] Apache Flink stream processing
-- [x] ScyllaDB time-series storage
-- [x] PostgreSQL data warehouse
-- [x] Airflow ETL pipeline
-- [x] Real-time web dashboard
-- [x] Prometheus + Grafana monitoring
-- [x] ML-based price prediction
-
-### Phase 2 (Q1 2025)
-- [ ] Sentiment analysis from news
-- [ ] Twitter/social media integration
-- [ ] Multi-model ensemble predictions
-- [ ] Automated trading signals
-- [ ] Mobile app (React Native)
-- [ ] Advanced technical indicators (200+)
-
-### Phase 3 (Q2 2025)
-- [ ] Reinforcement learning for trading
-- [ ] Portfolio optimization engine
-- [ ] Risk management dashboard
-- [ ] Multi-exchange support (HOSE, HNX, UPCOM)
-- [ ] Real-time alerts (Telegram, Email)
-- [ ] Backtesting framework
-
-### Phase 4 (Q3 2025)
-- [ ] Kubernetes deployment
-- [ ] Auto-scaling infrastructure
-- [ ] ML model marketplace
-- [ ] API monetization
-- [ ] White-label solution
-- [ ] Institutional-grade features
+```
+feat: thêm tính năng mới
+fix: sửa bug
+docs: cập nhật documentation
+style: format code
+refactor: refactor code
+test: thêm tests
+chore: cập nhật dependencies
+```
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see below for details:
-
-```
 MIT License
 
-Copyright (c) 2024 Ky Tran
+Copyright (c) 2025 Stock Trading System
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## Acknowledgments
+## Liên hệ & Hỗ trợ
 
-- **Apache Software Foundation**: Kafka, Flink, Airflow
-- **ScyllaDB Team**: High-performance NoSQL database
-- **Yahoo Finance**: Real-time stock data API
-- **WandB Team**: Experiment tracking platform
-- **Google**: Gemini AI for alpha generation
-- **PyTorch Community**: Deep learning framework
-- **Vercel**: Next.js framework
-- **Grafana Labs**: Monitoring stack
+- **Issues**: [GitHub Issues](https://github.com/user-kytran/repo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/user-kytran/repo/discussions)
+- **Email**: support@stocktrading.com
 
 ---
 
-## Contact & Support
+## Roadmap
 
-**Author**: Ky Tran  
-**Repository**: [MLOps-based-Realtime-Data-Platform-for-Stock-Market-Prediction](https://github.com/user-kytran/MLOps-based-Realtime-Data-Platform-for-Stock-Market-Prediction)
+### Phase 1 (Completed ✅)
+- [x] Real-time streaming pipeline
+- [x] ScyllaDB CDC integration
+- [x] ML prediction API
+- [x] Web dashboard
 
-**For Issues**: Please open an issue on GitHub  
-**For Questions**: Discussions tab on GitHub  
-**For Commercial Support**: Contact via repository
+### Phase 2 (In Progress 🚧)
+- [ ] Mobile app (React Native)
+- [ ] Portfolio management
+- [ ] Trading signals
+- [ ] Backtesting engine
 
----
-
-## Citation
-
-If you use this project in your research or work, please cite:
-
-```bibtex
-@software{tran2024mlops_stock_platform,
-  author = {Tran, Ky},
-  title = {MLOps-based Realtime Data Platform for Stock Market Prediction},
-  year = {2024},
-  url = {https://github.com/user-kytran/MLOps-based-Realtime-Data-Platform-for-Stock-Market-Prediction},
-  note = {Real-time stock market data platform with ML predictions}
-}
-```
+### Phase 3 (Planned 📋)
+- [ ] Social trading features
+- [ ] Multi-market support (US, CN stocks)
+- [ ] Options & Derivatives
+- [ ] Advanced ML models (GNN, Reinforcement Learning)
 
 ---
 
-**⭐ Star this repo if you find it useful!**
-
-**🔔 Watch for updates and new features**
-
-**🍴 Fork to create your own trading platform**
+**⭐ Nếu project hữu ích, hãy star repo này!**
 
 

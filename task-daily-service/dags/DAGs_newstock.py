@@ -36,7 +36,7 @@ if GOOGLE_API_KEY:
             api_key=GOOGLE_API_KEY,
             temperature=0.3
         )
-        parser = SimpleJsonOutputParser()
+        parser = JsonOutputParser()
         logger.info("✅ Google AI model initialized")
     except Exception as e:
         logger.warning(f"⚠️ Failed to initialize Google AI model: {e}")
@@ -340,12 +340,12 @@ default_args = {
 }
 
 with DAG(
-    dag_id='vietstock_news_crawler',
+    dag_id='DAGs_newstock',
     default_args=default_args,
     schedule_interval='@hourly',  # Chạy mỗi 1 tiếng
     start_date=pendulum.datetime(2025, 1, 1, tz='Asia/Ho_Chi_Minh'),
     catchup=False,
-    tags=['vietstock', 'crawler']
+    tags=['DAGs_newstock', 'crawler']
 ) as dag:
 
     get_date_range = PythonOperator(

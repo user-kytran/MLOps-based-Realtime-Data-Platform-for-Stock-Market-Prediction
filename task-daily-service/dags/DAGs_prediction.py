@@ -44,12 +44,12 @@ default_args = {
 }
 
 with DAG(
-    dag_id='stock_prediction_daily',
+    dag_id='DAGs_prediction',
     default_args=default_args,
     schedule_interval='0 23 * * *', # Chạy 23:00 hàng ngày
     start_date=pendulum.datetime(2025, 1, 1, tz='Asia/Ho_Chi_Minh'),
     catchup=False,
-    tags=['stock', 'prediction', 'daily'],
+    tags=['DAGs_prediction', 'prediction', 'daily'],
 ) as dag:
 
     run_prediction_task = PythonOperator(
