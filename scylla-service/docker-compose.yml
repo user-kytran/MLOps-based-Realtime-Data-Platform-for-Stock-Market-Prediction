@@ -17,13 +17,14 @@ services:
       - SCYLLA_DC=datacenter1
       - SCYLLA_RACK=rack1
     networks:
-      - financi-network
+      financi-network:
+        ipv4_address: 172.18.0.5
     healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
   scylla-node2:
     container_name: scylla-node2
@@ -40,13 +41,14 @@ services:
       - SCYLLA_DC=datacenter1
       - SCYLLA_RACK=rack1
     networks:
-      - financi-network
+      financi-network:
+        ipv4_address: 172.18.0.8
     healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
   scylla-node3:
     container_name: scylla-node3
@@ -63,13 +65,14 @@ services:
       - SCYLLA_DC=datacenter1
       - SCYLLA_RACK=rack1
     networks:
-      - financi-network
+      financi-network:
+        ipv4_address: 172.18.0.22
     healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 120s
 
   scylla-setup:
     container_name: scylla-setup

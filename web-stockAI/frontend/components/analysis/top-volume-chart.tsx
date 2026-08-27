@@ -14,7 +14,7 @@ export function TopVolumeChart() {
     .map(s => ({
       symbol: s.symbol,
       volume: s.match.volume / 1000000,
-      fill: s.match.change > 0 ? '#22c55e' : s.match.change < 0 ? '#ef4444' : '#6b7280'
+      fill: s.match.change > 0 ? '#10b981' : s.match.change < 0 ? '#ef4444' : '#6b7280'
     }))
 
   return (

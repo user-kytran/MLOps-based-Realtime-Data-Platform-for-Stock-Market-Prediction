@@ -7,10 +7,16 @@ import { Header } from "@/components/layout/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StockHeader, StockInfoSidebar, MatchedOrdersSidebar, StockCompanyInfo, StockFinancialInfo, StockStatistics } from "@/components/stock"
 import { useStockData } from "@/hooks/useStockData"
+import { useState, useEffect } from "react"
 
 export default function StockDetailPage({ params }: { params: { symbol: string } }) {
+  const [isMounted, setIsMounted] = useState(false)
   const symbol = params.symbol.toUpperCase()
   const { stockInfo, stockRealtime, reference, matchedOrders, loading, error } = useStockData(symbol)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   if (loading && !error) {
     return (
@@ -55,9 +61,23 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
     )
   }
 
-  if (!stockInfo || !stockRealtime) {
-    return null
+  if (!isMounted) {
+    // Có thể trả về null, hoặc một div loading rất đơn giản, không gây mismatch
+    return null 
   }
+
+  if (!stockInfo) {
+    return (
+        <div className="min-h-screen relative overflow-hidden">
+            <Header />
+            <div className="container mx-auto px-4 py-8 text-center relative z-10">
+                <p className="text-gray-600">Không tìm thấy dữ liệu hoặc thị trường chưa mở.</p>
+            </div>
+        </div>
+    )
+  }
+
+  const hasRealtimeData = !!stockRealtime;
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -97,11 +117,25 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
               </div>
 
               <div className="lg:col-span-6">
-                <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
+                {/* <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} /> */}
+                {hasRealtimeData ? (
+                 <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
+                ) : (
+                    <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
+                        <p>Biểu đồ realtime không khả dụng.</p>
+                    </div>
+                )}
               </div>
 
               <div className="lg:col-span-3">
-                <MatchedOrdersSidebar matchedOrders={matchedOrders} />
+                {/* <MatchedOrdersSidebar matchedOrders={matchedOrders} /> */}
+                {hasRealtimeData ? (
+                  <MatchedOrdersSidebar matchedOrders={matchedOrders} />
+                ) : (
+                    <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
+                        <p>Sổ lệnh realtime không khả dụng.</p>
+                    </div>
+                )}
               </div>
             </div>
           </TabsContent>

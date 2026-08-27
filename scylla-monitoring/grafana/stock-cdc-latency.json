@@ -9,7 +9,7 @@
   "links": [],
   "panels": [
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "palette-classic"},
@@ -24,15 +24,15 @@
       "id": 1,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "right", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "none"}},
       "targets": [
-        {"expr": "histogram_quantile(0.50, sum(rate(cdc_latency_ms_bucket[1m])) by (le))", "legendFormat": "P50", "refId": "A"},
-        {"expr": "histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le))", "legendFormat": "P95", "refId": "B"},
-        {"expr": "histogram_quantile(0.99, sum(rate(cdc_latency_ms_bucket[1m])) by (le))", "legendFormat": "P99", "refId": "C"}
+        {"expr": "histogram_quantile(0.50, sum(increase(cdc_latency_ms_bucket[5m])) by (le))", "legendFormat": "P50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(increase(cdc_latency_ms_bucket[5m])) by (le))", "legendFormat": "P95", "refId": "B"},
+        {"expr": "histogram_quantile(0.99, sum(increase(cdc_latency_ms_bucket[5m])) by (le))", "legendFormat": "P99", "refId": "C"}
       ],
       "title": "CDC Latency Percentiles (Overall)",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "palette-classic"},
@@ -47,13 +47,13 @@
       "id": 2,
       "options": {"legend": {"calcs": ["mean", "last"], "displayMode": "table", "placement": "right", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[1m])) by (le, symbol))", "legendFormat": "{{symbol}}", "refId": "A"}
+        {"expr": "histogram_quantile(0.95, sum(increase(cdc_latency_ms_bucket[5m])) by (le, symbol))", "legendFormat": "{{symbol}}", "refId": "A"}
       ],
       "title": "CDC Latency P95 by Symbol",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
@@ -67,13 +67,13 @@
       "id": 3,
       "options": {"orientation": "auto", "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""}, "showThresholdLabels": false, "showThresholdMarkers": true, "text": {}},
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[5m])) by (le))", "refId": "A"}
+        {"expr": "histogram_quantile(0.95, sum(increase(cdc_latency_ms_bucket[5m])) by (le))", "refId": "A"}
       ],
       "title": "Current P95 Latency",
       "type": "gauge"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
@@ -93,7 +93,7 @@
       "type": "stat"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "palette-classic"},
@@ -108,13 +108,13 @@
       "id": 5,
       "options": {"legend": {"calcs": ["mean"], "displayMode": "list", "placement": "bottom", "showLegend": false}, "tooltip": {"mode": "single", "sort": "none"}},
       "targets": [
-        {"expr": "sum(rate(cdc_events_total[1m]))", "legendFormat": "Events/sec", "refId": "A"}
+        {"expr": "sum(increase(cdc_events_total[1m]))", "legendFormat": "Events/min", "refId": "A"}
       ],
       "title": "CDC Events Rate",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "datasource": {"type": "prometheus", "uid": "P1809F7CD0C75ACF3"},
       "fieldConfig": {
         "defaults": {
           "custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false},
@@ -133,7 +133,7 @@
       "options": {"showHeader": true, "cellHeight": "sm", "footer": {"show": false, "reducer": ["sum"], "fields": ""}},
       "targets": [
         {"expr": "histogram_quantile(0.95, sum(rate(cdc_latency_ms_bucket[5m])) by (le, symbol))", "format": "table", "instant": true, "legendFormat": "", "refId": "A"},
-        {"expr": "sum(rate(cdc_events_total[5m])) by (symbol)", "format": "table", "instant": true, "refId": "B"}
+        {"expr": "sum(cdc_events_total) by (symbol)", "format": "table", "instant": true, "refId": "B"}
       ],
       "title": "CDC Stats by Symbol",
       "transformations": [

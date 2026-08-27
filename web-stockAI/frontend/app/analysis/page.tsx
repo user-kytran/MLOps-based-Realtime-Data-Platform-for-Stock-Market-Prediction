@@ -7,6 +7,8 @@ import { PriceChangeChart } from "@/components/analysis/price-change-chart"
 import { SectorDistribution } from "@/components/analysis/sector-distribution"
 import { SectorVolumeDetail } from "@/components/analysis/sector-volume-detail"
 import { SectorPriceTrend } from "@/components/analysis/sector-price-trend"
+import { PredictionSummary } from "@/components/analysis/prediction-summary"
+import { PredictionAccuracy } from "@/components/analysis/prediction-accuracy"
 import { BarChart3 } from "lucide-react"
 
 export default function AnalysisPage() {
@@ -39,6 +41,10 @@ export default function AnalysisPage() {
 
         <div className="space-y-8 max-w-7xl mx-auto">
           <MarketSummary />
+
+          <PredictionSummary />
+          
+          <PredictionAccuracy />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <PriceChangeChart />

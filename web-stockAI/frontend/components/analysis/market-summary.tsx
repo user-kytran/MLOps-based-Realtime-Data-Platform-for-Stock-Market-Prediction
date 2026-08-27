@@ -2,27 +2,37 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
-import { TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { usePredictions } from "@/hooks/usePredictions"
+import { TrendingUp, TrendingDown, Minus, Database } from "lucide-react"
 
 export function MarketSummary() {
   const stocks = useStocksRealtimeWS()
+  const predictions = usePredictions()
 
   const advancing = stocks.filter(s => s.match.change > 0).length
   const declining = stocks.filter(s => s.match.change < 0).length
   const unchanged = stocks.filter(s => s.match.change === 0).length
   const totalVolume = stocks.reduce((sum, s) => sum + (s.match.volume || 0), 0)
   const avgChange = stocks.reduce((sum, s) => sum + s.match.change_percent, 0) / stocks.length
+  const totalPredictions = Object.keys(predictions).length
 
   const stats = [
     { 
-      label: "Advancing", 
+      label: "Total Stocks", 
+      value: totalPredictions, 
+      color: "text-purple-600",
+      icon: Database,
+      bg: "bg-purple-100"
+    },
+    { 
+      label: "Bullish", 
       value: advancing, 
       color: "text-green-600",
       icon: TrendingUp,
       bg: "bg-green-100"
     },
     { 
-      label: "Declining", 
+      label: "Bearish", 
       value: declining, 
       color: "text-red-600",
       icon: TrendingDown,
@@ -55,7 +65,7 @@ export function MarketSummary() {
         <CardTitle className="text-gray-900 text-xl">Market Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 justify-center">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 justify-center">
           {stats.map((stat, i) => (
             <div key={i} className={`${stat.bg} rounded-lg p-4 border border-gray-200`}>
               <div className="flex items-center gap-2 mb-2 justify-center text-[16px]">

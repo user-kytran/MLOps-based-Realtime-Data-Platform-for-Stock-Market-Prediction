@@ -62,7 +62,7 @@ class NewsCrawler:
             return latest_date, today if latest_date else today
         except Exception as e:
             print(f"[DATE RANGE ERROR] {e}")
-            return datetime.now() + timedelta(days=1), datetime.now() + timedelta(days=1)
+            return datetime.now(), datetime.now()
 
     # ---- TASK 2: Crawl dữ liệu ----
     def crawl_articles(self, from_date, to_date):

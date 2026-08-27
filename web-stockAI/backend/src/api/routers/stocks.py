@@ -11,6 +11,7 @@ import os
 import time
 from prometheus_client import Histogram, Counter, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from zoneinfo import ZoneInfo
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -466,85 +467,29 @@ async def get_stock_predictions_accuracy(db=Depends(get_db)):
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT stock_code, prediction_date, predicted_price
-            FROM fact_predictions
-            ORDER BY stock_code, prediction_date
+            SELECT p.stock_code, p.prediction_date, p.predicted_price, d.close as actual_price
+            FROM fact_predictions p LEFT JOIN fact_daily_prices d 
+            ON ( p.stock_code = d.stock_code 
+            OR p.stock_code = split_part(d.stock_code, '.', 1)) 
+            AND p.prediction_date = d.trade_date
+            ORDER BY p.stock_code, p.prediction_date;
         """)
         
-        predictions = cur.fetchall()
+        df = pd.DataFrame(cur.fetchall(), columns=['stock_code', 'prediction_date', 'predicted_price', 'actual_price'])
         
-        price_cache = {}
-        symbol_dates_map = {}
+        df['actual_trend'] = (df['actual_price'].shift(-1) - df['actual_price']).apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1)
+        df['predicted_trend'] = (df['predicted_price'].shift(-1) - df['predicted_price']).apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1)
         
-        for pred in predictions:
-            stock_code = pred[0]
-            prediction_date = pred[1]
-            
-            if stock_code not in symbol_dates_map:
-                symbol_dates_map[stock_code] = set()
-            
-            symbol_dates_map[stock_code].add(prediction_date)
-            
-            prev_date = prediction_date - datetime.timedelta(days=1)
-            while prev_date.weekday() >= 5:
-                prev_date = prev_date - datetime.timedelta(days=1)
-            symbol_dates_map[stock_code].add(prev_date)
+        df['is_correct'] = df['actual_trend'] == df['predicted_trend']
         
-        for stock_code, dates in symbol_dates_map.items():
-            symbol_with_exchange = stock_code + ".VN"
-            min_date = min(dates)
-            max_date = max(dates)
-            
-            query = "SELECT trade_date, close FROM stock_daily_summary WHERE symbol = %s AND trade_date >= %s AND trade_date <= %s"
-            rows = db.execute(query, (symbol_with_exchange, min_date, max_date))
-            for row in rows:
-                trade_date = row.trade_date
-                if hasattr(trade_date, 'date'):
-                    trade_date = trade_date.date()
-                price_cache[(stock_code, trade_date)] = float(row.close)
-        
-        results = []
-        accuracy_by_symbol = {}
-        
-        for pred in predictions:
-            stock_code = pred[0]
-            prediction_date = pred[1]
-            predicted_price = float(pred[2])
-            
-            prev_date = prediction_date - datetime.timedelta(days=1)
-            while prev_date.weekday() >= 5:
-                prev_date = prev_date - datetime.timedelta(days=1)
-            
-            prev_close = price_cache.get((stock_code, prev_date))
-            actual_close = price_cache.get((stock_code, prediction_date))
-            
-            if prev_close is None or actual_close is None:
-                continue
-            
-            predicted_trend = "up" if predicted_price > prev_close else ("down" if predicted_price < prev_close else "neutral")
-            actual_trend = "up" if actual_close > prev_close else ("down" if actual_close < prev_close else "neutral")
-            
-            is_correct = predicted_trend == actual_trend
-            
-            if stock_code not in accuracy_by_symbol:
-                accuracy_by_symbol[stock_code] = {"correct": 0, "total": 0}
-            
-            accuracy_by_symbol[stock_code]["total"] += 1
-            if is_correct:
-                accuracy_by_symbol[stock_code]["correct"] += 1
-        
-        for symbol, stats in accuracy_by_symbol.items():
-            accuracy = (stats["correct"] / stats["total"]) * 100 if stats["total"] > 0 else 0
-            results.append({
-                "symbol": symbol,
-                "accuracy": round(accuracy, 2),
-                "correct": stats["correct"],
-                "total": stats["total"]
-            })
-        
-        results.sort(key=lambda x: x["symbol"])
-        return results
-        
+        # Tính accuracy theo từng stock, gồm symbol, accuracy, correct, total
+        accuracy_by_stock = df.groupby('stock_code')['is_correct'].agg(['mean', 'sum', 'count']).reset_index()
+        accuracy_by_stock.columns = ['symbol', 'accuracy', 'correct', 'total']
+        accuracy_by_stock['accuracy'] = round(accuracy_by_stock['accuracy'] * 100, 2)
+        accuracy_by_stock['correct'] = accuracy_by_stock['correct'].astype(int)
+        accuracy_by_stock['total'] = accuracy_by_stock['total'].astype(int)
+        return accuracy_by_stock.to_dict(orient='records')
+
     except Exception as e:
         logger.error(f"Error calculating predictions accuracy: {e}")
         raise
@@ -553,36 +498,6 @@ async def get_stock_predictions_accuracy(db=Depends(get_db)):
             cur.close()
         if 'conn' in locals():
             conn.close()
-    
-
-
-
-@stock_router.get("/stock_prices_week")
-async def get_stock_prices_week(symbol: str, db=Depends(get_db)):
-    end_date = datetime.date.today()
-    start_date = end_date - datetime.timedelta(days=7)
-    weekday_end = end_date.weekday()
-    if weekday_end == 5:
-        end_date = end_date
-    elif weekday_end == 6:
-        end_date = end_date - datetime.timedelta(days=1)
-    start_dt = datetime.datetime.combine(start_date, datetime.time(0, 0, 0))
-    end_dt = datetime.datetime.combine(end_date, datetime.time(23, 59, 59))
-    start_timestamp_ms = str(int(start_dt.timestamp() * 1000))
-    end_timestamp_ms = str(int(end_dt.timestamp() * 1000))
-    query = "SELECT * FROM stock_prices WHERE symbol = %s AND timestamp >= %s AND timestamp <= %s"
-    rows = db.execute(query, (symbol + ".VN", start_timestamp_ms, end_timestamp_ms))
-    def row_to_dict(row):
-        return {
-            "symbol": row.symbol,
-            "timestamp": row.timestamp,
-            "price": row.price,
-            "change": row.change,
-            "change_percent": row.change_percent,
-            "day_volume": row.day_volume,
-            "last_size": row.last_size,
-        }
-    return [row_to_dict(row) for row in rows.all()]
 
 
 class ConnectionManager:

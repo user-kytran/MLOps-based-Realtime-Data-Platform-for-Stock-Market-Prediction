@@ -59,7 +59,7 @@ export function PriceChangeChart() {
             />
             <Bar dataKey="change" radius={[0, 8, 8, 0]}>
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.type === 'gain' ? '#22c55e' : '#ef4444'} />
+                <Cell key={`cell-${index}`} fill={entry.type === 'gain' ? '#10b981' : '#ef4444'} />
               ))}
             </Bar>
           </BarChart>
