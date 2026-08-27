@@ -271,7 +271,9 @@ task-daily-service/*.log
 airflow.cfg
 airflow.db
 webserver_config.py
-
+task-daily-service/backfill_news/
+task-daily-service/backfill_stock_summary/
+task-daily-service/tests/
 # Scylla Service
 scylla/data/
 scylla/commitlog/
