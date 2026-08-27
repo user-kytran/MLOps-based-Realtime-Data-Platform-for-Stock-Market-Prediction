@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -40,7 +40,8 @@ RUN rm -rf __pycache__ \
     && find . -type f -name "*.pyc" -delete
 
 # Create non-root user
-RUN useradd -m -s /bin/bash appuser
+RUN useradd -m -s /bin/bash appuser \
+    && chown -R appuser:appuser /app
 USER appuser
 
 CMD ["python", "-O", "stock_producer.py"]

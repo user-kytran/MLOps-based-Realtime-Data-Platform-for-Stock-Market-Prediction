@@ -33,7 +33,7 @@ export function TopVolume({ stocks }: TopVolumeProps) {
   return (
     <Card className="bg-black border-gray-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-100">
+        <CardTitle className="flex items-center gap-2 text-gray-100 text-sm font-bold">
           <Icons.BarChart className="h-5 w-5 text-blue-400" />
           Top Volume
         </CardTitle>

@@ -9,7 +9,7 @@ export function MatchedOrdersSidebar({ matchedOrders }: MatchedOrdersSidebarProp
   return (
     <Card className="h-full bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-center text-gray-900">Matched Orders</CardTitle>
+        <CardTitle className="text-sm font-bold text-center text-gray-900">Matched Orders</CardTitle>
         <p className="text-xs text-center text-gray-500">
           Update realtime
         </p>

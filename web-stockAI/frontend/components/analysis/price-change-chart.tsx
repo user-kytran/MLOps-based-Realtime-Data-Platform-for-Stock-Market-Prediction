@@ -1,8 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
+import { AnalysisPanel, axisTick, chartColors, tooltipStyle } from "./analysis-ui"
 
 export function PriceChangeChart() {
   const stocks = useStocksRealtimeWS()
@@ -23,49 +23,41 @@ export function PriceChangeChart() {
   ].sort((a, b) => b.change - a.change)
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-gray-900 text-xl">Price Change</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={chartData} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+    <AnalysisPanel title="Price Change Leaders" eyebrow="Top gainers and losers">
+        <ResponsiveContainer width="100%" height={360}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 18, bottom: 4, left: 4 }}>
+            <CartesianGrid strokeDasharray="4 4" stroke={chartColors.grid} horizontal={false} />
             <XAxis 
               type="number"
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
-              label={{ value: '%', position: 'insideRight', fill: '#6b7280' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}%`}
             />
             <YAxis 
               type="category"
               dataKey="symbol" 
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
+              width={58}
             />
             <Tooltip 
-              cursor={{ fill:'rgba(6, 182, 212, 0.1)' }}
-              contentStyle={{ 
-                backgroundColor: '#ffffff', 
-                border: '1px solid #d1d5db', 
-                color: '#374151',
-                fontSize: '12px',
-                padding: '8px',
-                borderRadius: '6px'
-              }}
-              labelStyle={{ color: '#374151', fontWeight: 'bold', fontSize: '12px' }}
-              itemStyle={{ color: '#374151', fontSize: '11px' }}
+              cursor={{ fill:'rgba(15, 118, 110, 0.08)' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: '#0f172a', fontWeight: 'bold', fontSize: '12px' }}
+              itemStyle={{ color: '#334155', fontSize: '11px' }}
               formatter={(value: number) => [`${value.toFixed(2)}%`, 'Change']}
             />
-            <Bar dataKey="change" radius={[0, 8, 8, 0]}>
+            <Bar dataKey="change" radius={[0, 6, 6, 0]} barSize={20}>
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.type === 'gain' ? '#10b981' : '#ef4444'} />
+                <Cell key={`cell-${index}`} fill={entry.type === 'gain' ? chartColors.positive : chartColors.negative} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    </AnalysisPanel>
   )
 }
-

@@ -28,14 +28,14 @@ export default function NewsPage() {
 
       <Header />
 
-      <main className="w-full px-4 py-20 relative z-10">
+      <main className="w-full px-3 py-4 relative z-10">
         {/* Page Header */}
-        <section className="text-center mb-12">
-          <h1 className="text-black text-4xl md:text-6xl font-extrabold mb-4 text-balance">
+        <section className="text-center mb-3">
+          <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
             NEWS & 
             <span className="text-cyan-900"> ANALYSIS</span>
           </h1>
-          <p className="text-black text-xl font-extrabold mb-8 text-pretty max-w-2xl mx-auto py-5">
+          <p className="text-black text-xs font-semibold text-pretty max-w-2xl mx-auto">
             Update news and analysis of the stock market
           </p>
         </section>
@@ -44,14 +44,14 @@ export default function NewsPage() {
         <NewsFilters filters={filters} setFilters={setFilters} />
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 **w-full**">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3 w-full">
           {/* Left Column - News List */}
           <div className="lg:col-span-2">
             <NewsList filters={filters} />
           </div>
 
           {/* Right Column - Statistics */}
-          <div className="space-y-8">
+          <div className="space-y-3">
             <NewsStatistics filters={filters} />
           </div>
         </div>

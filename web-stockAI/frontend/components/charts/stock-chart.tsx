@@ -1,21 +1,45 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useEffect, useMemo, useState } from "react"
+import {
+  Area,
+  Bar,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 import { BarChart3 } from "lucide-react"
-import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts"
-import { getApiUrl, getWsUrl } from "@/lib/config"
-import type { StockInfo } from "@/types/stock"
-import { Icons } from "@/components/icons"
-import { usePredictions } from "@/hooks/usePredictions"
 
-interface IntradayData {
-  time: string
-  price: number
-  volume: number
+import { Icons } from "@/components/icons"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { usePredictions } from "@/hooks/usePredictions"
+import { getApiUrl } from "@/lib/config"
+import { useStockWSContext, type StockWSConnectionStatus } from "@/lib/stockWSContext"
+import type { StockInfo } from "@/types/stock"
+
+interface ApiIntradayTick {
+  timestamp?: string | number
+  price?: number
+  day_volume?: number
+  last_size?: number
   change?: number
   change_percent?: number
+}
+
+interface IntradayPoint {
+  time: string
+  timestamp: number
+  price: number
+  volume: number
+  change: number
+  changePercent: number
+  direction: "up" | "down" | "flat"
 }
 
 interface StockChartProps {
@@ -24,362 +48,373 @@ interface StockChartProps {
   stockInfo?: StockInfo
 }
 
-const isInTradingHours = () => {
-  const now = new Date()
-  const day = now.getDay()
-  const hour = now.getHours()
-  const minute = now.getMinutes()
-  
-  if (day === 0 || day === 6) return false
-  
-  const currentTime = hour * 60 + minute
-  const startTime = 9 * 60
-  const endTime = 15 * 60
-  
-  return currentTime >= startTime && currentTime < endTime
+const COLORS = {
+  price: "#2563eb",
+  priceFill: "#dbeafe",
+  positive: "#00b83f",
+  negative: "#ef2424",
+  neutral: "#94a3b8",
+  reference: "#d97706",
+  grid: "#e2e8f0",
+  axis: "#64748b",
+}
+
+function parseTimestamp(value: string | number | undefined) {
+  if (typeof value === "number") return value < 10_000_000_000 ? value * 1000 : value
+  if (typeof value !== "string") return Date.now()
+  const numeric = Number(value.match(/\d+/)?.[0])
+  if (!Number.isFinite(numeric)) return Date.now()
+  return numeric < 10_000_000_000 ? numeric * 1000 : numeric
+}
+
+function formatMinute(timestamp: number) {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(timestamp))
+}
+
+function getDirection(change: number): IntradayPoint["direction"] {
+  if (change > 0) return "up"
+  if (change < 0) return "down"
+  return "flat"
+}
+
+function aggregateTicks(rawTicks: ApiIntradayTick[]) {
+  const buckets = new Map<string, IntradayPoint>()
+  const sorted = [...rawTicks].sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp))
+
+  sorted.forEach((tick) => {
+    const price = Number(tick.price)
+    if (!Number.isFinite(price) || price <= 0) return
+    const timestamp = parseTimestamp(tick.timestamp)
+    const time = formatMinute(timestamp)
+    const change = Number(tick.change) || 0
+    const existing = buckets.get(time)
+    const matchedVolume = Math.max(0, Number(tick.last_size) || 0)
+
+    if (existing) {
+      existing.timestamp = timestamp
+      existing.price = price
+      existing.volume += matchedVolume
+      existing.change = change
+      existing.changePercent = Number(tick.change_percent) || 0
+      existing.direction = getDirection(change)
+      return
+    }
+
+    buckets.set(time, {
+      time,
+      timestamp,
+      price,
+      volume: matchedVolume,
+      change,
+      changePercent: Number(tick.change_percent) || 0,
+      direction: getDirection(change),
+    })
+  })
+
+  return Array.from(buckets.values())
+}
+
+function mergeRealtimePoint(points: IntradayPoint[], tick: ApiIntradayTick) {
+  const price = Number(tick.price)
+  if (!Number.isFinite(price) || price <= 0) return points
+
+  const timestamp = parseTimestamp(tick.timestamp)
+  const time = formatMinute(timestamp)
+  const change = Number(tick.change) || 0
+  const point: IntradayPoint = {
+    time,
+    timestamp,
+    price,
+    volume: Math.max(0, Number(tick.last_size) || 0),
+    change,
+    changePercent: Number(tick.change_percent) || 0,
+    direction: getDirection(change),
+  }
+  const next = [...points]
+  const last = next.at(-1)
+
+  if (last?.time === time) {
+    next[next.length - 1] = {
+      ...point,
+      volume: last.volume + point.volume,
+    }
+  } else {
+    next.push(point)
+  }
+
+  return next.slice(-360)
+}
+
+function formatPrice(value: number | undefined) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value.toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : "—"
+}
+
+function ConnectionBadge({ status }: { status: StockWSConnectionStatus }) {
+  const config = {
+    open: { label: "LIVE", className: "border-emerald-200 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
+    connecting: { label: "CONNECTING", className: "border-blue-200 bg-blue-50 text-blue-700", dot: "bg-blue-500" },
+    reconnecting: { label: "RECONNECTING", className: "border-amber-200 bg-amber-50 text-amber-700", dot: "bg-amber-500" },
+    market_closed: { label: "MARKET CLOSED", className: "border-slate-300 bg-slate-100 text-slate-700", dot: "bg-slate-500" },
+    closed: { label: "OFFLINE", className: "border-slate-200 bg-slate-50 text-slate-600", dot: "bg-slate-400" },
+  }[status]
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-extrabold tracking-wide ${config.className}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
+      {config.label}
+    </span>
+  )
+}
+
+function IntradayTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null
+  const point = payload.find((entry: any) => entry?.payload)?.payload as IntradayPoint | undefined
+  if (!point) return null
+  const positive = point.change >= 0
+
+  return (
+    <div className="w-[220px] rounded-lg border border-slate-300 bg-white p-3 text-xs shadow-2xl">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="font-bold text-slate-950">{point.time}</span>
+        <span className="font-mono font-bold text-blue-700">{formatPrice(point.price)} VND</span>
+      </div>
+      <div className="h-px bg-slate-200" />
+      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+        <span className="text-slate-500">Change</span>
+        <span className={`text-right font-mono font-bold ${positive ? "text-emerald-600" : "text-red-600"}`}>
+          {positive ? "+" : ""}{formatPrice(point.change)}
+        </span>
+        <span className="text-slate-500">Change %</span>
+        <span className={`text-right font-mono font-bold ${positive ? "text-emerald-600" : "text-red-600"}`}>
+          {positive ? "+" : ""}{point.changePercent.toFixed(2)}%
+        </span>
+        <span className="text-slate-500">Minute volume</span>
+        <span className="text-right font-mono font-bold text-slate-800">{formatPrice(point.volume)}</span>
+      </div>
+    </div>
+  )
+}
+
+function Metric({ label, value, tone = "neutral" }: { label: string; value: string; tone?: "positive" | "negative" | "neutral" | "accent" }) {
+  const valueColor = {
+    positive: "text-emerald-600",
+    negative: "text-red-600",
+    neutral: "text-slate-800",
+    accent: "text-blue-700",
+  }[tone]
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-center">
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className={`font-mono text-lg font-extrabold ${valueColor}`}>{value}</p>
+    </div>
+  )
 }
 
 export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProps) {
-  const [chartData, setChartData] = useState<IntradayData[]>([])
-  const [isRealtime, setIsRealtime] = useState(false)
-  const wsRef = useRef<WebSocket | null>(null)
+  const [chartData, setChartData] = useState<IntradayPoint[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   const predictions = usePredictions()
+  const { subscribe, unsubscribe, connectionStatus } = useStockWSContext()
   const trend = predictions[symbol]?.predictionTrend ?? null
 
-  const trendBadge = (() => {
-    if (!trend) {
-      return (
-        <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
-          Prediction Trend: —
-        </div>
-      )
-    }
-
-    const map = {
-      up: {
-        label: "Prediction Trend: Bullish",
-        className: "bg-emerald-50 text-emerald-600 border border-emerald-200",
-        Icon: Icons.TrendingUp,
-      },
-      down: {
-        label: "Prediction Trend: Bearish",
-        className: "bg-rose-50 text-rose-600 border border-rose-200",
-        Icon: Icons.TrendingDown,
-      },
-      neutral: {
-        label: "Prediction Trend: Neutral",
-        className: "bg-slate-50 text-slate-500 border border-slate-200",
-        Icon: Icons.Minus,
-      },
-    } as const
-
-    const config = map[trend]
-
-    return (
-      <div className={`flex items-center gap-3 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide shadow-sm ${config.className}`}>
-        <config.Icon className="h-4 w-4" />
-        <span>{config.label}</span>
-      </div>
-    )
-  })()
-
-  const getPriceDomain = () => {
-    if (chartData.length === 0) return [0, 100]
-    
-    const prices = chartData.map(d => d.price)
-    const centerPrice = referencePrice || (Math.min(...prices) + Math.max(...prices)) / 2
-    const rangeSize = 500
-    
-    return [
-      Math.floor(centerPrice - rangeSize / 2),
-      Math.ceil(centerPrice + rangeSize / 2)
-    ]
-  }
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null
-
-    const data = payload[0]?.payload
-    if (!data) return null
-
-    // Safe extraction with fallbacks
-    const price = data.price || 0
-    const volume = data.volume || 0
-    const change = data.change || 0
-    const changePercent = data.change_percent || 0
-    const isPositive = change >= 0
-
-    return (
-      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-xl">
-        <div className="text-blue-600 font-semibold mb-2 text-xs">{label}</div>
-        <div className="space-y-1 text-xs">
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-500">Price:</span>
-            <span className="text-gray-900 font-mono font-bold">{price.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-500">Change:</span>
-            <span className={`font-mono font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? '+' : ''}{change.toFixed(0)}
-            </span>
-          </div>
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-500">Change %:</span>
-            <span className={`font-mono font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
-            </span>
-          </div>
-          <div className="border-t border-gray-200 my-1"></div>
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-500">Volume:</span>
-            <span className="text-blue-600 font-mono">{volume.toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-
-  // Check trading hours periodically
   useEffect(() => {
-    const checkTradingHours = () => {
-      setIsRealtime(isInTradingHours())
-    }
-    
-    checkTradingHours()
-    const interval = setInterval(checkTradingHours, 60000)
-    
-    return () => clearInterval(interval)
-  }, [])
+    let mounted = true
+    const controller = new AbortController()
 
-  // Load data on mount
-  useEffect(() => {
-    const loadData = () => {
-      fetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${symbol}`)
-        .then(res => res.json())
-        .then((data) => {
-          if (data && data.length > 0) {
-            const formattedData = data.map((item: any) => {
-              const tsMs = Number(item.timestamp)
-              const timestamp = new Date(tsMs)
-              const timeStr = `${timestamp.getHours().toString().padStart(2, '0')}:${timestamp.getMinutes().toString().padStart(2, '0')}:${timestamp.getSeconds().toString().padStart(2, '0')}`
-              return {
-                time: timeStr,
-                price: item.price,
-                volume: item.day_volume,
-                change: item.change,
-                change_percent: item.change_percent
-              }
-            }).sort((a: IntradayData, b: IntradayData) => a.time.localeCompare(b.time))
-            
-            setChartData(formattedData)
-          }
+    const loadData = async (showLoading = false) => {
+      if (showLoading) setLoading(true)
+      try {
+        const response = await fetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(symbol)}`, {
+          signal: controller.signal,
         })
-        .catch(err => {})
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const result = await response.json()
+        if (mounted) {
+          setChartData(aggregateTicks(Array.isArray(result) ? result : []))
+          setError("")
+        }
+      } catch (fetchError: any) {
+        if (mounted && fetchError.name !== "AbortError") setError("Unable to load intraday data.")
+      } finally {
+        if (mounted) setLoading(false)
+      }
     }
 
-    loadData()
-    
-    // Chỉ refresh khi ngoài giờ giao dịch để hiển thị data cuối phiên
-    const refreshInterval = setInterval(() => {
-      if (!isRealtime) {
-        loadData()
-      }
-    }, 60000)
-    
-    return () => clearInterval(refreshInterval)
-  }, [symbol, isRealtime])
-
-  // WebSocket for real-time updates during trading hours
-  useEffect(() => {
-    const inTradingHours = isInTradingHours()
-
-    if (inTradingHours) {
-      const socket = new WebSocket(`${getWsUrl()}/stocks/ws/stocks_realtime`)
-      wsRef.current = socket
-
-      socket.onopen = () => {
-        
-      }
-
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          if (data.symbol === symbol) {
-            let timeStr = ''
-            if (data.timestamp) {
-              let tsMs: number | null = null
-              
-              if (typeof data.timestamp === 'string') {
-                const match = data.timestamp.match(/\d+/)
-                if (match) {
-                  tsMs = Number(match[0])
-                }
-              } else {
-                tsMs = Number(data.timestamp)
-              }
-              
-              if (tsMs && !isNaN(tsMs)) {
-                const timestamp = new Date(tsMs)
-                timeStr = `${timestamp.getHours().toString().padStart(2, '0')}:${timestamp.getMinutes().toString().padStart(2, '0')}:${timestamp.getSeconds().toString().padStart(2, '0')}`
-              }
-            }
-            
-            if (!timeStr) {
-              const now = new Date()
-              timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`
-            }
-            
-            setChartData(prev => {
-              const newData = [...prev]
-              const lastPoint = newData[newData.length - 1]
-              
-              if (lastPoint && lastPoint.time === timeStr) {
-                newData[newData.length - 1] = {
-                  time: timeStr,
-                  price: data.price,
-                  volume: data.day_volume,
-                  change: data.change,
-                  change_percent: data.change_percent
-                }
-              } else {
-                newData.push({
-                  time: timeStr,
-                  price: data.price,
-                  volume: data.day_volume,
-                  change: data.change,
-                  change_percent: data.change_percent
-                })
-              }
-              
-              return newData
-            })
-          }
-        } catch (e) {
-          
-        }
-      }
-
-      socket.onerror = (err) => {
-        
-      }
-
-      return () => {
-        socket.close()
-      }
+    loadData(true)
+    const refreshInterval = window.setInterval(() => loadData(false), 60_000)
+    return () => {
+      mounted = false
+      controller.abort()
+      window.clearInterval(refreshInterval)
     }
   }, [symbol])
 
+  useEffect(() => {
+    const id = `stock-chart-${symbol}`
+    subscribe(id, (data) => {
+      if (data.symbol !== symbol) return
+      setChartData((current) => mergeRealtimePoint(current, data))
+    })
+    return () => unsubscribe(id)
+  }, [symbol, subscribe, unsubscribe])
+
+  const priceDomain = useMemo<[number, number]>(() => {
+    const prices = chartData.map((point) => point.price)
+    if (referencePrice) prices.push(referencePrice)
+    if (!prices.length) return [0, 1]
+    const min = Math.min(...prices)
+    const max = Math.max(...prices)
+    const padding = Math.max((max - min) * 0.08, max * 0.003, 50)
+    return [Math.floor((min - padding) / 10) * 10, Math.ceil((max + padding) / 10) * 10]
+  }, [chartData, referencePrice])
+
+  const stats = useMemo(() => {
+    const prices = chartData.map((point) => point.price)
+    return {
+      open: chartData[0]?.price ?? stockInfo?.open,
+      high: prices.length ? Math.max(...prices) : stockInfo?.dayHigh,
+      low: prices.length ? Math.min(...prices) : stockInfo?.dayLow,
+      last: chartData.at(-1)?.price ?? stockInfo?.currentPrice,
+    }
+  }, [chartData, stockInfo])
+
+  const trendBadge = (() => {
+    if (!trend) return <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Prediction trend: —</span>
+    const config = {
+      up: { label: "Bullish", className: "border-emerald-200 bg-emerald-50 text-emerald-700", Icon: Icons.TrendingUp },
+      down: { label: "Bearish", className: "border-rose-200 bg-rose-50 text-rose-700", Icon: Icons.TrendingDown },
+      neutral: { label: "Neutral", className: "border-slate-200 bg-slate-50 text-slate-600", Icon: Icons.Minus },
+    }[trend]
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide ${config.className}`}>
+        <config.Icon className="h-3.5 w-3.5" />
+        Prediction trend: {config.label}
+      </span>
+    )
+  })()
+
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
+    <Card className="border-slate-200 bg-white shadow-sm">
+      <CardHeader className="gap-3 pb-2">
         <div className="flex flex-wrap items-center gap-3">
-          <CardTitle className="flex items-center gap-2 text-gray-900 text-2xl font-extrabold">
-            <BarChart3 className="h-5 w-5 text-blue-600 text-2xl font-extrabold" />
-            Price chart {symbol} - Today
-            {isRealtime && (
-              <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">
-                LIVE
-              </span>
-            )}
+          <CardTitle className="flex items-center gap-2 text-lg font-extrabold text-slate-950 sm:text-xl">
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+            {symbol} Intraday Trading
           </CardTitle>
+          <ConnectionBadge status={connectionStatus} />
           {trendBadge}
         </div>
+        <p className="text-xs font-semibold text-slate-500">One-minute price and matched-volume view · Today</p>
       </CardHeader>
-      <CardContent>
 
-        {/* Chart */}
-        <div className="h-[500px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData}>
-              <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" className="opacity-30" />
-              <XAxis 
-                dataKey="time" 
-                tick={{ fontSize: 12, fill: '#6b7280' }} 
-                tickLine={false} 
-                axisLine={false}
-                ticks={['09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00', '11:30:00', '12:00:00', '12:30:00', '13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00']}
-                tickFormatter={(value) => value.substring(0, 5)}
-              />
-              <YAxis
-                orientation="right"
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                tickLine={false}
-                axisLine={false}
-                domain={getPriceDomain()}
-                tickFormatter={(value) => `${(value / 1000).toFixed(1)}K`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="price"
-                stroke="transparent"
-                fill="url(#priceGradient)"
-                fillOpacity={1}
-                isAnimationActive={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke="#3b82f6"
-                strokeWidth={1}
-                dot={false}
-                activeDot={{ r: 6, fill: "#3b82f6", stroke: "#ffffff", strokeWidth: 2 }}
-                isAnimationActive={false}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Chart Info */}
-        {(chartData.length > 0 || stockInfo) && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <div className="text-gray-500 text-center">Giá mở cửa</div>
-                <div className="font-extrabold text-gray-700 text-center text-2xl">
-                  {chartData.length > 0 
-                    ? chartData[0]?.price?.toLocaleString("vi-VN") 
-                    : stockInfo?.open?.toLocaleString("vi-VN") || "—"}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500 text-center">Giá cao nhất</div>
-                <div className="font-extrabold text-green-600 text-center text-2xl">
-                  {chartData.length > 0 
-                    ? Math.max(...chartData.map((d) => d.price)).toLocaleString("vi-VN")
-                    : stockInfo?.dayHigh?.toLocaleString("vi-VN") || "—"}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500 text-center">Giá thấp nhất</div>
-                <div className="font-extrabold text-red-600 text-center text-2xl">
-                  {chartData.length > 0 
-                    ? Math.min(...chartData.map((d) => d.price)).toLocaleString("vi-VN")
-                    : stockInfo?.dayLow?.toLocaleString("vi-VN") || "—"}
-                </div>
-              </div>
-              <div>
-                <div className="text-gray-500 text-center">Giá đóng cửa</div>
-                <div className="font-extrabold text-gray-700 text-center text-2xl">
-                  {isRealtime 
-                    ? "—" 
-                    : chartData.length > 0
-                      ? chartData[chartData.length - 1]?.price?.toLocaleString("vi-VN")
-                      : stockInfo?.currentPrice?.toLocaleString("vi-VN") || "—"}
-                </div>
-              </div>
+      <CardContent className="px-2 pb-4 sm:px-4">
+        {loading ? (
+          <div className="flex h-[500px] items-center justify-center rounded-lg bg-slate-50 text-sm font-semibold text-slate-500">
+            Loading intraday data...
+          </div>
+        ) : error && !chartData.length ? (
+          <div className="flex h-[500px] items-center justify-center rounded-lg border border-dashed border-red-200 bg-red-50 text-sm font-semibold text-red-700">
+            {error}
+          </div>
+        ) : !chartData.length ? (
+          <div className="flex h-[500px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm font-semibold text-slate-500">
+            No intraday trades are available for {symbol}.
+          </div>
+        ) : (
+          <div role="img" aria-label={`${symbol} intraday price and minute-volume chart`}>
+            <div className="relative h-[340px] sm:h-[430px]">
+              <span className="pointer-events-none absolute left-2 top-1 z-10 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                Price · thousand VND
+              </span>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} syncId={`intraday-${symbol}`} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id={`intraday-fill-${symbol}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={COLORS.price} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={COLORS.priceFill} stopOpacity={0.15} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke={COLORS.grid} strokeDasharray="4 4" vertical={false} />
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fill: COLORS.axis, fontSize: 12, fontWeight: 600 }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#a8b1c1" }}
+                    minTickGap={52}
+                    height={34}
+                  />
+                  <YAxis
+                    orientation="right"
+                    domain={priceDomain}
+                    tick={{ fill: COLORS.axis, fontSize: 12, fontWeight: 600 }}
+                    tickFormatter={(value) => `${(value / 1000).toFixed(1)}`}
+                    tickLine={false}
+                    axisLine={false}
+                    width={58}
+                  />
+                  <Tooltip content={<IntradayTooltip />} cursor={{ stroke: "#94a3b8", strokeDasharray: "5 4" }} isAnimationActive={false} />
+                  {referencePrice ? (
+                    <ReferenceLine
+                      y={referencePrice}
+                      stroke={COLORS.reference}
+                      strokeDasharray="6 4"
+                      label={{ value: "Reference", position: "insideTopRight", fill: COLORS.reference, fontSize: 10, fontWeight: 700 }}
+                    />
+                  ) : null}
+                  <Area type="linear" dataKey="price" stroke="none" fill={`url(#intraday-fill-${symbol})`} isAnimationActive={false} />
+                  <Line
+                    type="linear"
+                    dataKey="price"
+                    stroke={COLORS.price}
+                    strokeWidth={2.25}
+                    dot={false}
+                    activeDot={{ r: 5, fill: COLORS.price, stroke: "#fff", strokeWidth: 2 }}
+                    isAnimationActive={false}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
             </div>
+
+            <div className="h-[100px] border-t border-slate-200" aria-label="Matched volume by minute">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} syncId={`intraday-${symbol}`} margin={{ top: 8, right: 66, bottom: 0, left: 0 }}>
+                  <XAxis dataKey="time" hide />
+                  <YAxis hide domain={[0, "dataMax"]} />
+                  <Tooltip content={() => null} cursor={{ stroke: "#94a3b8", strokeDasharray: "5 4" }} />
+                  <Bar dataKey="volume" isAnimationActive={false} maxBarSize={16} minPointSize={1}>
+                    {chartData.map((point) => (
+                      <Cell
+                        key={`${point.time}-${point.timestamp}`}
+                        fill={point.direction === "up" ? COLORS.positive : point.direction === "down" ? COLORS.negative : COLORS.neutral}
+                      />
+                    ))}
+                  </Bar>
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <Metric label="Open" value={formatPrice(stats.open)} />
+              <Metric label="High" value={formatPrice(stats.high)} tone="positive" />
+              <Metric label="Low" value={formatPrice(stats.low)} tone="negative" />
+              <Metric label="Last" value={formatPrice(stats.last)} tone="accent" />
+            </div>
+
+            <p className="sr-only">
+              Latest price {formatPrice(stats.last)} VND. The chart shows one-minute last prices, reference price, and matched volume.
+            </p>
           </div>
         )}
       </CardContent>
     </Card>
   )
 }
-

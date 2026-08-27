@@ -49,10 +49,10 @@ export function StockNews({ symbol }: StockNewsProps) {
 
   const filterNewsByTime = (news: NewsItem[]) => {
     const now = new Date()
-    
+
     return news.filter(item => {
       const newsDate = new Date(item.date)
-      
+
       switch (timeFilter) {
         case "today": {
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -68,10 +68,10 @@ export function StockNews({ symbol }: StockNewsProps) {
         }
         case "custom": {
           if (!startDate && !endDate) return true
-          
+
           const start = startDate ? new Date(startDate) : null
           const end = endDate ? new Date(endDate) : null
-          
+
           if (start && end) {
             end.setHours(23, 59, 59, 999)
             return newsDate >= start && newsDate <= end
@@ -96,7 +96,7 @@ export function StockNews({ symbol }: StockNewsProps) {
       const diffMs = now.getTime() - date.getTime()
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-      
+
       if (diffHours < 1) {
         return "Just now"
       } else if (diffHours < 24) {
@@ -118,7 +118,7 @@ export function StockNews({ symbol }: StockNewsProps) {
       <CardHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="flex items-center gap-2 text-gray-900">
+            <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
               <Newspaper className="h-5 w-5 text-blue-600" />
               News about {symbol}
             </CardTitle>
@@ -168,7 +168,7 @@ export function StockNews({ symbol }: StockNewsProps) {
               </div>
             </div>
           </div>
-          
+
           {timeFilter === "custom" && (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center gap-2 flex-1">
@@ -225,22 +225,22 @@ export function StockNews({ symbol }: StockNewsProps) {
                         {item.stock_code}
                       </Badge>
                     </div>
-                    
+
                     {/* Title */}
-                    <h2 
+                    <h2
                       className="px-5 my-[20px] font-extrabold text-gray-900 text-[17px] line-clamp-1 hover:text-cyan-600 transition-colors cursor-pointer"
                       onClick={() => window.open(item.is_pdf && item.pdf_link ? item.pdf_link : item.link, '_blank')}
                     >
                       {item.title}
                     </h2>
-                    
+
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-0">
                       <span className="text-xs text-gray-500">{formatDate(item.date)}</span>
                       <div className="flex items-center gap-1.5">
                         {item.is_pdf && item.pdf_link && (
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="text-purple-600 hover:text-purple-700 h-6 px-2 text-[12px]"
                             onClick={() => window.open(item.pdf_link!, '_blank')}

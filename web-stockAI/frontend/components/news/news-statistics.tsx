@@ -165,14 +165,14 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
   if (loading) {
     return (
       <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900">
-            <BarChart3 className="h-5 w-5 text-cyan-600" />
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
+            <BarChart3 className="h-4 w-4 text-cyan-600" />
             Thống kê tin tức
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-600">Đang tải...</div>
+          <div className="py-6 text-center text-xs text-gray-600">Đang tải...</div>
         </CardContent>
       </Card>
     )
@@ -182,32 +182,32 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900">
-          <BarChart3 className="h-5 w-5 text-cyan-600" />
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
+          <BarChart3 className="h-4 w-4 text-cyan-600" />
           Thống kê tin tức
         </CardTitle>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="mt-1 text-xs text-gray-600">
           Tổng số: <span className="font-bold text-cyan-600">{totalNews.toLocaleString()}</span> bài báo
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3">
         {/* Pie Chart */}
         {stats.length > 0 && (
-          <div className="h-64">
+          <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={stats.map(s => ({ name: s.sectorLabel, value: s.total, color: s.color }))}
                   cx="50%"
                   cy="50%"
-                  innerRadius={50}
-                  outerRadius={90}
+                  innerRadius={38}
+                  outerRadius={70}
                   paddingAngle={2}
                   dataKey="value"
                   label={({percent }: any) => `${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
-                  style={{ fontSize: 13, fontWeight: 'bold' }}
+                  style={{ fontSize: 11, fontWeight: 'bold' }}
                 >
                   {stats.map((stat, index) => (
                     <Cell key={`cell-${index}`} fill={stat.color} />
@@ -217,9 +217,9 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                   contentStyle={{
                     backgroundColor: '#ffffff',
                     border: '1px solid #d1d5db',
-                    borderRadius: '10px',
+                    borderRadius: '6px',
                     color: '#374151',
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 'bold'
                   }}
                   wrapperStyle={{ color: '#374151' }}
@@ -234,25 +234,25 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
         )}
 
         {/* Sector List */}
-        <div className="space-y-3">
+        <div className="space-y-2">
         {stats.map((stat) => (
           <div key={stat.sector} className="space-y-2">
             {/* Sector Header */}
-            <div 
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            <div
+              className="flex cursor-pointer items-center justify-between rounded-md bg-gray-50 p-2 transition-colors hover:bg-gray-100"
               onClick={() => toggleSector(stat.sector)}
             >
-              <div className="flex items-center gap-3 flex-1">
-                <div 
-                  className="w-1 h-8 rounded-full" 
+              <div className="flex flex-1 items-center gap-2">
+                <div
+                  className="h-6 w-1 rounded-full"
                   style={{ backgroundColor: stat.color }}
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-gray-900 text-sm">{stat.sectorLabel}</span>
-                    <Badge 
-                      variant="outline" 
-                      className="text-xs bg-gray-200 text-gray-700 border-gray-300"
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-gray-900">{stat.sectorLabel}</span>
+                    <Badge
+                      variant="outline"
+                      className="bg-gray-200 text-[10px] text-gray-700 border-gray-300"
                     >
                       {stat.total} bài
                     </Badge>
@@ -272,37 +272,37 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-gray-700 h-8 w-8 p-0"
+                className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
               >
                 {expandedSector === stat.sector ? (
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-3.5 w-3.5" />
                 ) : (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3.5 w-3.5" />
                 )}
               </Button>
             </div>
 
             {/* Top Stocks - Expanded */}
             {expandedSector === stat.sector && (
-              <div className="ml-4 pl-4 border-l-2 space-y-2 animate-in slide-in-from-top-2" style={{ borderColor: stat.color }}>
-                <div className="text-xs text-gray-600 font-medium mb-2">
+              <div className="ml-2 space-y-1.5 border-l-2 pl-3 animate-in slide-in-from-top-2" style={{ borderColor: stat.color }}>
+                <div className="mb-1.5 text-[11px] font-medium text-gray-600">
                   Top cổ phiếu nhiều tin nhất:
                 </div>
                 {stat.stocks.map((stock, index) => (
                   <div
                     key={stock.code}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between rounded bg-gray-50 p-1.5 transition-colors hover:bg-gray-100"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-bold" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
+                      <div className="flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>
                         {index + 1}
                       </div>
-                      <span className="font-mono font-bold text-gray-900 text-sm">
+                      <span className="font-mono text-xs font-bold text-gray-900">
                         {stock.code}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="text-xs text-gray-600">
+                      <div className="text-[11px] text-gray-600">
                         {stock.count} bài
                       </div>
                       <div className="w-16 bg-gray-200 rounded-full h-1.5">
@@ -326,4 +326,3 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
     </Card>
   )
 }
-

@@ -13,3 +13,4 @@ fastavro
 yfinance
 prometheus-client
 psycopg2-binary
+holidays

@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/layout/theme-provider"
+import { StockWSProvider } from "@/lib/stockWSContext"
+import { AgentationDev } from "@/components/agentation-dev"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -23,8 +25,11 @@ export default function RootLayout({
     <html lang="vi" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ThemeProvider>
-          {children}
+          <StockWSProvider>
+            {children}
+          </StockWSProvider>
         </ThemeProvider>
+        <AgentationDev />
       </body>
     </html>
   )

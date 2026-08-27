@@ -21,7 +21,9 @@ services:
     environment:
       - TZ=Asia/Ho_Chi_Minh
     networks:
-      - financi-network
+      financi-network:
+        aliases:
+          - prometheus
 
   grafana:
     image: grafana/grafana:12.1.0
@@ -32,6 +34,7 @@ services:
       - "1020:3000"
     volumes:
       - ./grafana/build:/var/lib/grafana/dashboards:z
+      - ./grafana/dashboards/stock-cdc:/var/lib/grafana/dashboards/stock-cdc:z
       - ./grafana/plugins:/var/lib/grafana/plugins:z
       - ./grafana/provisioning:/var/lib/grafana/provisioning:z
       - /etc/localtime:/etc/localtime:ro
@@ -54,8 +57,9 @@ services:
     depends_on:
       - prometheus
     networks:
-      - financi-network
-
+      financi-network:
+        aliases:
+          - grafana
 
 networks:
   financi-network:

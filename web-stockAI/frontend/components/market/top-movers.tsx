@@ -16,7 +16,7 @@ export function TopMovers() {
   return (
     <Card className="bg-zinc-950 text-white">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Flame className="h-5 w-5 text-sky-400" />
           Top Movers
         </CardTitle>

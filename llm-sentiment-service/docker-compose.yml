@@ -1,0 +1,21 @@
+services:
+  g4f:
+    image: hlohaus789/g4f:latest-slim
+    container_name: g4f-sentiment-api
+    restart: unless-stopped
+    ports:
+      - "1337:8080"
+    volumes:
+      - ./har_and_cookies:/app/har_and_cookies
+      - ./generated_media:/app/generated_media
+    environment:
+      - G4F_PORT=8080
+      - G4F_HOST=0.0.0.0
+    networks:
+      - financi-network
+
+networks:
+  financi-network:
+    name: financi-network
+    external: true
+

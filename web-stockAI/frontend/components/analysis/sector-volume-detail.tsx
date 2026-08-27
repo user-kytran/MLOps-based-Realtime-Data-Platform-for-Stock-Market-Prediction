@@ -1,9 +1,9 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, CartesianGrid } from "recharts"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
 import { useState } from "react"
+import { AnalysisPanel, axisTick, chartColors, sectorPalette, tooltipStyle } from "./analysis-ui"
 
 const SECTOR_SYMBOLS: Record<string, string[]> = {
   Consumer_Cyclical: ['AAA','ADS','CSM','CTF','DAH','DPR','DRC','DSN','EVE','FRT','GDT','GIL','GVR','HAX','HTG','HTN','HVH','KMR','MCP','MSH','MWG','PNJ','SAV','SFC','ST8','STK','TCM','TCT','TDP','TMT','TTF'],
@@ -19,7 +19,7 @@ const SECTOR_SYMBOLS: Record<string, string[]> = {
   Energy: ['GAS','PET','PGC','PLX','PVD'],
 }
 
-const COLORS = ['#0d4d4d', '#116666', '#157a7a', '#1a8f8f', '#1fa3a3', '#24b8b8', '#29cccc', '#47d9d9', '#66e0e0', '#85e6e6', '#a3ecec', '#c2f2f2', '#e0f9f9', '#f0fcfc', '#f7fefe']
+const COLORS = sectorPalette
 
 export function SectorVolumeDetail() {
   const stocks = useStocksRealtimeWS()
@@ -35,51 +35,52 @@ export function SectorVolumeDetail() {
     .slice(0, 15)
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-gray-900 text-xl">Sector Volume Detail</CardTitle>
-          <select 
+    <AnalysisPanel
+      title="Sector Volume Detail"
+      eyebrow="Selected sector"
+      action={
+          <select
             value={selectedSector}
             onChange={(e) => setSelectedSector(e.target.value)}
-            className="bg-white text-gray-900 border border-gray-300 rounded px-3 py-1 text-sm"
+            className="min-w-0 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm"
           >
             {Object.keys(SECTOR_SYMBOLS).map(sector => (
               <option key={sector} value={sector}>{sector.replace(/_/g, ' ')}</option>
             ))}
           </select>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={sectorStocks}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+      }
+    >
+        <ResponsiveContainer width="100%" height={360}>
+          <BarChart data={sectorStocks} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+            <CartesianGrid strokeDasharray="4 4" stroke={chartColors.grid} vertical={false} />
             <XAxis 
               dataKey="symbol" 
-              stroke="#6b7280"
-              style={{ fontSize: '11px' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
             />
             <YAxis 
-              stroke="#6b7280"
-              style={{ fontSize: '11px' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
               tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db', color: '#374151', fontSize: '12px', fontWeight: 'bold' }}
-              labelStyle={{ color: '#374151' }}
-              itemStyle={{ color: '#374151' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: '#0f172a' }}
+              itemStyle={{ color: '#334155' }}
               formatter={(value: number) => [`${(value / 1000000).toFixed(2)}M`, 'Volume']}
-              cursor={{ fill: 'rgba(6, 182, 212, 0.1)' }}
+              cursor={{ fill: 'rgba(15, 118, 110, 0.08)' }}
             />
-            <Bar dataKey="volume" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="volume" radius={[6, 6, 0, 0]} barSize={24}>
               {sectorStocks.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    </AnalysisPanel>
   )
 }
-

@@ -186,8 +186,11 @@ cython_debug/
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 #  and can be added to the global gitignore or merged into this file. However, if you prefer, 
 #  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
-
+.vscode/
+.omx/
+.codegraph/
+*.session
+*.session-journal
 # Ruff stuff:
 .ruff_cache/
 
@@ -211,29 +214,104 @@ data/
 *.parquet
 *.avro
 
-# Kafka/Confluent
+# General logs and runtime files
+logs/
+**/logs/
+log/
+**/log/
+*.log
+*.log.*
+*.log-*
+*.log.[0-9]*
+*.out
+*.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Kafka Service
 kafka-logs/
+**/kafka-logs/
 connect-offsets
 connect-configs
 connect-status
+kafka-service/logs/
+kafka-service/*.log
 
-# Scylla/Cassandra
-scylla/data/
-scylla/commitlog/
-scylla/saved_caches/
-scylla/hints/
-
-# Monitoring data
+# Scylla Monitoring
 prometheus_data/
 grafana_data/
+scylla-monitoring/prometheus_data/
+scylla-monitoring/grafana_data/
+scylla-monitoring/grafana/plugins/
+scylla-monitoring/loki/data/
+scylla-monitoring/loki_data/
+scylla-monitoring/logs/
+scylla-monitoring/*.log
+scylla-monitoring/.env
 
-# # Minio data
-# warehouse/
+# LLM Sentiment Service
+llm-sentiment-service/logs/
+llm-sentiment-service/har_and_cookies/.logging/
+llm-sentiment-service/har_and_cookies/.usage/
+llm-sentiment-service/har_and_cookies/.gui_cache/
+llm-sentiment-service/har_and_cookies/.models/
+llm-sentiment-service/har_and_cookies/models/
+llm-sentiment-service/har_and_cookies/*.pem
+llm-sentiment-service/har_and_cookies/*.json
+llm-sentiment-service/generated_media/*
+!llm-sentiment-service/generated_media/.gitkeep
+llm-sentiment-service/*.log
 
-# Airflow
+# Airflow / Task Daily Service
+task-daily-service/logs/
+task-daily-service/data/
+task-daily-service/*.log
 airflow.cfg
 airflow.db
 webserver_config.py
 
-# Flink
+# Scylla Service
+scylla/data/
+scylla/commitlog/
+scylla/saved_caches/
+scylla/hints/
+scylla-service/dsbulk*/
+scylla-service/extracted_data/
+scylla-service/inserts_script/
+scylla-service/volume-backups/
+scylla-service/scylla/
+scylla-service/logs/
+scylla-service/*.log
+
+# Flink Service
 flink-web-upload/
+flink-service/flink-web-upload/
+flink-service/logs/
+flink-service/log/
+flink-service/*.log
+
+# Stock Websocket Service
+stock-websocket-service/logs/
+stock-websocket-service/*.log
+
+# Stock Prediction Service
+stock-prediction/logs/
+stock-prediction/*.log
+
+# Warehouse Service
+warehouse/warehouse_data/
+warehouse/logs/
+warehouse/*.log
+
+# Model LLM Service
+model_llm/logs/
+model_llm/*.log
+
+# Web StockAI
+web-stockAI/backend/logs/
+web-stockAI/backend/*.log
+web-stockAI/frontend/.next/
+web-stockAI/frontend/out/
+web-stockAI/frontend/node_modules/

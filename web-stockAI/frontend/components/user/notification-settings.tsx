@@ -29,7 +29,7 @@ export function NotificationSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Bell className="h-5 w-5" />
           Cài đặt thông báo
         </CardTitle>
@@ -38,7 +38,7 @@ export function NotificationSettings() {
       <CardContent className="space-y-6">
         {/* Notification Channels */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Kênh thông báo</h3>
+          <h3 className="text-sm font-semibold mb-3">Kênh thông báo</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function NotificationSettings() {
 
         {/* Notification Types */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Loại thông báo</h3>
+          <h3 className="text-sm font-semibold mb-3">Loại thông báo</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

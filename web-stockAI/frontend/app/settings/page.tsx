@@ -9,17 +9,17 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-5">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Settings</h1>
-          <p className="text-xl text-muted-foreground">Manage your account and customize your experience</p>
+        <div className="mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Settings</h1>
+          <p className="text-sm text-muted-foreground">Manage your account and customize your experience</p>
         </div>
 
         {/* Settings Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - Main Settings */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4">
             <UserProfile />
             <NotificationSettings />
             <SecuritySettings />

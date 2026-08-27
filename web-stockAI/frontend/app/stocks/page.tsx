@@ -5,14 +5,12 @@ import { StockTable } from "@/components/market/stock-table"
 import { SearchBar } from "@/components/search/search-bar"
 import { TopMovers } from "@/components/market/top-movers"
 import { TopVolume } from "@/components/market/top-volume"
-import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
-import { useState } from "react"
+  import { useState } from "react"
 
 export default function StocksPage() {
-  const stocks = useStocksRealtimeWS()
-  const [mode, setMode] = useState<"ALL" | "VN30">("ALL")
+  const [mode, setMode] = useState<"ALL" | "VN30">("VN30")
   const [sector, setSector] = useState<string>("all")
-  
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div
@@ -20,7 +18,7 @@ export default function StocksPage() {
         style={{
           backgroundImage: "url('/img_bg.png')",
           opacity: 0.2,
-          zIndex: -1, 
+          zIndex: -1,
         }}
       ></div>
 
@@ -28,39 +26,39 @@ export default function StocksPage() {
 
       <main className="w-full px-4 py-5 relative z-10">
         {/* Search and Filter Controls */}
-        <div className="w-full mb-8">
-          <div className="flex flex-col lg:flex-row items-center gap-4 w-full">
-            <div className="px-4 lg:px-6">
-              <SearchBar fullWidth noMargin />
+        <div className="w-full mb-4">
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-2 w-full">
+            <div className="w-full max-w-xs px-2 lg:max-w-sm">
+              <SearchBar fullWidth noMargin compact />
             </div>
-            
+
             {/* Filter Controls */}
-            <div className="flex items-center gap-3 flex-wrap px-30 lg:px-40">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap px-2">
+              <div className="flex items-center gap-1.5">
                 <button
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                    mode === "ALL" 
-                      ? "bg-cyan-700 text-white shadow-sm" 
-                      : "text-gray-700 bg-gray-50 border border-gray-200 hover:text-cyan-600 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setMode("ALL")}
-                >
-                  ALL STOCKS
-                </button>
-                <button
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                    mode === "VN30" 
-                      ? "bg-cyan-700 text-white shadow-sm" 
+                  className={`px-3 py-1.5 rounded-md font-semibold text-xs transition-all duration-200 ${
+                    mode === "VN30"
+                      ? "bg-cyan-700 text-white shadow-sm"
                       : "text-gray-700 bg-gray-50 border border-gray-200 hover:text-cyan-600 hover:bg-gray-100"
                   }`}
                   onClick={() => setMode("VN30")}
                 >
                   VN30
                 </button>
+                <button
+                  className={`px-3 py-1.5 rounded-md font-semibold text-xs transition-all duration-200 ${
+                    mode === "ALL"
+                      ? "bg-cyan-700 text-white shadow-sm"
+                      : "text-gray-700 bg-gray-50 border border-gray-200 hover:text-cyan-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setMode("ALL")}
+                >
+                  ALL STOCKS
+                </button>
               </div>
-              
+
               <select
-                className="px-4 py-2 rounded-lg font-semibold text-sm bg-white border border-gray-200 text-gray-700 hover:border-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
+                className="px-3 py-1.5 rounded-md font-semibold text-xs bg-white border border-gray-200 text-gray-700 hover:border-cyan-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 transition-all duration-200"
                 value={sector}
                 onChange={(e) => setSector(e.target.value)}
               >
@@ -81,7 +79,7 @@ export default function StocksPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 w-full">
+        <div className="grid grid-cols-1 gap-4 w-full">
           <div className="col-span-1">
             <StockTable mode={mode} sector={sector} />
           </div>

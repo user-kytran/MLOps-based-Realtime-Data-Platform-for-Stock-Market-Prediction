@@ -45,7 +45,7 @@ export function MarketAlerts() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm font-bold">
             <Bell className="h-5 w-5 text-primary" />
             Cảnh báo thị trường
           </CardTitle>

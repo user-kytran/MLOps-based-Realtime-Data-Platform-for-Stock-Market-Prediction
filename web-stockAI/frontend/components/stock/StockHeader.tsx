@@ -17,25 +17,24 @@ export function StockHeader({ symbol, name }: StockHeaderProps) {
   }
 
   return (
-    <div className="flex items-center mb-6 pb-4 border-b border-gray-200">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center mb-3 pb-2 border-b border-gray-200">
+      <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
           size="lg" 
           onClick={handleBack}
-          className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 text-lg"
+          className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 text-sm h-8 px-2"
         >
           <Icons.ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
         <div>
-          <h1 className="text-3xl font-extrabold flex items-center gap-3 text-gray-900">
+          <h1 className="text-xl md:text-2xl font-extrabold flex items-center gap-2 text-gray-900">
             {symbol} 
-            <span className="text-2xl font-normal text-gray-600">({name})</span>
+            <span className="text-sm md:text-base font-normal text-gray-600">({name})</span>
           </h1>
         </div>
       </div>
     </div>
   )
 }
-

@@ -1,9 +1,9 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Legend } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Cell } from "recharts"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
 import { useState } from "react"
+import { AnalysisPanel, axisTick, chartColors, tooltipStyle } from "./analysis-ui"
 
 const SECTOR_SYMBOLS: Record<string, string[]> = {
   Consumer_Cyclical: ['AAA','ADS','CSM','CTF','DAH','DPR','DRC','DSN','EVE','FRT','GDT','GIL','GVR','HAX','HTG','HTN','HVH','KMR','MCP','MSH','MWG','PNJ','SAV','SFC','ST8','STK','TCM','TCT','TDP','TMT','TTF'],
@@ -17,20 +17,6 @@ const SECTOR_SYMBOLS: Record<string, string[]> = {
   Technology: ['CMG','DGW','ELC','FPT','ITD','SGT'],
   Healthcare: ['DBD','DBT','DCL','DMC','IMP','JVC','TNH','VMD'],
   Energy: ['GAS','PET','PGC','PLX','PVD'],
-}
-
-const COLORS: Record<string, string> = {
-  Banking: '#60A5FA',
-  Insurance: '#34D399',
-  Securities: '#FBBF24',
-  Real_Estate: '#F87171',
-  Technology: '#A78BFA',
-  Materials: '#FB923C',
-  Energy: '#22D3EE',
-  Transport: '#C084FC',
-  Consumer: '#4ADE80',
-  Healthcare: '#FACC15',
-  Industrial: '#F472B6',
 }
 
 export function SectorPriceTrend() {
@@ -51,46 +37,49 @@ export function SectorPriceTrend() {
     .sort((a, b) => b.value - a.value)
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-gray-900 text-xl">Sector Stock Trends</CardTitle>
-          <div className="flex gap-2">
-            <select 
+    <AnalysisPanel
+      title="Sector Stock Snapshot"
+      eyebrow="Price and performance"
+      action={
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <select
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
-              className="bg-white text-gray-900 border border-gray-300 rounded px-3 py-1 text-sm"
+              className="min-w-0 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm"
             >
               {Object.keys(SECTOR_SYMBOLS).map(sector => (
                 <option key={sector} value={sector}>{sector.replace(/_/g, ' ')}</option>
               ))}
             </select>
-            <select 
+            <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as 'percentage' | 'price')}
-              className="bg-white text-gray-900 border border-gray-300 rounded px-3 py-1 text-sm"
+              className="min-w-0 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm"
             >
               <option value="percentage">% Change</option>
               <option value="price">Price</option>
             </select>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={stockData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+      }
+    >
+        <ResponsiveContainer width="100%" height={360}>
+          <BarChart data={stockData} margin={{ top: 4, right: 14, bottom: 18, left: 0 }}>
+            <CartesianGrid strokeDasharray="4 4" stroke={chartColors.grid} vertical={false} />
             <XAxis 
               dataKey="symbol" 
-              stroke="#6b7280"
-              style={{ fontSize: '11px' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
               angle={-45}
               textAnchor="end"
-              height={80}
+              height={72}
             />
             <YAxis 
-              stroke="#6b7280"
-              style={{ fontSize: '11px' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
               tickFormatter={(value) => 
                 viewMode === 'percentage' 
                   ? `${value.toFixed(1)}%` 
@@ -98,28 +87,27 @@ export function SectorPriceTrend() {
               }
             />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db', color: '#374151', fontSize: '12px', fontWeight: 'bold' }}
-              labelStyle={{ color: '#374151' }}
-              itemStyle={{ color: '#374151' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: '#0f172a' }}
+              itemStyle={{ color: '#334155' }}
               formatter={(value: number) => [
                 viewMode === 'percentage' 
                   ? `${value.toFixed(2)}%` 
                   : `${value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} VND`,
                 viewMode === 'percentage' ? 'Change' : 'Price'
               ]}
+              cursor={{ fill: 'rgba(15, 118, 110, 0.08)' }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#06b6d4" 
-              strokeWidth={2}
-              dot={{ fill: '#06b6d4', r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
+            <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={20}>
+              {stockData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={viewMode === "percentage" && entry.value < 0 ? chartColors.negative : chartColors.accent}
+                />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    </AnalysisPanel>
   )
 }
-

@@ -44,7 +44,7 @@ export function MarketNews() {
   return (
     <Card className="bg-zinc-950 text-white">
       <CardHeader>
-        <CardTitle className="flex items-center justify-center gap-2 text-2xl font-bold text-white">
+        <CardTitle className="flex items-center justify-center gap-2 text-sm font-bold text-white">
           <Newspaper className="h-6 w-6 text-sky-700" />
           MARKET NEWS
         </CardTitle>

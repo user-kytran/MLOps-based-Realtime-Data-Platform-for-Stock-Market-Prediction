@@ -3,7 +3,7 @@ set -e
 
 echo "Khởi động lại Scylla Monitoring với Stock CDC metrics..."
 
-cd /home/obito/main/scylla-monitoring
+cd "$(dirname "$0")"
 
 python3 update_dashboard_timezone.py
 

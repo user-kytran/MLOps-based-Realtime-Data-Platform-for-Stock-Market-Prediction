@@ -12,10 +12,7 @@ interface PredictionCellProps {
 }
 
 export const PredictionCell = ({ trend, confidence, className }: PredictionCellProps) => {
-  const wrapperClass = "flex items-center justify-center h-full w-[120px]";
-
-  // Thêm hiệu ứng "pulse" nhẹ để làm nó "sinh động"
-  const pulseClass = "animate-pulse"; 
+  const wrapperClass = "flex h-6 w-full max-w-full min-w-0 items-center justify-center overflow-hidden px-0.5";
 
   let icon;
   let colorClass;
@@ -23,33 +20,33 @@ export const PredictionCell = ({ trend, confidence, className }: PredictionCellP
   switch (trend) {
     case "up":
       // Sử dụng icon 'TrendingUp' từ file của bạn
-      icon = <Icons.TrendingUp className="h-6 w-6 stroke-[2.5]" />;
-      colorClass = "text-green-500 bg-green-100"; // Màu xanh lá cho "tăng"
+      icon = <Icons.TrendingUp className="h-3.5 w-3.5 shrink-0 stroke-[2.5]" />;
+      colorClass = "border border-green-200 bg-green-50 text-green-600"; // Đồng bộ với màu tăng trong bảng
       break;
     case "down":
       // Sử dụng icon 'TrendingDown' từ file của bạn
-      icon = <Icons.TrendingDown className="h-6 w-6 stroke-[2.5]" />;
-      colorClass = "text-red-500 bg-red-100"; // Màu đỏ cho "giảm"
+      icon = <Icons.TrendingDown className="h-3.5 w-3.5 shrink-0 stroke-[2.5]" />;
+      colorClass = "border border-red-200 bg-red-50 text-red-600"; // Đồng bộ với màu giảm trong bảng
       break;
     case "neutral":
       // Sử dụng icon 'Minus' từ file của bạn
-      icon = <Icons.Minus className="h-6 w-6 stroke-[3]" />; 
-      colorClass = "text-gray-500 bg-gray-100"; // Màu xám cho "đi ngang"
+      icon = <Icons.Minus className="h-3.5 w-3.5 shrink-0 stroke-[3]" />;
+      colorClass = "border border-gray-200 bg-gray-50 text-gray-600"; // Màu xám cho "đi ngang"
       break;
     default:
       // Hiển thị khi không có dữ liệu dự đoán
       return (
         <div className={cn(wrapperClass, className)}>
-          <span className="text-gray-400 text-xl">—</span>
+          <span className="text-gray-400 text-sm">—</span>
         </div>
       );
   }
 
   return (
-    <div className={cn(wrapperClass, colorClass, pulseClass, "rounded-md", className)}>
-      <div className="flex items-center gap-2 text-[14px] min-w-[80px] justify-center">
-        <div className="w-6 flex justify-center">{icon}</div>
-        <span className="font-bold w-12 text-center">
+    <div className={cn(wrapperClass, colorClass, "rounded-md", className)}>
+      <div className="flex min-w-0 max-w-full items-center justify-center gap-0.5 text-[10px]">
+        {icon}
+        <span className="min-w-0 truncate text-center font-extrabold leading-none">
           {trend === "up" ? "UP" : trend === "down" ? "DOWN" : "—"}
         </span>
       </div>

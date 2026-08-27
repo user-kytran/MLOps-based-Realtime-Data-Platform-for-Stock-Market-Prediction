@@ -17,16 +17,16 @@ export default function HomePage() {
 
       <Header />
 
-      <main className="w-full px-4 py-20 relative z-10">
-        <section className="text-center mb-4">
-          <h1 className="text-black text-4xl md:text-6xl font-extrabold mb-4 text-balance">
+      <main className="w-full px-4 py-6 relative z-10">
+        <section className="text-center mb-3">
+          <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
             PREDICT STOCK PRICE
             <span className="text-cyan-900"> SMART</span>
           </h1>
-          <p className="text-black text-xl font-extrabold mb-4 text-pretty max-w-2xl mx-auto py-5">
+          <p className="text-black text-sm font-semibold mb-3 text-pretty max-w-xl mx-auto">
             Analyze stock market with AI, track price trends and get accurate predictions
           </p>
-          <div className="max-w-2xl mx-auto py-4">
+          <div className="max-w-xl mx-auto py-2">
             <SearchBar />
           </div>
         </section>

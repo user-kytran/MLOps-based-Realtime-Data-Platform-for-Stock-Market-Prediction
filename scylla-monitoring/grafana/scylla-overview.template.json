@@ -70,7 +70,7 @@
                         "span": 2,
                         "targets": [
                             {
-                                "expr": "wlatencya{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "wlatencya{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}}",
                                 "refId": "A",
@@ -87,14 +87,14 @@
                         "span": 2,
                         "targets": [
                             {
-                                "expr": "wlatencyp95{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "wlatencyp95{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 95%",
                                 "refId": "A",
                                 "step": 1
                             },
                             {
-                                "expr": "wlatencyp99{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "wlatencyp99{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 99%",
                                 "refId": "B",
@@ -126,7 +126,7 @@
                         "span": 2,
                         "targets": [
                             {
-                                "expr": "rlatencya{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "rlatencya{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}}",
                                 "refId": "A",
@@ -143,14 +143,14 @@
                         "span": 2,
                         "targets": [
                             {
-                                "expr": "rlatencyp95{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "rlatencyp95{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} {{instance}} {{shard}} 95%",
                                 "refId": "A",
                                 "step": 1
                             },
                             {
-                                "expr": "rlatencyp99{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}>0",
+                                "expr": "rlatencyp99{by=\"cluster\", cluster=\"$cluster\",scheduling_group_name=~\"$sg\"}",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 99%",
                                 "refId": "B",
@@ -325,14 +325,14 @@
                         "span": 2,
                         "targets": [
                             {
-                                "expr": "avg(wlatencyp95{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}>0) by (scheduling_group_name, [[by]])",
+                                "expr": "avg(wlatencyp95{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}) by (scheduling_group_name, [[by]])",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 95% {{instance}} {{shard}}",
                                 "refId": "A",
                                 "step": 1
                             },
                             {
-                                "expr": "avg(wlatencyp99{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}>0) by (scheduling_group_name, [[by]])",
+                                "expr": "avg(wlatencyp99{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}) by (scheduling_group_name, [[by]])",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 99% {{instance}} {{shard}}",
                                 "refId": "B",
@@ -417,14 +417,14 @@
                         },
                         "targets": [
                             {
-                                "expr": "avg(rlatencyp95{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}>0) by(scheduling_group_name, [[by]])",
+                                "expr": "avg(rlatencyp95{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}) by(scheduling_group_name, [[by]])",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 95% {{instance}} {{shard}}",
                                 "refId": "A",
                                 "step": 1
                             },
                             {
-                                "expr": "avg(rlatencyp99{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}>0) by(scheduling_group_name, [[by]])",
+                                "expr": "avg(rlatencyp99{by=\"[[by]]\", instance=~\"[[node]]|^$\",cluster=\"$cluster\", dc=~\"$dc\", shard=~\"[[shard]]|$^\",scheduling_group_name=~\"$sg\"}) by(scheduling_group_name, [[by]])",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{scheduling_group_name}} 99% {{instance}} {{shard}}",
                                 "refId": "B",

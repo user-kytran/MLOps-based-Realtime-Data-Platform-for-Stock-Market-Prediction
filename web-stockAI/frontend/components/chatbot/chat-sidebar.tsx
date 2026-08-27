@@ -57,7 +57,7 @@ export function ChatSidebar() {
       {/* Chat Categories */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-primary" />
             Chủ đề
           </CardTitle>
@@ -94,7 +94,7 @@ export function ChatSidebar() {
       {/* Recent Chats */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             Cuộc trò chuyện gần đây
           </CardTitle>
@@ -121,7 +121,7 @@ export function ChatSidebar() {
       {/* Popular Questions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Star className="h-5 w-5 text-primary" />
             Câu hỏi phổ biến
           </CardTitle>

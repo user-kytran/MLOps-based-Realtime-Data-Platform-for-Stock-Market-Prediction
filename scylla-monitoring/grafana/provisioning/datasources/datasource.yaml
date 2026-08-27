@@ -3,7 +3,7 @@ apiVersion: 1
 datasources:
 - name: prometheus
   type: prometheus
-  url: http://172.18.0.25:9090
+  url: http://172.18.0.23:9090
   access: proxy
   basicAuth: false
   isDefault: true

@@ -1,31 +1,47 @@
 import signal, asyncio, logging, os, time, sys
-from datetime import datetime
-import pytz
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import SerializingProducer
 from confluent_kafka.serialization import StringSerializer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 import yfinance as yf
-from websockets.exceptions import ConnectionClosedError
+from yfinance.config import YfConfig
+import yfinance.live as yf_live
+
+# Patch async_connect để tắt keepalive ping timeout (1011) do Yahoo Finance không phản hồi ping
+_original_async_connect = yf_live.async_connect
+async def _patched_async_connect(url, **kwargs):
+    kwargs.setdefault('ping_interval', None)
+    kwargs.setdefault('ping_timeout', None)
+    kwargs.setdefault('close_timeout', 10)
+    return await _original_async_connect(url, **kwargs)
+
+yf_live.async_connect = _patched_async_connect
 
 yf.set_tz_cache_location("/home/obito/.cache/py-yfinance")
+YfConfig.debug.hide_exceptions = False
+
+HEALTHCHECK_FILE = "/tmp/healthy"
+
+
+def check_websocket_open(ws_obj) -> bool:
+    """Kiểm tra an toàn xem WebSocket nội bộ có đang ở trạng thái OPEN không"""
+    if ws_obj is None:
+        return False
+    inner_ws = getattr(ws_obj, '_ws', None)
+    if inner_ws is None:
+        return False
+    state = getattr(inner_ws, 'state', None)
+    if state is not None:
+        if hasattr(state, 'name'):
+            return state.name == 'OPEN'
+        return state == 1
+    if hasattr(inner_ws, 'closed'):
+        return not inner_ws.closed
+    return getattr(inner_ws, 'close_code', None) is None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-MAX_RECONNECT_ATTEMPTS = 5
-RECONNECT_DELAY = 10
-MESSAGE_TIMEOUT = 60
-VN_TIMEZONE = pytz.timezone('Asia/Ho_Chi_Minh')
-
-def is_trading_hours():
-    now = datetime.now(VN_TIMEZONE)
-    if now.weekday() >= 5:
-        return False
-    hour = now.hour
-    minute = now.minute
-    return (hour == 9 and minute >= 0) or (9 < hour < 15) or (hour == 15 and minute == 0)
 
 schema_registry_conf = {'url': os.getenv('SCHEMA_REGISTRY_URL')}
 schema_registry_client = SchemaRegistryClient(schema_registry_conf)
@@ -84,11 +100,6 @@ class StockDataProducer:
         self.shutdown_event.set()
 
     def _send(self, msg: dict):
-        self.message_count += 1
-        
-        if time.time() - self.last_log_time >= 10:
-            self.last_log_time = time.time()
-
         mapped_data = {
             "symbol": msg.get("id", ""),
             "price": float(msg.get("price", 0.0)),
@@ -106,59 +117,69 @@ class StockDataProducer:
         self.producer.produce(topic=self.topic, value=mapped_data)
         self.producer.poll(0)
 
-    async def run(self):
-        reconnect_count = 0
-        while reconnect_count < MAX_RECONNECT_ATTEMPTS:
+    async def _healthcheck_watchdog(self):
+        """Task chạy ngầm định kỳ mỗi 10s cập nhật timestamp vào file nếu WebSocket đang OPEN"""
+        logger.info("[Healthcheck] Watchdog task đã bắt đầu...")
+        while not self.shutdown_event.is_set():
             try:
-                logger.info(f"Đang kết nối WebSocket cho {len(self.symbols)} symbols... (lần thử {reconnect_count + 1}/{MAX_RECONNECT_ATTEMPTS})")
-                self.ws = yf.AsyncWebSocket()
-                await self.ws.subscribe(self.symbols)
-                logger.info("Subscribe thành công! Bắt đầu nhận data...")
-                reconnect_count = 0
-                self.message_count = 0
-                self.last_message_time = time.time()
-                self.last_log_time = time.time()
-                
-                async def message_handler(msg):
-                    self.last_message_time = time.time()
-                    self._send(msg)
-                
-                async def check_timeout():
-                    while True:
-                        await asyncio.sleep(10)
-                        if is_trading_hours():
-                            if time.time() - self.last_message_time > MESSAGE_TIMEOUT:
-                                logger.error(f"Trong giờ giao dịch nhưng không nhận message trong {MESSAGE_TIMEOUT}s. Force reconnect...")
-                                raise ConnectionClosedError(None, None, "Message timeout")
-                
-                try:
-                    timeout_task = asyncio.create_task(check_timeout())
-                    listen_task = asyncio.create_task(self.ws.listen(message_handler))
-                    done, pending = await asyncio.wait(
-                        [timeout_task, listen_task],
-                        return_when=asyncio.FIRST_COMPLETED
-                    )
-                    for task in pending:
-                        task.cancel()
-                    for task in done:
-                        if task.exception():
-                            raise task.exception()
-                except (ConnectionClosedError, Exception) as e:
-                    logger.error(f"Lỗi trong quá trình listen: {e}")
-                    raise
-            except ConnectionClosedError as e:
-                reconnect_count += 1
-                logger.error(f"Lỗi kết nối WebSocket: {e} (lần thử {reconnect_count}/{MAX_RECONNECT_ATTEMPTS})")
-                if reconnect_count >= MAX_RECONNECT_ATTEMPTS:
-                    logger.error(f"Đã vượt quá số lần reconnect. Thoát để Docker restart container...")
-                    sys.exit(1)
-                logger.info(f"Đợi {RECONNECT_DELAY} giây trước khi reconnect...")
-                await asyncio.sleep(RECONNECT_DELAY)
+                if check_websocket_open(self.ws):
+                    with open(HEALTHCHECK_FILE, "w") as f:
+                        f.write(str(time.time()))
+                else:
+                    # Socket không mở -> không cập nhật mtime để Docker phát hiện Unhealthy
+                    logger.debug("[Healthcheck] Socket chưa OPEN, bỏ qua cập nhật heartbeat.")
             except Exception as e:
-                logger.error(f"Lỗi không xác định: {e}. Thoát để Docker restart...")
-                import traceback
-                logger.error(traceback.format_exc())
-                sys.exit(1)
+                logger.debug(f"[Healthcheck] Lỗi ghi heartbeat: {e}")
+            await asyncio.sleep(10)
+
+    async def run(self):
+        watchdog_task = asyncio.create_task(self._healthcheck_watchdog())
+        min_delay = 3
+        max_delay = 60
+        retry_delay = min_delay
+        consecutive_failures = 0
+        max_consecutive_failures = 15
+
+        try:
+            while not self.shutdown_event.is_set():
+                try:
+                    logger.info(f"Đang kết nối WebSocket cho {len(self.symbols)} symbols...")
+                    self.ws = yf.AsyncWebSocket(verbose=False)
+                    await self.ws.subscribe(self.symbols)
+                    logger.info("Subscribe thành công")
+
+                    # Reset thời gian chờ và bộ đếm lỗi khi kết nối thành công
+                    retry_delay = min_delay
+                    consecutive_failures = 0
+
+                    async def message_handler(msg):
+                        await asyncio.to_thread(self._send, msg)
+
+                    await self.ws.listen(message_handler)
+
+                except Exception as e:
+                    consecutive_failures += 1
+                    logger.warning(f"WebSocket mất kết nối: {e}. Thử lại sau {retry_delay} giây (Lần lỗi: {consecutive_failures})...")
+                    try:
+                        await self.ws.close()
+                    except Exception:
+                        pass
+
+                    # Crash-on-Failure: Nếu lỗi liên tục quá 15 lần mà không hồi phục -> Thoát để Docker/Autoheal tái tạo container sạch sẽ
+                    if consecutive_failures >= max_consecutive_failures:
+                        logger.critical(f"Đã thử kết nối {consecutive_failures} lần thất bại liên tiếp. Thoát để restart container...")
+                        sys.exit(1)
+
+                    await asyncio.sleep(retry_delay)
+                    retry_delay = min(max_delay, retry_delay * 2)
+
+        finally:
+            watchdog_task.cancel()
+            if os.path.exists(HEALTHCHECK_FILE):
+                try:
+                    os.remove(HEALTHCHECK_FILE)
+                except Exception:
+                    pass
 
         
 async def main():

@@ -30,7 +30,7 @@ export function DisplaySettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Monitor className="h-5 w-5" />
           Hiển thị
         </CardTitle>

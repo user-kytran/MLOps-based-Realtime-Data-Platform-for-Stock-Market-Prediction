@@ -40,31 +40,31 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Brain className="h-5 w-5 text-purple-600" />
           AI Prediction for {symbol}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className={`text-center p-4 rounded-lg border-2 ${getTrendColor(nextDayPrediction.trend)}`}>
-            <div className="text-sm font-semibold mb-2">Predicted Trend</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className={`text-center p-3 rounded-lg border-2 ${getTrendColor(nextDayPrediction.trend)}`}>
+            <div className="text-xs font-semibold mb-2">Predicted Trend</div>
             <div className="flex items-center justify-center gap-2 mb-1">
               {getTrendIcon(nextDayPrediction.trend)}
-              <span className="text-2xl font-bold">{getTrendLabel(nextDayPrediction.trend)}</span>
+              <span className="text-xl font-bold">{getTrendLabel(nextDayPrediction.trend)}</span>
             </div>
             <div className="text-xs text-gray-600">Date {nextDayPrediction.date || "—"}</div>
           </div>
 
-          <div className="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-            <div className="text-sm text-blue-700 font-semibold mb-2">Accuracy</div>
-            <div className="text-2xl font-bold text-blue-900 mb-2">{accuracy.toFixed(1)}%</div>
+          <div className="text-center p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <div className="text-xs text-blue-700 font-semibold mb-2">Accuracy</div>
+            <div className="text-xl font-bold text-blue-900 mb-2">{accuracy.toFixed(1)}%</div>
             <Progress value={accuracy} className="h-2" />
           </div>
 
-          <div className="text-center p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-            <div className="text-sm text-purple-700 font-semibold mb-2">Correct Predictions</div>
-            <div className="text-2xl font-bold text-purple-900">{correctCount}/{totalCount}</div>
+          <div className="text-center p-3 bg-purple-50 rounded-lg border-2 border-purple-200">
+            <div className="text-xs text-purple-700 font-semibold mb-2">Correct Predictions</div>
+            <div className="text-xl font-bold text-purple-900">{correctCount}/{totalCount}</div>
             <div className="text-xs text-purple-600 mt-1">Total Predictions</div>
           </div>
         </div>

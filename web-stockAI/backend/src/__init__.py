@@ -1,9 +1,17 @@
+import logging
+import os
+
 from fastapi import FastAPI
 from .api.router import router
 from .db import db_instance
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
-# from .api.routers.stocks import kafka_consumer_task
+
+log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = getattr(logging, log_level_name, logging.INFO)
+logging.basicConfig(
+    level=log_level,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 app = FastAPI()
 
@@ -18,13 +26,48 @@ app.add_middleware(
 
 app.include_router(router, prefix="")
 
-# Quản lý lifecycle
+
+@app.get("/health", tags=["health"])
+@app.get("/api/health", tags=["health"])
+async def health_check():
+    import time
+    from fastapi.responses import JSONResponse
+
+    session = db_instance.get_session()
+    scylla_healthy = False
+    details = {}
+
+    if session is not None and not getattr(session, "is_shutdown", False):
+        try:
+            session.execute("SELECT now() FROM system.local;")
+            scylla_healthy = True
+            details["scylladb"] = "connected"
+        except Exception as e:
+            details["scylladb"] = f"error: {str(e)}"
+    else:
+        details["scylladb"] = "disconnected"
+
+    status_str = "healthy" if scylla_healthy else "unhealthy"
+    status_code = 200 if scylla_healthy else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": status_str,
+            "timestamp": time.time(),
+            "details": details,
+        },
+    )
+
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
+    from .api.routers.stocks import manager
     db_instance.connect()
-    # asyncio.create_task(kafka_consumer_task("cdc_stock_latest_prices.stock_data.stock_latest_prices"))
+    manager.start_background_cdc()
 
 
 @app.on_event("shutdown")
-def shutdown_event():
+async def shutdown_event():
+    from .api.routers.stocks import manager
+    await manager.shutdown_background_cdc()
     db_instance.close()

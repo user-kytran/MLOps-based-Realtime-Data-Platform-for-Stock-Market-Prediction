@@ -1,0 +1,11 @@
+[Unit]
+Description=Ensure the stock Flink job is submitted
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/obito/Desktop/main/main/flink-service
+Environment=LOCK_FILE=/run/flink-stock-job-watchdog.lock
+ExecStart=/home/obito/Desktop/main/main/flink-service/ensure-flink-job.sh

@@ -1,10 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, PieLabelRenderProps } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 import { useEffect, useState } from "react"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 import { CheckCircle2, XCircle, Target } from "lucide-react"
+import { AnalysisPanel, axisTick, chartColors, MetricTile, sectorPalette, tooltipStyle } from "./analysis-ui"
 
 interface AccuracyData {
   symbol: string
@@ -14,9 +15,9 @@ interface AccuracyData {
 }
 
 const COLORS = {
-  correct: '#10b981',
-  incorrect: '#ef4444',
-  chart: ['#0d4d4d', '#116666', '#157a7a', '#1a8f8f', '#1fa3a3', '#24b8b8', '#29cccc', '#47d9d9', '#66e0e0', '#85e6e6', '#a3ecec', '#c2f2f2', '#e0f9f9', '#f0fcfc', '#f7fefe']
+  correct: chartColors.positive,
+  incorrect: chartColors.negative,
+  chart: sectorPalette
 }
 
 
@@ -27,12 +28,9 @@ export function PredictionAccuracy() {
   useEffect(() => {
     const fetchAccuracy = async () => {
       try {
-        const res = await fetch(`${API_URL}/stocks/stock_predictions_accuracy`)
-        if (!res.ok) throw new Error('Failed to fetch accuracy data')
-        const data: AccuracyData[] = await res.json()
+        const data: AccuracyData[] = await cachedFetch(`${API_URL}/stocks/stock_predictions_accuracy`, 10 * 60 * 1000)
         setAccuracyData(data)
-      } catch (error) {
-      } finally {
+      } catch {} finally {
         setLoading(false)
       }
     }
@@ -69,106 +67,110 @@ export function PredictionAccuracy() {
 
   if (loading) {
     return (
-      <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-gray-900 text-xl">Prediction Accuracy</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <AnalysisPanel title="Prediction Accuracy" eyebrow="Model quality">
           <div className="flex items-center justify-center h-[400px]">
-            <p className="text-gray-500">Loading...</p>
+            <p className="text-sm font-semibold text-slate-500">Loading...</p>
           </div>
-        </CardContent>
-      </Card>
+      </AnalysisPanel>
     )
   }
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-gray-900 text-xl">Prediction Accuracy vs Reality</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-          <div className="lg:col-span-3 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(props: PieLabelRenderProps) => {
-                  const percent = Number(props.percent) || 0
-                  return `${(percent * 100).toFixed(1)}%`
-                }}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  style={{ fontSize: '14px', fontWeight: 'bold' }}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db', color: '#374151', fontSize: '13px', fontWeight: 'bold' }}
-                  formatter={(value: number) => {
-                    const percentage = ((value / totalStats.total) * 100).toFixed(1)
-                    return [`${value} predictions (${percentage}%)`, '']
-                  }}
-                />
-                <Legend 
-                  verticalAlign="bottom"
-                  align="center"
-                  iconSize={12}
-                  wrapperStyle={{ fontSize: '13px', fontWeight: 'bold', paddingTop: '10px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="lg:col-span-2 flex flex-col justify-center gap-4">
-            <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-200 text-center">
-              <Target className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-xs text-gray-600 font-semibold">Accuracy</p>
-              <p className="text-3xl font-bold text-purple-600">{overallAccuracy}%</p>
+    <AnalysisPanel title="Prediction Accuracy vs Reality" eyebrow={`${totalStats.total} resolved calls`}>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div className="flex flex-col items-center justify-center gap-3 lg:col-span-3">
+            <div className="aspect-square w-full max-w-[240px] min-w-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="56%"
+                    outerRadius="78%"
+                    fill="#8884d8"
+                    dataKey="value"
+                    isAnimationActive={false}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <text
+                    x="50%"
+                    y="47%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-500 text-[11px] font-bold uppercase tracking-[0.08em]"
+                  >
+                    Accuracy
+                  </text>
+                  <text
+                    x="50%"
+                    y="58%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-teal-700 text-2xl font-bold"
+                  >
+                    {overallAccuracy}%
+                  </text>
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value: number) => {
+                      const percentage = ((value / totalStats.total) * 100).toFixed(1)
+                      return [`${value} predictions (${percentage}%)`, '']
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-
-            <div className="p-4 bg-green-50 rounded-lg text-center">
-              <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-xs text-gray-600 font-semibold">Correct</p>
-              <p className="text-3xl font-bold text-green-600">{totalStats.correct}</p>
-            </div>
-
-            <div className="p-4 bg-red-50 rounded-lg text-center">
-              <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
-              <p className="text-xs text-gray-600 font-semibold">Incorrect</p>
-              <p className="text-3xl font-bold text-red-600">{totalStats.total - totalStats.correct}</p>
+            <div className="flex flex-wrap justify-center gap-3 text-xs font-bold">
+              <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                <span className="h-2.5 w-2.5 rounded-sm bg-emerald-600" />
+                Correct
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-red-700">
+                <span className="h-2.5 w-2.5 rounded-sm bg-red-600" />
+                Incorrect
+              </span>
             </div>
           </div>
 
-          <div className="lg:col-span-5">
-            <h3 className="text-lg font-bold text-gray-700 mb-3">Top 10 Most Accurate Predictions</h3>
-            <ResponsiveContainer width="100%" height={380}>
-              <BarChart data={top10Accurate} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" domain={[0, 100]} />
-                <YAxis dataKey="symbol" type="category" width={50} style={{ fontSize: '11px', fontWeight: 'bold' }} />
+          <div className="grid content-center gap-2 sm:grid-cols-3 lg:col-span-3 lg:grid-cols-1">
+            <MetricTile label="Accuracy" value={`${overallAccuracy}%`} tone="accent" icon={<Target className="h-4 w-4" />} />
+            <MetricTile label="Correct" value={totalStats.correct} tone="positive" icon={<CheckCircle2 className="h-4 w-4" />} />
+            <MetricTile label="Incorrect" value={totalStats.total - totalStats.correct} tone="negative" icon={<XCircle className="h-4 w-4" />} />
+          </div>
+
+          <div className="lg:col-span-6">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-[0.08em] text-slate-500">
+              Top 10 Most Accurate Predictions
+            </h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={top10Accurate} layout="vertical" margin={{ top: 4, right: 14, bottom: 4, left: 4 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke={chartColors.grid} horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={axisTick}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis dataKey="symbol" type="category" width={52} tick={axisTick} tickLine={false} axisLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db', fontSize: '12px', fontWeight: 'bold' }}
+                  contentStyle={tooltipStyle}
                   formatter={(value: number) => [`${value.toFixed(1)}%`, 'Accuracy']}
                 />
-                <Bar dataKey="accuracy" fill={COLORS.chart[0]} radius={[0, 4, 4, 0]}>
+                <Bar dataKey="accuracy" fill={COLORS.chart[0]} radius={[0, 6, 6, 0]} barSize={20}>
                   {top10Accurate.map((item, index) => (
-                    <Cell key={index} fill={COLORS.chart[index]} />
+                    <Cell key={index} fill={COLORS.chart[index % COLORS.chart.length]} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </AnalysisPanel>
   )
 }
-

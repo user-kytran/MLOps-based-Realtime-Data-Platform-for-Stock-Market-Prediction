@@ -1,19 +1,19 @@
-# Dùng Node chính thức
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package.json trước để cache install
 COPY package*.json ./
-
-# Cài dependencies
 RUN npm install
 
-# Copy toàn bộ code
 COPY . .
 
-# Expose port Next.js
-EXPOSE 3005
+ARG NEXT_PUBLIC_API_URL=https://api.kytran.io.vn
+ARG NEXT_PUBLIC_WS_URL=https://api.kytran.io.vn
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 
-# Run dev (dev mode) hoặc build + start (production)
-CMD ["npm", "run", "dev"]
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

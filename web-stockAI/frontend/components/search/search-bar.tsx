@@ -10,9 +10,10 @@ import { isValidStockSymbol } from "@/constants/stocks"
 type SearchBarProps = {
   fullWidth?: boolean
   noMargin?: boolean
+  compact?: boolean
 }
 
-export function SearchBar({ fullWidth = false, noMargin = false }: SearchBarProps) {
+export function SearchBar({ fullWidth = false, noMargin = false, compact = false }: SearchBarProps) {
   const [query, setQuery] = useState("")
   const [symbols, setSymbols] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string>("")
@@ -65,14 +66,14 @@ export function SearchBar({ fullWidth = false, noMargin = false }: SearchBarProp
   return (
     <div className={fullWidth ? "w-full" : "max-w-2xl mx-auto"}>
       <div className={noMargin ? "relative" : "relative mb-2"}>
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-black" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 transform -translate-y-1/2 text-black" />
         <Input
           type="text"
           placeholder="Search by stock symbol or company name..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyPress}
-          className={`pl-12 pr-20 py-6 text-lg rounded-xl border-2 ${error ? "border-red-500" : "border-gray-600 hover:border-gray-500"} text-black bg-white`}
+          className={`${compact ? "h-8 pl-9 pr-3 py-1.5 text-sm rounded-lg" : "h-10 pl-9 pr-3 py-2 text-sm rounded-lg"} border-2 ${error ? "border-red-500" : "border-gray-600 hover:border-gray-500"} text-black bg-white`}
         />
       </div>
       {error && (

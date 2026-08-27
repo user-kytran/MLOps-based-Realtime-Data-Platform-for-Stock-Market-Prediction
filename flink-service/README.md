@@ -48,6 +48,25 @@ docker exec -it jobmanager flink run \
   /opt/flink/usrlib/target/flink-consumer-1.0.jar
 ```
 
+### Tự submit lại job khi Flink bị mất job
+Script watchdog kiểm tra Flink REST API. Nếu không thấy job `Stock Processing Pipeline - Java`
+đang active, script sẽ bật lại compose stack và submit job ở chế độ detached:
+
+```bash
+./ensure-flink-job.sh
+```
+
+Để chạy tự động sau khi máy reboot hoặc khi job bị kill, cài systemd timer:
+
+```bash
+sudo cp systemd/flink-stock-job-watchdog.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now flink-stock-job-watchdog.timer
+systemctl list-timers flink-stock-job-watchdog.timer
+```
+
+Timer chạy mỗi phút và script có lock để tránh submit trùng.
+
 ## Cấu hình
 
 ### Flink
@@ -72,4 +91,3 @@ docker exec -it jobmanager flink run \
 - Chỉ xử lý dữ liệu market_hours = 1 cho tổng hợp
 - Làm tròn giá đến 2 chữ số thập phân
 - Network: `financi-network` (external)
-

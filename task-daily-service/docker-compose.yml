@@ -54,11 +54,14 @@ services:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
-    user: "50000:0"
+    user: "0:0"
     entrypoint: >
       bash -c "
+        mkdir -p /opt/airflow/logs /opt/airflow/data /opt/airflow/dags &&
+        chown -R 50000:0 /opt/airflow/logs /opt/airflow/data /opt/airflow/dags &&
         airflow db migrate &&
-        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true &&
+        chown -R 50000:0 /opt/airflow/logs /opt/airflow/data /opt/airflow/dags
       "
     networks:
       - financi-network
@@ -69,6 +72,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
@@ -106,6 +111,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow

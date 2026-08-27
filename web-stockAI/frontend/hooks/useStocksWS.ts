@@ -1,24 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useStockWSContext } from "@/lib/stockWSContext";
 
 export function useStocksWS() {
     const [data, setData] = useState<{ price: number; volume: number } | null>(null);
-    const ws = useRef<WebSocket | null>(null);
+    const { subscribe, unsubscribe } = useStockWSContext();
 
     useEffect(() => {
-        ws.current = new WebSocket("ws://localhost:8005/ws/stocks");
-        ws.current.onmessage = (event) => {
-        try {
-            const msg = JSON.parse(event.data);
-            setData(msg);
-        } catch {}
-        };
-        ws.current.onerror = () => {
-            setData(null);
-        };
-        return () => {
-            ws.current?.close();
-        };
+        subscribe("useStocksWS", (msg) => {
+            if (msg.price !== undefined) setData({ price: msg.price, volume: msg.day_volume ?? 0 });
+        });
+        return () => unsubscribe("useStocksWS");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return data;
+}
+
+export function usePriceVolumeWS() {
+    return useStocksWS();
 }

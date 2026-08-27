@@ -31,7 +31,7 @@ export function SecuritySettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Shield className="h-5 w-5" />
           Bảo mật
         </CardTitle>
@@ -40,7 +40,7 @@ export function SecuritySettings() {
       <CardContent className="space-y-6">
         {/* Change Password */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Key className="h-4 w-4" />
             Đổi mật khẩu
           </h3>
@@ -117,7 +117,7 @@ export function SecuritySettings() {
 
         {/* Two-Factor Authentication */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Smartphone className="h-4 w-4" />
             Xác thực hai yếu tố (2FA)
           </h3>
@@ -145,7 +145,7 @@ export function SecuritySettings() {
 
         {/* Security Alerts */}
         <div>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             Cảnh báo bảo mật
           </h3>
@@ -162,7 +162,7 @@ export function SecuritySettings() {
 
         {/* Active Sessions */}
         <div>
-          <h3 className="text-lg font-semibold mb-4">Phiên đăng nhập</h3>
+          <h3 className="text-sm font-semibold mb-3">Phiên đăng nhập</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>

@@ -1,8 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
+import { AnalysisPanel, axisTick, chartColors, tooltipStyle } from "./analysis-ui"
 
 export function TopVolumeChart() {
   const stocks = useStocksRealtimeWS()
@@ -14,47 +14,38 @@ export function TopVolumeChart() {
     .map(s => ({
       symbol: s.symbol,
       volume: s.match.volume / 1000000,
-      fill: s.match.change > 0 ? '#10b981' : s.match.change < 0 ? '#ef4444' : '#6b7280'
+      fill: s.match.change > 0 ? chartColors.positive : s.match.change < 0 ? chartColors.negative : chartColors.neutral
     }))
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-gray-900 text-xl">Top 10 Volume</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={topVolume}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
+    <AnalysisPanel title="Top 10 Volume" eyebrow="Liquidity leaders">
+        <ResponsiveContainer width="100%" height={360}>
+          <BarChart data={topVolume} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+            <CartesianGrid strokeDasharray="4 4" stroke={chartColors.grid} vertical={false} />
             <XAxis 
               dataKey="symbol" 
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
             />
             <YAxis 
-              stroke="#6b7280"
-              tick={{ fill: '#6b7280' }}
-              label={{ value: 'Million Shares', angle: -90, position: 'insideLeft', fill: '#6b7280' }}
+              stroke={chartColors.axis}
+              tick={axisTick}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}M`}
             />
             <Tooltip  
-              cursor={{ fill:'rgba(6, 182, 212, 0.1)' }}
-              contentStyle={{ 
-                backgroundColor: '#ffffff', 
-                border: '1px solid #d1d5db', 
-                color: '#374151',
-                fontSize: '12px',
-                padding: '8px',
-                borderRadius: '6px'
-              }}
-              labelStyle={{ color: '#374151', fontWeight: 'bold', fontSize: '12px' }}
-              itemStyle={{ color: '#374151', fontSize: '11px' }}
+              cursor={{ fill:'rgba(15, 118, 110, 0.08)' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: '#0f172a', fontWeight: 'bold', fontSize: '12px' }}
+              itemStyle={{ color: '#334155', fontSize: '11px' }}
               formatter={(value: number) => [`${value.toFixed(2)}M`, 'Volume']}
             />
-            <Bar dataKey="volume" radius={[8, 8, 8, 8]} />
+            <Bar dataKey="volume" radius={[6, 6, 0, 0]} barSize={28} />
           </BarChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+    </AnalysisPanel>
   )
 }
-

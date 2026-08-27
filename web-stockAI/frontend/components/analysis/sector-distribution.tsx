@@ -1,8 +1,8 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
+import { AnalysisPanel, sectorPalette, tooltipStyle } from "./analysis-ui"
 
 const SECTOR_SYMBOLS: Record<string, string[]> = {
   Consumer_Cyclical: ['AAA','ADS','CSM','CTF','DAH','DPR','DRC','DSN','EVE','FRT','GDT','GIL','GVR','HAX','HTG','HTN','HVH','KMR','MCP','MSH','MWG','PNJ','SAV','SFC','ST8','STK','TCM','TCT','TDP','TMT','TTF'],
@@ -18,7 +18,7 @@ const SECTOR_SYMBOLS: Record<string, string[]> = {
   Energy: ['GAS','PET','PGC','PLX','PVD'],
 };
 
-const COLORS = ['#3b82f6', '#1d4ed8', '#2563eb', '#1e40af', '#1e3a8a', '#10b981', '#059669', '#047857', '#f59e0b', '#d97706', '#b45309', '#92400e', '#ef4444', '#dc2626', '#b91c1c', '#991b1b']
+const COLORS = sectorPalette
 
 export function SectorDistribution() {
   const stocks = useStocksRealtimeWS()
@@ -30,51 +30,53 @@ export function SectorDistribution() {
   }).filter(d => d.value > 0)
 
   return (
-    <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-gray-900 text-xl"> Sector Distribution</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
+    <AnalysisPanel title="Sector Distribution" eyebrow="Volume mix" contentClassName="space-y-3">
+        <ResponsiveContainer width="100%" height={260}>
           <PieChart>
             <Pie
               data={sectorData}
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ percent }) => `${(percent as number * 100).toFixed(1)}%`}
-              outerRadius={120}
+              innerRadius={58}
+              outerRadius={98}
               fill="#8884d8"
               dataKey="value"
-              style={{ fontSize: '11px', fontWeight: 'bold' }}
             >
               {sectorData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip 
-              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #d1d5db', color: '#374151', fontSize: '12px', fontWeight: 'bold' }}
-              labelStyle={{ color: '#374151' }}
-              itemStyle={{ color: '#374151' }}
+              contentStyle={tooltipStyle}
+              labelStyle={{ color: '#0f172a' }}
+              itemStyle={{ color: '#334155' }}
               formatter={(value: number, name: string) => {
                 const total = sectorData.reduce((sum, item) => sum + item.value, 0)
                 const percentage = ((value / total) * 100).toFixed(1)
                 return [`${(value / 1000000).toFixed(2)}M (${percentage}%)`, name.replace(/_/g, ' ')]
               }}
             />
-            <Legend   
-              layout="vertical"
-              align="right"
-              verticalAlign="top"
-              iconSize={10}
-              wrapperStyle={{ fontSize: '10px', paddingLeft: '20px', fontWeight: 'bold' }}
-              style={{ fontSize: '10px', fontWeight: 'bold' }}
-              formatter={(value: string) => value.replace(/_/g, ' ')}
-            />
           </PieChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          {sectorData.map((entry, index) => {
+            const total = sectorData.reduce((sum, item) => sum + item.value, 0)
+            const percent = total ? (entry.value / total) * 100 : 0
+            return (
+              <div key={entry.name} className="flex min-w-0 items-center justify-between gap-2 rounded-md bg-slate-50 px-2 py-1.5 text-[11px]">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  />
+                  <span className="truncate font-semibold text-slate-700">{entry.name.replace(/_/g, ' ')}</span>
+                </div>
+                <span className="shrink-0 font-mono font-bold text-slate-600">{percent.toFixed(1)}%</span>
+              </div>
+            )
+          })}
+        </div>
+    </AnalysisPanel>
   )
 }
-

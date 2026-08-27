@@ -44,7 +44,7 @@ export function FinancialData({ symbol }: FinancialDataProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-bold">
           <Calculator className="h-5 w-5 text-primary" />
           Thông tin tài chính
         </CardTitle>

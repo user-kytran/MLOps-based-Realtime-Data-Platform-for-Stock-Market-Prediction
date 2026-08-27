@@ -46,7 +46,7 @@ export function StockWidget({
         <CardContent className="py-2 px-6">
           <div className="flex justify-between items-start mb-3">
             <div>
-              <h2 className="font-extrabold text-lg text-black text-[20px]">{symbol}</h2>
+              <h2 className="font-extrabold text-base text-black">{symbol}</h2>
             </div>
           </div>
           

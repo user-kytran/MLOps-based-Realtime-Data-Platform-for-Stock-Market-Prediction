@@ -123,9 +123,9 @@ export function NewsList({ filters }: NewsListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="text-gray-600 text-lg">Loading...</div>
+      <div className="space-y-3">
+        <div className="py-6 text-center">
+          <div className="text-gray-600 text-sm">Loading...</div>
         </div>
       </div>
     )
@@ -133,9 +133,9 @@ export function NewsList({ filters }: NewsListProps) {
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="text-red-600 text-lg">Lỗi: {error}</div>
+      <div className="space-y-3">
+        <div className="py-6 text-center">
+          <div className="text-red-600 text-sm">Lỗi: {error}</div>
         </div>
       </div>
     )
@@ -143,18 +143,18 @@ export function NewsList({ filters }: NewsListProps) {
 
   if (news.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="text-gray-600 text-lg">No news found</div>
+      <div className="space-y-3">
+        <div className="py-6 text-center">
+          <div className="text-gray-600 text-sm">No news found</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Total count */}
-      <div className="flex items-center justify-between text-sm text-gray-600">
+      <div className="flex items-center justify-between text-xs text-gray-600">
         <span>Found {news.length} news</span>
         <span>Page {currentPage} / {totalPages}</span>
       </div>
@@ -163,41 +163,41 @@ export function NewsList({ filters }: NewsListProps) {
       {currentNews.map((item) => {
         const sector = getSectorByCode(item.stock_code)
         return (
-          <Card key={item.article_id} className="overflow-hidden hover:shadow-lg transition-all bg-white/95 backdrop-blur-sm border-gray-200 hover:border-gray-300 shadow-sm">
-            <CardContent className="px-10 py-4 h-20 flex flex-col justify-center">
+          <Card key={item.article_id} className="overflow-hidden border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm transition-all hover:border-gray-300 hover:shadow-md">
+            <CardContent className="flex min-h-[74px] flex-col justify-center px-3 py-2.5 sm:px-4">
               <div className="space-y-1.5">
                 {/* Header: Stock Code + Sector */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <a href={`/stock/${item.stock_code}`} className="cursor-pointer hover:opacity-80 transition-opacity">
-                    <Badge variant="outline" className="text-xs h-5 px-2 bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold">
+                    <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-semibold text-cyan-800 border-cyan-300">
                       {item.stock_code}
                     </Badge>
                   </a>
-                  <Badge variant="outline" className="text-xs h-5 px-2 bg-gray-100 text-gray-700 border-gray-300">
+                  <Badge variant="outline" className="h-5 bg-gray-100 px-1.5 text-[11px] text-gray-700 border-gray-300">
                     {sector}
                   </Badge>
                 </div>
-                
+
                 {/* Title */}
-                <h2 
-                  className="px-5 my-[20px] font-extrabold text-gray-900 text-[17px] line-clamp-1 hover:text-cyan-600 transition-colors cursor-pointer"
+                <h2
+                  className="line-clamp-2 cursor-pointer text-sm font-bold leading-snug text-gray-900 transition-colors hover:text-cyan-600"
                   onClick={() => window.open(item.link, '_blank')}
                 >
                   {item.title}
                 </h2>
-                  
+
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-0">
-                  <span className="text-xs text-gray-500">{formatDate(item.date)}</span>
+                  <span className="text-[11px] text-gray-500">{formatDate(item.date)}</span>
                   <div className="flex items-center gap-1.5">
                     {item.is_pdf && item.pdf_link && (
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
-                        className="text-purple-600 hover:text-purple-700 h-6 px-2 text-[12px]"
+                        className="h-6 px-1.5 text-[11px] text-purple-600 hover:text-purple-700"
                         onClick={() => window.open(item.pdf_link, '_blank')}
                       >
-                        <FileText className="h-4 w-4 mr-1" />
+                        <FileText className="mr-1 h-3.5 w-3.5" />
                         PDF
                       </Button>
                     )}
@@ -211,18 +211,18 @@ export function NewsList({ filters }: NewsListProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex items-center justify-center gap-1.5 pt-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="h-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
             Trước
           </Button>
-          
+
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
               // Show first, last, current, and adjacent pages
@@ -237,9 +237,9 @@ export function NewsList({ filters }: NewsListProps) {
                     variant={page === currentPage ? "default" : "outline"}
                     size="sm"
                     onClick={() => setCurrentPage(page)}
-                    className={page === currentPage 
-                      ? "bg-cyan-600 text-white hover:bg-cyan-700"
-                      : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                    className={page === currentPage
+                      ? "h-7 min-w-7 bg-cyan-600 px-2 text-xs text-white hover:bg-cyan-700"
+                      : "h-7 min-w-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50"
                     }
                   >
                     {page}
@@ -260,10 +260,10 @@ export function NewsList({ filters }: NewsListProps) {
             size="sm"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="h-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           >
             Sau
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>
       )}

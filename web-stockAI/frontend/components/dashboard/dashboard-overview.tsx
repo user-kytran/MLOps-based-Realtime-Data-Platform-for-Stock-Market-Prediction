@@ -37,15 +37,15 @@ const portfolioMetrics = [
 
 export function DashboardOverview() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Portfolio Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {portfolioMetrics.map((metric) => {
           const Icon = metric.icon
           return (
             <Card key={metric.title}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
                   <Icon className="h-5 w-5 text-muted-foreground" />
                   {metric.change !== 0 && (
                     <Badge
@@ -63,13 +63,13 @@ export function DashboardOverview() {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">{metric.title}</p>
-                  <p className="text-2xl font-bold font-mono">
+                  <p className="text-xs text-muted-foreground">{metric.title}</p>
+                  <p className="text-lg font-bold font-mono">
                     {metric.title.includes("Tổng") || metric.title.includes("Lợi nhuận")
                       ? `${Number.parseInt(metric.value).toLocaleString("vi-VN")} VND`
                       : metric.value}
                   </p>
-                  <p className="text-sm text-muted-foreground">{metric.changeValue}</p>
+                  <p className="text-xs text-muted-foreground">{metric.changeValue}</p>
                 </div>
               </CardContent>
             </Card>
@@ -80,24 +80,24 @@ export function DashboardOverview() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Hành động nhanh</CardTitle>
+          <CardTitle className="text-sm font-bold">Hành động nhanh</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
-              <TrendingUp className="h-6 w-6 text-primary mx-auto mb-2" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
+              <TrendingUp className="h-5 w-5 text-primary mx-auto mb-2" />
               <div className="font-medium text-sm">Thêm cổ phiếu</div>
             </div>
-            <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
-              <BarChart3 className="h-6 w-6 text-primary mx-auto mb-2" />
+            <div className="p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
+              <BarChart3 className="h-5 w-5 text-primary mx-auto mb-2" />
               <div className="font-medium text-sm">Phân tích danh mục</div>
             </div>
-            <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
-              <AlertCircle className="h-6 w-6 text-primary mx-auto mb-2" />
+            <div className="p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
+              <AlertCircle className="h-5 w-5 text-primary mx-auto mb-2" />
               <div className="font-medium text-sm">Cài đặt cảnh báo</div>
             </div>
-            <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
-              <Eye className="h-6 w-6 text-primary mx-auto mb-2" />
+            <div className="p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer text-center">
+              <Eye className="h-5 w-5 text-primary mx-auto mb-2" />
               <div className="font-medium text-sm">Xem báo cáo</div>
             </div>
           </div>

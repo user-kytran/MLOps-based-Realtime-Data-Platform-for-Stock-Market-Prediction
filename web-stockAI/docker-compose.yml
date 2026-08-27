@@ -9,31 +9,46 @@ services:
       - ../scylla-cdc-printer:/cdc-printer:ro
     environment:
       - PYTHONUNBUFFERED=1
+      - REALTIME_TRADING_HOURS_ONLY=${REALTIME_TRADING_HOURS_ONLY:-true}
+      - WS_ALLOWED_ORIGINS=${WS_ALLOWED_ORIGINS:-}
       - CASSANDRA_HOST=["scylla-node1","scylla-node2","scylla-node3"]
       - CASSANDRA_PORT=9042
       - CASSANDRA_KEYSPACE=stock_data
       - SCHEMA_REGISTRY_URL=http://schema-registry:8081
       - CDC_PRINTER_PATH=/cdc-printer/target/release/scylla-cdc-printer
-
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    labels:
+      - autoheal=true
     restart: always
     networks:
-      - financi-network
+      financi-network:
+        ipv4_address: 172.18.0.123
 
   frontend:
     build: ./frontend
     container_name: webstock-frontend
     ports:
       - "3005:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
-      - ./frontend/.env.local:/app/.env.local:ro
     environment:
-      - NEXT_PUBLIC_API_URL=https://api.kytran.io.vn
-      - NEXT_PUBLIC_WS_URL=https://api.kytran.io.vn
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.kytran.io.vn}
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-https://api.kytran.io.vn}
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/health > /dev/null || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - autoheal=true
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
     networks:
       - financi-network
@@ -46,7 +61,6 @@ services:
     networks:
       - financi-network
       
-
 networks:
   financi-network:
     external: true

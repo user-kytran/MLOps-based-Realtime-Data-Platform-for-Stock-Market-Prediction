@@ -1,5 +1,5 @@
 confluent-kafka
-yfinance
+yfinance==1.5.2
 fastavro
 pyflink
 attrs

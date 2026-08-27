@@ -7,7 +7,19 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: false,
+    formats: ['image/webp'],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'recharts'],
+  },
+  async headers() {
+    return [
+      {
+        source: '/manifest.json',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=604800, immutable' }],
+      },
+    ]
   },
 }
 

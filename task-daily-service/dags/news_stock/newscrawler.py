@@ -80,14 +80,19 @@ class NewsCrawler:
 
         def crawl_stock(code):
             print(f"[START] {code}")
+            session = requests.Session()
+            session.headers.update({
+                'Accept': 'text/html, */*;q=0.01',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            })
             p = {**params, 'code': code}
             results = []
             page = 1
             while True:
                 try:
-                    s = BeautifulSoup(self.session.get(
+                    s = BeautifulSoup(session.get(
                         'https://finance.vietstock.vn/View/PagingNewsContent',
-                        params=p, timeout=60
+                        params=p, timeout=30
                     ).text, 'html.parser')
 
                     rows = s.select('table.table-striped tr')
@@ -105,18 +110,46 @@ class NewsCrawler:
                         pdf_link = None
                         is_pdf = False
                         try:
-                            soup = BeautifulSoup(self.session.get(link, timeout=60).text, 'html.parser')
-                            date, content_div = soup.find('span', class_=['datenew','date hidden-xs']).get_text(strip=True), soup.find('div', id='vst_detail')
+                            soup = BeautifulSoup(session.get(link, timeout=30).text, 'html.parser')
+                            
+                            # 1. Trích xuất ngày đăng (Date)
+                            date_span = soup.select_one('span.datenew, span.date.hidden-xs, span.date')
+                            if date_span and date_span.get_text(strip=True):
+                                date = date_span.get_text(strip=True)
+                            if not date:
+                                meta_date = soup.find('meta', {'itemprop': 'datePublished'}) or soup.find('meta', {'property': 'article:published_time'})
+                                if meta_date and meta_date.get('content'):
+                                    date = meta_date['content']
+
+                            # 2. Trích xuất nội dung (Content) và tài liệu đính kèm (PDF)
+                            content_div = soup.find('div', id='vst_detail')
                             if content_div:
                                 table = content_div.find('table')
                                 if table and 'Tài liệu đính kèm:' in table.get_text(strip=True):
-                                    pdf_link = table.find('a')['href']
-                                    is_pdf = True
+                                    a_tag = table.find('a')
+                                    if a_tag and a_tag.has_attr('href'):
+                                        pdf_link = a_tag['href']
+                                        is_pdf = True
                                 else:
-                                    content = ' '.join(p.get_text(" ", strip=True) for p in content_div.find_all('p', class_='pBody'))
+                                    p_list = content_div.find_all('p', class_='pBody')
+                                    if not p_list:
+                                        p_list = content_div.find_all('p')
+                                    content = ' '.join(p.get_text(" ", strip=True) for p in p_list if p.get_text(strip=True))
+                            else:
+                                # Xử lý bài báo dạng Longform / Magazine
+                                longform_div = soup.find('div', class_='longform-content') or soup.find('div', id=lambda x: x and x.startswith('article-'))
+                                if longform_div:
+                                    p_list = longform_div.find_all('p', class_=['pHead', 'pBody'])
+                                    if not p_list:
+                                        p_list = longform_div.find_all('p')
+                                    content = ' '.join(p.get_text(" ", strip=True) for p in p_list if p.get_text(strip=True))
                         except Exception as e:
                             print(f"[CONTENT ERROR] {e}")
+
+                        if content is None and is_pdf == False:
+                            print(f"[UNHANDLED ARTICLE] {link}")
                         results.append({'code': code, 'id': aid, 'title': title, 'link': link, 'date': date, 'is_pdf': is_pdf, 'content': content, 'pdf_link': pdf_link})
+
                     page += 1
                     p['page'] = str(page)
                     time.sleep(0.2)
