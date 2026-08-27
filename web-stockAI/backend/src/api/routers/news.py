@@ -1,6 +1,6 @@
 import select
 from ...db import get_db
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException
 from datetime import datetime, timedelta
 import pandas as pd
 
@@ -64,31 +64,11 @@ def get_sectors(db=Depends(get_db)):
     return sectors
 
 
-# @new_router.get("/news_all")
-# def read_news_all(db=Depends(get_db)):
-#     query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news"
-#     rows = db.execute(query)
-#     sorted_rows = sorted(rows, key=lambda x: x.date, reverse=True)
-#     results = []
-#     for row in sorted_rows:
-#         results.append({
-#             'stock_code': row.stock_code,
-#             'article_id': row.article_id,
-#             'title': row.title,
-#             'date': row.date,
-#             'link': row.link,
-#             'is_pdf': row.is_pdf,
-#             'pdf_link': row.pdf_link,
-#             'content': row.content
-#         })
-#     return results
-
-
 @new_router.get("/news_new")
 def read_news(db=Depends(get_db)):
     now = datetime.now()
     three_days_ago = now - timedelta(days=3)
-    query = f"SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news where date >= %s"
+    query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link FROM stock_news WHERE date >= %s ALLOW FILTERING"
     rows = db.execute(query, (three_days_ago,))
     sorted_rows = sorted(rows, key=lambda x: x.date, reverse=True)
     sorted_rows = sorted_rows[:5]
@@ -101,14 +81,13 @@ def read_news(db=Depends(get_db)):
             'date': row.date,
             'link': row.link,
             'is_pdf': row.is_pdf,
-            'pdf_link': row.pdf_link,
-            'content': row.content
+            'pdf_link': row.pdf_link
         })
     return results
 
 @new_router.get("/news_by_symbol")
 def read_news_by_symbol(symbol: str, db=Depends(get_db)):
-    query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news WHERE stock_code = %s"
+    query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link FROM stock_news WHERE stock_code = %s"
     rows = db.execute(query, (symbol,))
     results = []
     for row in rows:
@@ -119,8 +98,7 @@ def read_news_by_symbol(symbol: str, db=Depends(get_db)):
             'date': row.date,
             'link': row.link,
             'is_pdf': row.is_pdf,
-            'pdf_link': row.pdf_link,
-            'content': row.content
+            'pdf_link': row.pdf_link
         })
     return results
 
@@ -134,7 +112,7 @@ def read_news_time_filtered(
         to_date: str | None = None,
         db=Depends(get_db)
     ):
-    query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news"
+    query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link FROM stock_news"
     conditions = []
     params: list = []
 
@@ -178,9 +156,8 @@ def read_news_time_filtered(
             params.append(last_year)
 
     if search_query:
-        conditions.append("(title LIKE %s OR content LIKE %s)")
-        like = f"%{search_query}%"
-        params.extend([like, like])
+        conditions.append("title LIKE %s")
+        params.append(f"%{search_query}%")
 
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
@@ -210,10 +187,47 @@ def read_news_time_filtered(
             'date': r.date,
             'link': r.link,
             'is_pdf': r.is_pdf,
-            'pdf_link': r.pdf_link,
-            'content': r.content
+            'pdf_link': r.pdf_link
         } for r in sorted_rows
     ]
+
+
+@new_router.get("/news_detail")
+def read_news_detail(
+    stock_code: str,
+    article_id: str,
+    date: str | None = None,
+    db=Depends(get_db)
+):
+    """Lấy chi tiết toàn bộ nội dung bài viết theo stock_code và article_id."""
+    row = None
+    if date:
+        try:
+            dt = datetime.fromisoformat(date.replace('Z', '+00:00')) if 'T' in date else datetime.strptime(date, '%d-%m-%Y %H:%M:%S%z')
+            query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news WHERE stock_code = %s AND date = %s AND article_id = %s"
+            rows = db.execute(query, [stock_code, dt, article_id])
+            row = rows.one() if rows else None
+        except Exception:
+            pass
+
+    if not row:
+        query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news WHERE stock_code = %s AND article_id = %s ALLOW FILTERING"
+        rows = db.execute(query, [stock_code, article_id])
+        row = rows.one() if rows else None
+
+    if not row:
+        raise HTTPException(status_code=404, detail="News article not found")
+
+    return {
+        'stock_code': row.stock_code,
+        'article_id': row.article_id,
+        'title': row.title,
+        'date': row.date,
+        'link': row.link,
+        'is_pdf': row.is_pdf,
+        'pdf_link': row.pdf_link,
+        'content': row.content
+    }
 
 
 # @new_router.get("/news_range_filtered")

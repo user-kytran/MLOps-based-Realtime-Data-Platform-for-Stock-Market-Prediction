@@ -14,7 +14,7 @@ interface NewsItem {
   link: string
   is_pdf: boolean
   pdf_link?: string
-  content: string
+  content?: string
 }
 
 export function MarketNews() {
