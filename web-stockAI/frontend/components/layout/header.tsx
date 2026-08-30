@@ -8,10 +8,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Clock, Play, Square } from "lucide-react"
 
+import { useMarketStatus } from "@/hooks/useMarketStatus"
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
+  const { status: marketStatus } = useMarketStatus()
   const pathname = usePathname()
 
   const isActive = (path: string) => pathname === path
@@ -25,20 +28,6 @@ export function Header() {
 
     return () => clearInterval(timer)
   }, [])
-
-  // Check if market is open (9:00 AM - 3:00 PM, Monday-Friday, Vietnam time)
-  const isMarketOpen = () => {
-    const now = currentTime
-    const day = now.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const hour = now.getHours()
-    const minute = now.getMinutes()
-    const currentMinutes = hour * 60 + minute
-
-    const marketOpenMinutes = 9 * 60 // 9:00 AM
-    const marketCloseMinutes = 15 * 60 // 3:00 PM
-
-    return day >= 1 && day <= 5 && currentMinutes >= marketOpenMinutes && currentMinutes < marketCloseMinutes
-  }
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('vi-VN', {
@@ -145,15 +134,22 @@ export function Header() {
           <div className="hidden lg:flex items-center space-x-4">
             {/* Market Status */}
             <div className="flex items-center space-x-3">
-              {mounted ? (
-                isMarketOpen() ? (
-                  <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full">
+              {mounted && marketStatus ? (
+                marketStatus.is_open ? (
+                  <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
                     <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-bold text-green-800">MỞ</span>
+                    <span className="text-xs font-bold text-green-800">
+                      {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "MỞ"}
+                    </span>
                     <Play className="w-3.5 h-3.5 text-green-700" />
                   </div>
+                ) : marketStatus.status_code === "LUNCH_BREAK" ? (
+                  <div className="flex items-center space-x-2 bg-amber-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
+                    <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
+                    <span className="text-xs font-bold text-amber-800">NGHỈ TRƯA</span>
+                  </div>
                 ) : (
-                  <div className="flex items-center space-x-2 bg-red-100 px-3 py-1.5 rounded-full">
+                  <div className="flex items-center space-x-2 bg-red-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
                     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
                     <span className="text-xs font-bold text-red-800">ĐÓNG</span>
                     <Square className="w-3.5 h-3.5 text-red-700" />
@@ -206,24 +202,31 @@ export function Header() {
             <div className="px-4 py-4 mb-4 mx-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  {mounted ? (
-                    isMarketOpen() ? (
-                      <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full">
+                  {mounted && marketStatus ? (
+                    marketStatus.is_open ? (
+                      <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full" title={marketStatus.label}>
                         <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs font-bold text-green-800">MỞ</span>
-                  <Play className="w-3.5 h-3.5 text-green-700" />
+                        <span className="text-xs font-bold text-green-800">
+                          {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "MỞ"}
+                        </span>
+                        <Play className="w-3.5 h-3.5 text-green-700" />
+                      </div>
+                    ) : marketStatus.status_code === "LUNCH_BREAK" ? (
+                      <div className="flex items-center space-x-2 bg-amber-100 px-3 py-2 rounded-full" title={marketStatus.label}>
+                        <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
+                        <span className="text-xs font-bold text-amber-800">NGHỈ TRƯA</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2 bg-red-100 px-3 py-2 rounded-full">
+                      <div className="flex items-center space-x-2 bg-red-100 px-3 py-2 rounded-full" title={marketStatus.label}>
                         <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                  <span className="text-xs font-bold text-red-800">ĐÓNG</span>
-                  <Square className="w-3.5 h-3.5 text-red-700" />
+                        <span className="text-xs font-bold text-red-800">ĐÓNG</span>
+                        <Square className="w-3.5 h-3.5 text-red-700" />
                       </div>
                     )
                   ) : (
                     <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-full">
                       <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-bold text-gray-700">—</span>
+                      <span className="text-xs font-bold text-gray-700">—</span>
                     </div>
                   )}
                 </div>

@@ -2,7 +2,7 @@ import datetime
 import unittest
 from types import SimpleNamespace
 
-from src.api.routers.stocks import _fetch_daily_summary
+from src.api.routers.stocks import _fetch_daily_summary, get_vietnam_market_status
 
 
 def summary_row(symbol, trade_date, close):
@@ -74,6 +74,48 @@ class FetchDailySummaryTests(unittest.TestCase):
 
         self.assertEqual([row["symbol"] for row in result], ["ACB", "SAB"])
         self.assertEqual(db.queried_dates, [monday, friday])
+
+
+class MarketStatusTests(unittest.TestCase):
+    def test_weekend_status(self):
+        # 2026-08-30 is Sunday
+        dt = datetime.datetime(2026, 8, 30, 10, 0, 0)
+        status = get_vietnam_market_status(dt)
+        self.assertFalse(status["is_open"])
+        self.assertFalse(status["is_trading_day"])
+        self.assertEqual(status["status_code"], "CLOSED_WEEKEND")
+
+    def test_holiday_status(self):
+        # 2026-09-02 is VN National Day
+        dt = datetime.datetime(2026, 9, 2, 10, 0, 0)
+        status = get_vietnam_market_status(dt)
+        self.assertFalse(status["is_open"])
+        self.assertFalse(status["is_trading_day"])
+        self.assertEqual(status["status_code"], "CLOSED_HOLIDAY")
+
+    def test_continuous_trading_morning(self):
+        # 2026-09-03 is Thursday (Trading day), 10:15 AM
+        dt = datetime.datetime(2026, 9, 3, 10, 15, 0)
+        status = get_vietnam_market_status(dt)
+        self.assertTrue(status["is_open"])
+        self.assertTrue(status["is_trading_day"])
+        self.assertEqual(status["status_code"], "CONTINUOUS_MORNING")
+
+    def test_lunch_break(self):
+        # 2026-09-03 is Thursday, 12:00 PM (Lunch break)
+        dt = datetime.datetime(2026, 9, 3, 12, 0, 0)
+        status = get_vietnam_market_status(dt)
+        self.assertFalse(status["is_open"])
+        self.assertTrue(status["is_trading_day"])
+        self.assertEqual(status["status_code"], "LUNCH_BREAK")
+
+    def test_atc_session(self):
+        # 2026-09-03 is Thursday, 14:35 PM (ATC)
+        dt = datetime.datetime(2026, 9, 3, 14, 35, 0)
+        status = get_vietnam_market_status(dt)
+        self.assertTrue(status["is_open"])
+        self.assertTrue(status["is_trading_day"])
+        self.assertEqual(status["status_code"], "ATC")
 
 
 if __name__ == "__main__":

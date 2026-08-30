@@ -7,6 +7,7 @@ import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
 import { useEffect, useRef, useState } from "react"
 import { PredictionCell } from "@/components/market/PredictionCell" 
 import { usePredictions } from "@/hooks/usePredictions"
+import { MarketStatusBadge } from "@/components/market/MarketStatusBadge"
 
 const VN30_LIST = [
   "ACB","BCM","BID","CTG","DGC","FPT","GAS","GVR","HDB","HPG",
@@ -130,32 +131,13 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
     return list;
   })();
 
-  const [isLive, setIsLive] = useState(false);
-
-  useEffect(() => {
-    const checkTradingHours = () => {
-      const now = new Date();
-      const weekday = now.getDay();
-      const hour = now.getHours();
-      setIsLive(weekday >= 1 && weekday <= 5 && hour >= 9 && hour < 15);
-    };
-    checkTradingHours();
-    const interval = setInterval(checkTradingHours, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <Card className="bg-white/95 backdrop-blur-md border-0 shadow-lg rounded-xl overflow-hidden !py-0 !gap-0">
       <CardHeader className="place-items-center bg-white text-cyan-700 !py-1.5 !px-2">
         <CardTitle className="flex w-full items-center justify-center gap-1.5 text-sm font-bold">
           <Icons.TrendingUp className="h-3.5 w-3.5" />
           {mode === "VN30" ? "VN30 STOCKS" : "ALL STOCKS"}
-          {isLive && (
-            <div className="flex items-center gap-1 ml-2">
-              <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-[11px] font-normal">LIVE</span>
-            </div>
-          )}
+          <MarketStatusBadge variant="compact" className="ml-2" />
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">

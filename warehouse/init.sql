@@ -54,7 +54,7 @@ CREATE TABLE fact_predictions (
   prediction_date DATE NOT NULL,
   predicted_price DOUBLE PRECISION NOT NULL,
   decision VARCHAR(50),
-  state JSONB,
+  state TEXT,
   model_version VARCHAR(50),
   confidence_score DOUBLE PRECISION,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

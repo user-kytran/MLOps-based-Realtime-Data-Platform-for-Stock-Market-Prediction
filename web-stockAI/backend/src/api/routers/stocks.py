@@ -40,12 +40,148 @@ cdc_latency = Histogram('cdc_latency_ms', 'CDC end-to-end latency', ['symbol'], 
 cdc_events = Counter('cdc_events_total', 'Total CDC events', ['symbol'])
 cdc_connections = Gauge('cdc_active_connections', 'Active WebSocket connections')
 
-def in_trading_hours():
+def get_vietnam_market_status(target_dt: datetime.datetime = None):
     vn_tz = ZoneInfo("Asia/Ho_Chi_Minh")
-    now = datetime.datetime.now(vn_tz)
-    if now.weekday() >= 5 or now.date() in VN_HOLIDAYS:
-        return False
-    return datetime.time(9, 0) <= now.time() < datetime.time(15, 0)
+    now = target_dt or datetime.datetime.now(vn_tz)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=vn_tz)
+    else:
+        now = now.astimezone(vn_tz)
+
+    today = now.date()
+    current_time = now.time()
+    weekday = now.weekday()  # 0 = Monday, ..., 6 = Sunday
+
+    # Previous trading day
+    prev_d = today - datetime.timedelta(days=1) if current_time < datetime.time(15, 0) or weekday >= 5 or today in VN_HOLIDAYS else today
+    while prev_d.weekday() >= 5 or prev_d in VN_HOLIDAYS:
+        prev_d -= datetime.timedelta(days=1)
+
+    # Next trading day
+    next_d = today + datetime.timedelta(days=1)
+    while next_d.weekday() >= 5 or next_d in VN_HOLIDAYS:
+        next_d += datetime.timedelta(days=1)
+
+    # 1. Weekend
+    if weekday >= 5:
+        return {
+            "is_open": False,
+            "is_trading_day": False,
+            "status_code": "CLOSED_WEEKEND",
+            "session": "CLOSED",
+            "label": "Thị trường đóng cửa (Cuối tuần)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+
+    # 2. Holiday
+    if today in VN_HOLIDAYS:
+        holiday_name = VN_HOLIDAYS.get(today)
+        return {
+            "is_open": False,
+            "is_trading_day": False,
+            "status_code": "CLOSED_HOLIDAY",
+            "session": "CLOSED",
+            "label": f"Thị trường đóng cửa ({holiday_name})",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+
+    # 3. Trading Day: time slots
+    if current_time < datetime.time(9, 0):
+        return {
+            "is_open": False,
+            "is_trading_day": True,
+            "status_code": "PRE_OPEN",
+            "session": "PRE_OPEN",
+            "label": "Chưa mở cửa (Phiên mở lúc 09:00)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": today.isoformat(),
+        }
+    elif datetime.time(9, 0) <= current_time < datetime.time(9, 15):
+        return {
+            "is_open": True,
+            "is_trading_day": True,
+            "status_code": "ATO",
+            "session": "ATO",
+            "label": "Khớp lệnh định kỳ mở cửa (ATO)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    elif datetime.time(9, 15) <= current_time < datetime.time(11, 30):
+        return {
+            "is_open": True,
+            "is_trading_day": True,
+            "status_code": "CONTINUOUS_MORNING",
+            "session": "CONTINUOUS",
+            "label": "Khớp lệnh liên tục (Sáng)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    elif datetime.time(11, 30) <= current_time < datetime.time(13, 0):
+        return {
+            "is_open": False,
+            "is_trading_day": True,
+            "status_code": "LUNCH_BREAK",
+            "session": "INTERMISSION",
+            "label": "Nghỉ trưa (Mở lại lúc 13:00)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": today.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    elif datetime.time(13, 0) <= current_time < datetime.time(14, 30):
+        return {
+            "is_open": True,
+            "is_trading_day": True,
+            "status_code": "CONTINUOUS_AFTERNOON",
+            "session": "CONTINUOUS",
+            "label": "Khớp lệnh liên tục (Chiều)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    elif datetime.time(14, 30) <= current_time < datetime.time(14, 45):
+        return {
+            "is_open": True,
+            "is_trading_day": True,
+            "status_code": "ATC",
+            "session": "ATC",
+            "label": "Khớp lệnh định kỳ đóng cửa (ATC)",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    elif datetime.time(14, 45) <= current_time < datetime.time(15, 0):
+        return {
+            "is_open": True,
+            "is_trading_day": True,
+            "status_code": "RUNOFF",
+            "session": "RUNOFF",
+            "label": "Giao dịch thỏa thuận / PLO",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": prev_d.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+    else:
+        return {
+            "is_open": False,
+            "is_trading_day": True,
+            "status_code": "CLOSED_AFTER_HOURS",
+            "session": "CLOSED",
+            "label": "Đã chốt phiên giao dịch",
+            "server_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "last_trading_date": today.isoformat(),
+            "next_trading_date": next_d.isoformat(),
+        }
+
+
+def in_trading_hours():
+    return get_vietnam_market_status()["is_open"]
 
 
 def realtime_trading_hours_only():
@@ -65,14 +201,24 @@ def _next_trading_day(d):
 
 
 def next_trading_time():
-    """Tính thời điểm tiếp theo cần chạy CDC (start hoặc end)"""
+    """Tính thời điểm tiếp theo cần chạy CDC hoặc WebSocket (start hoặc end)"""
     vn_tz = ZoneInfo("Asia/Ho_Chi_Minh")
     now = datetime.datetime.now(vn_tz)
-    if in_trading_hours():
+    market = get_vietnam_market_status(now)
+
+    if market["is_open"]:
+        if market["status_code"] in ("ATO", "CONTINUOUS_MORNING"):
+            return datetime.datetime.combine(now.date(), datetime.time(11, 30), tzinfo=vn_tz)
         return datetime.datetime.combine(now.date(), datetime.time(15, 0), tzinfo=vn_tz)
-    if _is_trading_day(now.date()) and now.time() < datetime.time(9, 0):
+
+    if market["status_code"] == "PRE_OPEN":
         return datetime.datetime.combine(now.date(), datetime.time(9, 0), tzinfo=vn_tz)
-    return datetime.datetime.combine(_next_trading_day(now.date()), datetime.time(9, 0), tzinfo=vn_tz)
+    if market["status_code"] == "LUNCH_BREAK":
+        return datetime.datetime.combine(now.date(), datetime.time(13, 0), tzinfo=vn_tz)
+
+    next_date = datetime.date.fromisoformat(market["next_trading_date"])
+    return datetime.datetime.combine(next_date, datetime.time(9, 0), tzinfo=vn_tz)
+
 
 def cassandra_date_to_iso(cass_date):
     """
@@ -87,12 +233,17 @@ def cassandra_date_to_iso(cass_date):
 @stock_router.get("/metrics")
 async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
-    
+
+
+@stock_router.get("/market_status")
+async def market_status():
+    return get_vietnam_market_status()
+
 
 _DAILY_SUMMARY_QUERY = "SELECT symbol, trade_date, open, high, low, close, volume FROM stock_daily_summary where trade_date = %s"
 
 
-def _fetch_daily_summary(db, start_date, max_lookback=10):
+def _fetch_daily_summary(db, start_date, max_lookback=15):
     latest_by_symbol = {}
     d = start_date
     trading_days_checked = 0
@@ -119,8 +270,34 @@ def _fetch_daily_summary(db, start_date, max_lookback=10):
 
 @stock_router.get("/get_reference")
 async def get_reference(db=Depends(get_db)):
+    market = get_vietnam_market_status()
     today = datetime.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()
-    return _fetch_daily_summary(db, today - datetime.timedelta(days=1))
+    if market["is_open"]:
+        return _fetch_daily_summary(db, today - datetime.timedelta(days=1))
+
+    # Khi thị trường đóng cửa/nghỉ lễ, lấy ngày có dữ liệu gần nhất trong daily summary
+    latest_rows = _fetch_daily_summary(db, today, max_lookback=15)
+    if not latest_rows:
+        return []
+
+    dates = []
+    for r in latest_rows:
+        td = r.get("trade_date")
+        if isinstance(td, str):
+            try:
+                dates.append(datetime.date.fromisoformat(td))
+            except Exception:
+                pass
+        elif isinstance(td, datetime.date):
+            dates.append(td)
+
+    if not dates:
+        return latest_rows
+
+    latest_trade_date = max(dates)
+    # Giá tham chiếu của phiên đó chính là giá đóng cửa phiên liền trước nó
+    ref_rows = _fetch_daily_summary(db, latest_trade_date - datetime.timedelta(days=1), max_lookback=15)
+    return ref_rows if ref_rows else latest_rows
 
 
 @stock_router.get("/get_stocks")
