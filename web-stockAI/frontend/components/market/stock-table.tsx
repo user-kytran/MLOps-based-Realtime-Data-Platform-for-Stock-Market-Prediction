@@ -201,7 +201,7 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
                   : stock.match.price < stock.reference
                   ? "text-red-600"
                   : "text-amber-600"
-                const changeColor = displayChange > 0 ? "text-green-600" : displayChange < 0 ? "text-red-600" : "text-gray-600"
+                const changeColor = displayChange > 0 ? "text-green-600" : displayChange < 0 ? "text-red-600" : "text-amber-600"
                 const flashPrice = flashMap[stock.symbol]?.price
                 const flashVol = flashMap[stock.symbol]?.volume
                 const flashChg = flashMap[stock.symbol]?.change
@@ -228,10 +228,10 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
                       {stock.match.volume > 0 ? formatVolume(stock.match.volume) : ""}
                     </td>
                     <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${flashChg ? "" : changeColor} ${flashCellClass(flashChg)}`}>
-                      {displayChange ? (displayChange > 0 ? "+" : "") + displayChange : ""}
+                      {displayChange != null ? (displayChange > 0 ? "+" : "") + displayChange : ""}
                     </td>
                     <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${flashPct ? "" : changeColor} ${flashCellClass(flashPct)}`}>
-                      {displayChangePct ? displayChangePct + "%" : ""}
+                      {displayChangePct != null ? (displayChangePct > 0 ? "+" : "") + displayChangePct + "%" : ""}
                     </td>
                     <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-gray-700 border border-gray-300 whitespace-nowrap">
                       {stock.high > 0 ? stock.high.toLocaleString("vi-VN") : "-"}

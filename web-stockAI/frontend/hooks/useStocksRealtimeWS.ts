@@ -86,8 +86,12 @@ export function useStocksRealtimeWS() {
                 currentLow = Math.min(currentLow, price);
             }
 
-            const currentChange = (data.change !== undefined && data.change !== 0) ? data.change : (oldStock?.match.change ?? 0);
-            const currentChangePercent = (data.change_percent !== undefined && data.change_percent !== 0) ? data.change_percent : (oldStock?.match.change_percent ?? 0);
+            const currentChange = (data.change !== undefined && data.change !== null)
+                ? data.change
+                : (price > 0 && reference > 0 ? (price - reference) : (oldStock?.match.change ?? 0));
+            const currentChangePercent = (data.change_percent !== undefined && data.change_percent !== null)
+                ? data.change_percent
+                : (reference > 0 && price > 0 ? Number((((price - reference) / reference) * 100).toFixed(2)) : (oldStock?.match.change_percent ?? 0));
 
             const message: StockRealtime = {
                 symbol,
@@ -103,11 +107,11 @@ export function useStocksRealtimeWS() {
                     change_percent: currentChangePercent,
                     last_size: data.last_size ?? 0,
                 },
-                lastChange: (currentChange !== 0 && data.change !== undefined) ? currentChange : (oldStock?.lastChange ?? currentChange),
-                lastChangePercent: (currentChangePercent !== 0 && data.change_percent !== undefined) ? currentChangePercent : (oldStock?.lastChangePercent ?? currentChangePercent),
+                lastChange: currentChange,
+                lastChangePercent: currentChangePercent,
             };
 
-            if (data.change !== undefined && data.change !== 0) {
+            if (data.change !== undefined && data.change !== null) {
                 saveChangeValues(symbol, currentChange, currentChangePercent);
             }
 
@@ -155,11 +159,22 @@ export function useStocksRealtimeWS() {
                         const reference = refMap.get(symbol) ?? 0;
                         const currentPrice = item.price ?? 0;
                         const dailyValues = dailyMap.get(symbol);
-                        let currentChange = item.change ?? 0;
-                        let currentChangePercent = item.change_percent ?? 0;
-                        if (currentChange === 0) {
-                            const saved = loadChangeValues(symbol);
-                            if (saved) { currentChange = saved.change; currentChangePercent = saved.changePercent; }
+                        let currentChange = item.change;
+                        let currentChangePercent = item.change_percent;
+                        if (currentChange === undefined || currentChange === null) {
+                            if (currentPrice > 0 && reference > 0) {
+                                currentChange = currentPrice - reference;
+                                currentChangePercent = Number((((currentPrice - reference) / reference) * 100).toFixed(2));
+                            } else {
+                                const saved = loadChangeValues(symbol);
+                                if (saved) {
+                                    currentChange = saved.change;
+                                    currentChangePercent = saved.changePercent;
+                                } else {
+                                    currentChange = 0;
+                                    currentChangePercent = 0;
+                                }
+                            }
                         }
                         return {
                             symbol,

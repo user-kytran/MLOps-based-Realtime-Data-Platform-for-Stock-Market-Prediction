@@ -53,6 +53,8 @@ CREATE TABLE fact_predictions (
   stock_code TEXT NOT NULL,
   prediction_date DATE NOT NULL,
   predicted_price DOUBLE PRECISION NOT NULL,
+  decision VARCHAR(50),
+  state JSONB,
   model_version VARCHAR(50),
   confidence_score DOUBLE PRECISION,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
