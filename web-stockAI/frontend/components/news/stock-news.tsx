@@ -216,19 +216,19 @@ export function StockNews({ symbol }: StockNewsProps) {
         ) : (
           <div className="space-y-4">
             {filteredNews.map((item) => (
-              <Card key={item.article_id} className="overflow-hidden hover:shadow-lg transition-all bg-white border-gray-200 hover:border-gray-300">
-                <CardContent className="px-10 py-4 h-20 flex flex-col justify-center">
+              <Card key={item.article_id} className="overflow-hidden border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm transition-all hover:border-gray-300 hover:shadow-md">
+                <CardContent className="flex min-h-[74px] flex-col justify-center px-3 py-2.5 sm:px-4">
                   <div className="space-y-1.5">
                     {/* Header: Stock Code */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs h-5 px-2 bg-cyan-100 text-cyan-800 border-cyan-300 font-semibold">
+                      <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-semibold text-cyan-800 border-cyan-300">
                         {item.stock_code}
                       </Badge>
                     </div>
 
                     {/* Title */}
                     <h2
-                      className="px-5 my-[20px] font-extrabold text-gray-900 text-[17px] line-clamp-1 hover:text-cyan-600 transition-colors cursor-pointer"
+                      className="line-clamp-2 cursor-pointer text-sm font-bold leading-snug text-gray-900 transition-colors hover:text-cyan-600"
                       onClick={() => window.open(item.is_pdf && item.pdf_link ? item.pdf_link : item.link, '_blank')}
                     >
                       {item.title}
@@ -236,16 +236,16 @@ export function StockNews({ symbol }: StockNewsProps) {
 
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-0">
-                      <span className="text-xs text-gray-500">{formatDate(item.date)}</span>
+                      <span className="text-[11px] text-gray-500">{formatDate(item.date)}</span>
                       <div className="flex items-center gap-1.5">
                         {item.is_pdf && item.pdf_link && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-purple-600 hover:text-purple-700 h-6 px-2 text-[12px]"
+                            className="h-6 px-1.5 text-[11px] text-purple-600 hover:text-purple-700"
                             onClick={() => window.open(item.pdf_link!, '_blank')}
                           >
-                            <FileText className="h-4 w-4 mr-1" />
+                            <FileText className="mr-1 h-3.5 w-3.5" />
                             PDF
                           </Button>
                         )}
