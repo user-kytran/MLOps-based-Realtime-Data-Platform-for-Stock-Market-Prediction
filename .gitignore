@@ -318,3 +318,11 @@ web-stockAI/backend/*.log
 web-stockAI/frontend/.next/
 web-stockAI/frontend/out/
 web-stockAI/frontend/node_modules/
+
+#Cloudflare llm
+cloudflared-llm/*
+
+# Trading Agents
+TradingAgents/*
+TradingAgents/
+TradingAgents
