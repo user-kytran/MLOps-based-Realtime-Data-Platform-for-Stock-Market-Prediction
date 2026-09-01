@@ -156,13 +156,17 @@ function formatPrice(value: number | undefined) {
 }
 
 function ConnectionBadge({ status }: { status: StockWSConnectionStatus }) {
+  if (status === "market_closed" || status === "closed") {
+    return null
+  }
+
   const config = {
     open: { label: "LIVE", className: "border-emerald-200 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
     connecting: { label: "CONNECTING", className: "border-blue-200 bg-blue-50 text-blue-700", dot: "bg-blue-500" },
     reconnecting: { label: "RECONNECTING", className: "border-amber-200 bg-amber-50 text-amber-700", dot: "bg-amber-500" },
-    market_closed: { label: "MARKET CLOSED", className: "border-slate-300 bg-slate-100 text-slate-700", dot: "bg-slate-500" },
-    closed: { label: "OFFLINE", className: "border-slate-200 bg-slate-50 text-slate-600", dot: "bg-slate-400" },
   }[status]
+
+  if (!config) return null
 
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-extrabold tracking-wide ${config.className}`}>

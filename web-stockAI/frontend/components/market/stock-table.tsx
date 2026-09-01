@@ -3,11 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Icons } from "@/components/icons"
 import Link from "next/link"
-import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
 import { useEffect, useRef, useState } from "react"
-import { PredictionCell } from "@/components/market/PredictionCell" 
+import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
+import { PredictionCell } from "@/components/market/PredictionCell"
 import { usePredictions } from "@/hooks/usePredictions"
-import { MarketStatusBadge } from "@/components/market/MarketStatusBadge"
 
 const VN30_LIST = [
   "ACB","BCM","BID","CTG","DGC","FPT","GAS","GVR","HDB","HPG",
@@ -137,7 +136,6 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
         <CardTitle className="flex w-full items-center justify-center gap-1.5 text-sm font-bold">
           <Icons.TrendingUp className="h-3.5 w-3.5" />
           {mode === "VN30" ? "VN30 STOCKS" : "ALL STOCKS"}
-          <MarketStatusBadge variant="compact" className="ml-2" />
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">

@@ -544,7 +544,7 @@ async def get_stock_predictions():
         
         cur.execute("""
             SELECT DISTINCT ON (stock_code) 
-                stock_code, prediction_date, predicted_price, confidence_score 
+                stock_code, prediction_date, predicted_price, confidence_score, decision, state 
             FROM fact_predictions 
             ORDER BY stock_code, prediction_date DESC
         """)
@@ -555,7 +555,9 @@ async def get_stock_predictions():
                 "symbol": row[0],
                 "prediction_date": row[1].isoformat(),
                 "predicted_price": float(row[2]),
-                "confidence_score": float(row[3]) if row[3] is not None else None
+                "confidence_score": float(row[3]) if row[3] is not None else None,
+                "decision": row[4] if len(row) > 4 else None,
+                "state": row[5] if len(row) > 5 else None
             })
             
         return results
@@ -586,14 +588,14 @@ async def get_stock_predictions_history(symbol: str = None):
         
         if symbol:
             cur.execute("""
-                SELECT stock_code, prediction_date, predicted_price, confidence_score 
+                SELECT stock_code, prediction_date, predicted_price, confidence_score, decision, state 
                 FROM fact_predictions 
                 WHERE stock_code = %s
                 ORDER BY prediction_date DESC
             """, (symbol,))
         else:
             cur.execute("""
-                SELECT stock_code, prediction_date, predicted_price, confidence_score 
+                SELECT stock_code, prediction_date, predicted_price, confidence_score, decision, state 
                 FROM fact_predictions 
                 ORDER BY stock_code, prediction_date DESC
             """)
@@ -604,7 +606,9 @@ async def get_stock_predictions_history(symbol: str = None):
                 "symbol": row[0],
                 "prediction_date": row[1].isoformat(),
                 "predicted_price": float(row[2]),
-                "confidence_score": float(row[3]) if row[3] is not None else None
+                "confidence_score": float(row[3]) if row[3] is not None else None,
+                "decision": row[4] if len(row) > 4 else None,
+                "state": row[5] if len(row) > 5 else None
             })
             
         return results

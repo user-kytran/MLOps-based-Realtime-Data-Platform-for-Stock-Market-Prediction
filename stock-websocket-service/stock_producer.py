@@ -19,7 +19,7 @@ async def _patched_async_connect(url, **kwargs):
 yf_live.async_connect = _patched_async_connect
 
 yf.set_tz_cache_location("/home/obito/.cache/py-yfinance")
-YfConfig.debug.hide_exceptions = False
+YfConfig.debug.hide_exceptions = True
 
 HEALTHCHECK_FILE = "/tmp/healthy"
 

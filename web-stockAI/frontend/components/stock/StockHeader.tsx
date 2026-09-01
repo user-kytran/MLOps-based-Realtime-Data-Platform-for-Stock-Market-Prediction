@@ -17,8 +17,8 @@ export function StockHeader({ symbol, name }: StockHeaderProps) {
   }
 
   return (
-    <div className="flex items-center mb-3 pb-2 border-b border-gray-200">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+      <div className="flex items-center gap-3">
         <Button 
           variant="ghost" 
           size="lg" 

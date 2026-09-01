@@ -13,6 +13,10 @@ export interface PredictionHistoryItem {
 export interface NextDayPrediction {
   trend: "up" | "down" | "neutral" | null;
   date: string;
+  predicted_price?: number | null;
+  confidence_score?: number | null;
+  decision?: string | null;
+  state?: string | null;
 }
 
 export function usePredictionHistory(symbol: string) {
@@ -110,7 +114,7 @@ export function usePredictionHistory(symbol: string) {
           }
           const nextDateStr = nextDate.toISOString().split('T')[0];
           
-          const nextPrediction = predictionsMap[nextDateStr];
+          const nextPrediction = predictionsMap[nextDateStr] || (symbolPredictions.length > 0 ? symbolPredictions[0] : null);
           
           if (nextPrediction) {
             const predPrice = nextPrediction.predicted_price;
@@ -118,9 +122,15 @@ export function usePredictionHistory(symbol: string) {
             if (predPrice > latestClose) trend = "up";
             else if (predPrice < latestClose) trend = "down";
             
+            const predDate = nextPrediction.prediction_date ? new Date(nextPrediction.prediction_date).toLocaleDateString("vi-VN") : nextDate.toLocaleDateString("vi-VN");
+
             setNextDayPrediction({
               trend,
-              date: nextDate.toLocaleDateString("vi-VN")
+              date: predDate,
+              predicted_price: nextPrediction.predicted_price,
+              confidence_score: nextPrediction.confidence_score,
+              decision: nextPrediction.decision,
+              state: nextPrediction.state
             });
           } else {
             setNextDayPrediction({ trend: null, date: "" });
