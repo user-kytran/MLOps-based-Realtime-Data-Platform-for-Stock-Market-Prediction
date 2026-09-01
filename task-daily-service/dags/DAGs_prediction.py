@@ -1,60 +1,47 @@
 import logging
 import os
-import requests
 from datetime import datetime, timedelta
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-import pendulum
-import pandas as pd
 import holidays
-import dotenv
+import pendulum
+from airflow import DAG
+from airflow.operators.bash import BashOperator
 
-dotenv.load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
-TRAINING_API_URL = os.getenv("TRAINING_API_URL")
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-def is_next_day_trading():
-    tomorrow = datetime.now().date() + timedelta(days=1)
-    if tomorrow.weekday() >= 5:
-        return False
-    vn_holidays = holidays.VN(years=tomorrow.year)
-    return tomorrow not in vn_holidays
-
-def run_prediction():
-    if not is_next_day_trading():
-        logger.info("Tomorrow is not a trading day. Skipping prediction.")
-        return
-    logger.info(str(datetime.now().date() + timedelta(days=1)))
-    try:
-        requests.post(TRAINING_API_URL,json = {
-                                                "prediction_date": str(datetime.now().date() + timedelta(days=1))
-                                            }, timeout=5)
-        logger.info("Prediction API triggered successfully")
-    except Exception as e:
-        logger.warning(f"Failed to trigger prediction API: {e}")
-
+local_tz = pendulum.timezone("Asia/Ho_Chi_Minh")
 
 default_args = {
     'owner': 'airflow',
-    'retries': 3,
-    'retry_delay': timedelta(minutes=2),
-    'execution_timeout': timedelta(minutes=60),
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'execution_timeout': timedelta(hours=3),
 }
 
 with DAG(
     dag_id='DAGs_prediction',
     default_args=default_args,
-    schedule_interval='0 23 * * *', # Chạy 23:00 hàng ngày
-    start_date=pendulum.datetime(2025, 1, 1, tz='Asia/Ho_Chi_Minh'),
+    description='Daily TradingAgents Multi-Agents Prediction for VN30',
+    schedule_interval='0 17 * * 1-5',  # 17:00 Thứ 2 -> Thứ 6 (Sau khi DAGs_warehouse hoàn tất)
+    start_date=pendulum.datetime(2025, 1, 1, tz=local_tz),
     catchup=False,
-    tags=['DAGs_prediction', 'prediction', 'daily'],
+    tags=['DAGs_prediction', 'prediction', 'tradingagents', 'daily'],
 ) as dag:
 
-    run_prediction_task = PythonOperator(
-        task_id='Train_model_and_predict',
-        python_callable=run_prediction,
+    predict_vn30_task = BashOperator(
+        task_id='TradingAgents_VN30_Prediction',
+        bash_command="""
+        export TARGET_DATE=$(python -c "
+import holidays, pendulum, datetime
+vn_holidays = holidays.country_holidays('VN')
+current = pendulum.now(tz='Asia/Ho_Chi_Minh').date()
+target = current + datetime.timedelta(days=1)
+while target.weekday() >= 5 or target in vn_holidays:
+    target += datetime.timedelta(days=1)
+print(target.strftime('%Y-%m-%d'))
+")
+        echo "🎯 [Airflow] Khởi chạy TradingAgents phân tích dự đoán cho ngày: $TARGET_DATE"
+        python /opt/TradingAgents/main.py --date "$TARGET_DATE" --symbols all --workers 1
+        """,
+        execution_timeout=timedelta(hours=3),
     )
 
-    run_prediction_task
+    predict_vn30_task

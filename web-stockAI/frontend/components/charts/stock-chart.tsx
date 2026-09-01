@@ -16,9 +16,7 @@ import {
 } from "recharts"
 import { BarChart3 } from "lucide-react"
 
-import { Icons } from "@/components/icons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { usePredictions } from "@/hooks/usePredictions"
 import { getApiUrl } from "@/lib/config"
 import { useStockWSContext, type StockWSConnectionStatus } from "@/lib/stockWSContext"
 import type { StockInfo } from "@/types/stock"
@@ -225,9 +223,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
   const [chartData, setChartData] = useState<IntradayPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const predictions = usePredictions()
   const { subscribe, unsubscribe, connectionStatus } = useStockWSContext()
-  const trend = predictions[symbol]?.predictionTrend ?? null
 
   useEffect(() => {
     let mounted = true
@@ -290,22 +286,6 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
     }
   }, [chartData, stockInfo])
 
-  const trendBadge = (() => {
-    if (!trend) return <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Prediction trend: —</span>
-    const config = {
-      up: { label: "Bullish", className: "border-emerald-200 bg-emerald-50 text-emerald-700", Icon: Icons.TrendingUp },
-      down: { label: "Bearish", className: "border-rose-200 bg-rose-50 text-rose-700", Icon: Icons.TrendingDown },
-      neutral: { label: "Neutral", className: "border-slate-200 bg-slate-50 text-slate-600", Icon: Icons.Minus },
-    }[trend]
-
-    return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide ${config.className}`}>
-        <config.Icon className="h-3.5 w-3.5" />
-        Prediction trend: {config.label}
-      </span>
-    )
-  })()
-
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
       <CardHeader className="gap-3 pb-2">
@@ -315,7 +295,6 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
             {symbol} Intraday Trading
           </CardTitle>
           <ConnectionBadge status={connectionStatus} />
-          {trendBadge}
         </div>
         <p className="text-xs font-semibold text-slate-500">One-minute price and matched-volume view · Today</p>
       </CardHeader>

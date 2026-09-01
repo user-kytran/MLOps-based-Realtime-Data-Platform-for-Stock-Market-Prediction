@@ -286,7 +286,7 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
     <Card className={cardClassName}>
       <CardHeader className="gap-3 pb-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className={`flex items-center gap-2 font-extrabold text-gray-900 ${expanded ? "text-xl sm:text-2xl" : "text-lg sm:text-xl"}`}>
+          <CardTitle className={`flex items-center gap-2 font-extrabold text-slate-950 ${expanded ? "text-xl sm:text-2xl" : "text-lg sm:text-xl"}`}>
             <TrendingUp className="h-5 w-5 text-blue-600" />
             <span>{symbol} Technical Analysis</span>
           </CardTitle>
