@@ -48,29 +48,19 @@ export function usePredictionHistory(symbol: string) {
         });
 
         dailyData.sort((a: any, b: any) => new Date(b.trade_date).getTime() - new Date(a.trade_date).getTime());
-        const last5Days = dailyData.slice(0, 5).reverse();
-
-        const dailyMap: Record<string, number> = {};
-        dailyData.forEach((d: any) => {
-          const normalizedDate = new Date(d.trade_date).toISOString().split('T')[0];
-          dailyMap[normalizedDate] = d.close;
-        });
-
+        
         const chartItems: PredictionHistoryItem[] = [];
+        const evalCount = Math.min(5, Math.max(0, dailyData.length - 1));
 
-        for (const day of last5Days) {
-          const currentDateNormalized = new Date(day.trade_date).toISOString().split('T')[0];
-          const currentClose = day.close;
+        for (let i = evalCount - 1; i >= 0; i--) {
+          const currentDay = dailyData[i];
+          const prevDay = dailyData[i + 1];
 
-          const prevDate = new Date(currentDateNormalized);
-          prevDate.setDate(prevDate.getDate() - 1);
-          while (prevDate.getDay() === 0 || prevDate.getDay() === 6) {
-            prevDate.setDate(prevDate.getDate() - 1);
-          }
-          const prevDateStr = prevDate.toISOString().split('T')[0];
-          const prevClose = dailyMap[prevDateStr];
+          if (!currentDay || !prevDay) continue;
 
-          if (!prevClose) continue;
+          const currentDateNormalized = new Date(currentDay.trade_date).toISOString().split('T')[0];
+          const currentClose = currentDay.close;
+          const prevClose = prevDay.close;
 
           let actual_trend: "up" | "down" | "neutral" = "neutral";
           if (currentClose > prevClose) actual_trend = "up";

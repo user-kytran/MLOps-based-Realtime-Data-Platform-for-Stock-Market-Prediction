@@ -52,10 +52,14 @@ export function PredictionAccuracy() {
     ? ((totalStats.correct / totalStats.total) * 100).toFixed(1)
     : '0'
 
-  const chartData = [
-    { name: 'Correct', value: totalStats.correct, color: COLORS.correct },
-    { name: 'Incorrect', value: totalStats.total - totalStats.correct, color: COLORS.incorrect }
-  ].filter(d => d.value > 0)
+  const chartData = totalStats.total > 0
+    ? [
+        { name: 'Correct', value: totalStats.correct, color: COLORS.correct },
+        { name: 'Incorrect', value: totalStats.total - totalStats.correct, color: COLORS.incorrect }
+      ].filter(d => d.value > 0)
+    : [
+        { name: 'Pending', value: 1, color: '#cbd5e1' }
+      ]
 
   const top10Accurate = [...accuracyData]
     .sort((a, b) => b.accuracy - a.accuracy)
@@ -76,7 +80,7 @@ export function PredictionAccuracy() {
   }
 
   return (
-    <AnalysisPanel title="Prediction Accuracy vs Reality" eyebrow={`${totalStats.total} resolved calls`}>
+    <AnalysisPanel title="Prediction Accuracy vs Reality" eyebrow={totalStats.total > 0 ? `${totalStats.total} resolved calls` : "Pending session resolutions"}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
           <div className="flex flex-col items-center justify-center gap-3 lg:col-span-3">
             <div className="aspect-square w-full max-w-[240px] min-w-[220px]">
@@ -116,9 +120,10 @@ export function PredictionAccuracy() {
                   </text>
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: number) => {
+                    formatter={(value: number, name: string) => {
+                      if (totalStats.total === 0) return ['Awaiting completed sessions', '']
                       const percentage = ((value / totalStats.total) * 100).toFixed(1)
-                      return [`${value} predictions (${percentage}%)`, '']
+                      return [`${value} predictions (${percentage}%)`, name]
                     }}
                   />
                 </PieChart>

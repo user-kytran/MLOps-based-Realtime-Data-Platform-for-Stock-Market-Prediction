@@ -638,28 +638,67 @@ async def get_stock_predictions_accuracy(db=Depends(get_db)):
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT p.stock_code, p.prediction_date, p.predicted_price, d.close as actual_price
-            FROM fact_predictions p LEFT JOIN fact_daily_prices d 
-            ON ( p.stock_code = d.stock_code 
-            OR p.stock_code = split_part(d.stock_code, '.', 1)) 
-            AND p.prediction_date = d.trade_date
-            ORDER BY p.stock_code, p.prediction_date;
+            WITH daily_with_prev AS (
+                SELECT 
+                    stock_code,
+                    trade_date,
+                    close as actual_price,
+                    LAG(close) OVER (PARTITION BY stock_code ORDER BY trade_date) as prev_close
+                FROM fact_daily_prices
+            ),
+            eval_predictions AS (
+                SELECT 
+                    p.stock_code,
+                    p.prediction_date,
+                    p.predicted_price,
+                    d.actual_price,
+                    d.prev_close,
+                    CASE 
+                        WHEN d.actual_price > d.prev_close THEN 1
+                        WHEN d.actual_price < d.prev_close THEN -1
+                        ELSE 0
+                    END as actual_trend,
+                    CASE 
+                        WHEN p.predicted_price > d.prev_close THEN 1
+                        WHEN p.predicted_price < d.prev_close THEN -1
+                        ELSE 0
+                    END as predicted_trend
+                FROM fact_predictions p
+                INNER JOIN daily_with_prev d 
+                    ON (p.stock_code = d.stock_code OR p.stock_code = split_part(d.stock_code, '.', 1))
+                    AND p.prediction_date = d.trade_date
+                WHERE d.prev_close IS NOT NULL
+            ),
+            agg_accuracy AS (
+                SELECT 
+                    stock_code,
+                    COUNT(*) as total,
+                    SUM(CASE WHEN actual_trend = predicted_trend THEN 1 ELSE 0 END) as correct,
+                    ROUND(AVG(CASE WHEN actual_trend = predicted_trend THEN 1.0 ELSE 0.0 END) * 100, 2) as accuracy
+                FROM eval_predictions
+                GROUP BY stock_code
+            )
+            SELECT 
+                s.stock_code as symbol,
+                COALESCE(a.accuracy, 0.0)::float as accuracy,
+                COALESCE(a.correct, 0)::int as correct,
+                COALESCE(a.total, 0)::int as total
+            FROM (SELECT DISTINCT stock_code FROM fact_predictions) s
+            LEFT JOIN agg_accuracy a ON s.stock_code = a.stock_code
+            ORDER BY s.stock_code;
         """)
         
-        df = pd.DataFrame(cur.fetchall(), columns=['stock_code', 'prediction_date', 'predicted_price', 'actual_price'])
-        
-        df['actual_trend'] = (df['actual_price'].shift(-1) - df['actual_price']).apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1)
-        df['predicted_trend'] = (df['predicted_price'].shift(-1) - df['predicted_price']).apply(lambda x: 0 if x == 0 else 1 if x > 0 else -1)
-        
-        df['is_correct'] = df['actual_trend'] == df['predicted_trend']
-        
-        # Tính accuracy theo từng stock, gồm symbol, accuracy, correct, total
-        accuracy_by_stock = df.groupby('stock_code')['is_correct'].agg(['mean', 'sum', 'count']).reset_index()
-        accuracy_by_stock.columns = ['symbol', 'accuracy', 'correct', 'total']
-        accuracy_by_stock['accuracy'] = round(accuracy_by_stock['accuracy'] * 100, 2)
-        accuracy_by_stock['correct'] = accuracy_by_stock['correct'].astype(int)
-        accuracy_by_stock['total'] = accuracy_by_stock['total'].astype(int)
-        return accuracy_by_stock.to_dict(orient='records')
+        rows = cur.fetchall()
+        results = [
+            {
+                "symbol": row[0],
+                "accuracy": float(row[1]),
+                "correct": int(row[2]),
+                "total": int(row[3])
+            }
+            for row in rows
+        ]
+        return results
 
     except Exception as e:
         logger.error(f"Error calculating predictions accuracy: {e}")
