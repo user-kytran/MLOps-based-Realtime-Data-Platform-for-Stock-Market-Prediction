@@ -151,8 +151,8 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
       // Sắp xếp theo số lượng bài báo
       sectorStats.sort((a, b) => b.total - a.total)
       setStats(sectorStats)
-    } catch (error) {
-      console.error('Error fetching news stats:', error)
+    } catch {
+      // Silent on stats fetch error
     } finally {
       setLoading(false)
     }

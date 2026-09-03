@@ -26,8 +26,8 @@ export function MarketNews() {
       const response = await fetch(`${API_URL}/news/news_new`)
       const data = await response.json()
       setNews(data)
-    } catch (error) {
-      console.error("Lỗi khi tải tin tức:", error)
+    } catch {
+      // Silent on news fetch error
     } finally {
       setLoading(false)
     }

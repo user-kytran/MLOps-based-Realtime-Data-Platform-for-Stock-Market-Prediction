@@ -128,8 +128,7 @@ export function usePredictionHistory(symbol: string) {
         }
         
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching prediction history:", error);
+      } catch {
         setLoading(false);
       }
     };

@@ -59,8 +59,8 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
         const data = await response.json()
         const list = Array.isArray(data) ? data : []
         setSectors(list)
-      } catch (error) {
-        console.error('Error fetching sectors:', error)
+      } catch {
+        // Silent on sector fetch error
       } finally {
         setLoading(false)
       }

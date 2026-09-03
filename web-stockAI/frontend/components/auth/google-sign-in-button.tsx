@@ -37,12 +37,8 @@ export function GoogleSignInButton({
   useEffect(() => {
     window.__onGoogleSignInCallback = async (response: { credential?: string }) => {
       if (response?.credential) {
-        setIsSigningIn(true)
-        const success = await loginWithCredential(response.credential)
+        await loginWithCredential(response.credential)
         setIsSigningIn(false)
-        if (!success) {
-          console.error("Đăng nhập thất bại với Google ID Token")
-        }
       }
     }
   }, [loginWithCredential])
@@ -109,8 +105,8 @@ export function GoogleSignInButton({
           width: size === "large" ? 220 : 130,
         })
       }
-    } catch (err) {
-      console.error("Lỗi khi render Google Sign-In button:", err)
+    } catch {
+      // Fallback to custom button
     }
   }, [isScriptLoaded, googleClientId, theme, size, shape])
 
