@@ -14,3 +14,6 @@ yfinance
 prometheus-client
 psycopg2-binary
 holidays
+google-auth>=2.20.0
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

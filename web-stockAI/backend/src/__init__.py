@@ -13,15 +13,30 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 
-app = FastAPI()
+app = FastAPI(title="StockAI API", version="1.0.0")
 
-# --- Thêm CORS middleware ---
+# --- Explicit CORS Configuration for Credentials & Cookies ---
+allowed_origins = [
+    "https://stock.kytran.io.vn",
+    "https://api.kytran.io.vn",
+    "http://localhost:3000",
+    "http://localhost:3005",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3005",
+]
+env_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if env_origins:
+    custom_origins = [o.strip() for o in env_origins.split(",") if o.strip()]
+    allowed_origins.extend(custom_origins)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.kytran\.io\.vn",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(router, prefix="")

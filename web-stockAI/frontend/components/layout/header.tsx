@@ -9,12 +9,15 @@ import { usePathname } from "next/navigation"
 import { Clock, Play, Square } from "lucide-react"
 
 import { useMarketStatus } from "@/hooks/useMarketStatus"
+import { useAuth } from "@/lib/authContext"
+import { GoogleSignInButton, UserNav } from "@/components/auth"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
   const { status: marketStatus } = useMarketStatus()
+  const { user } = useAuth()
   const pathname = usePathname()
 
   const isActive = (path: string) => pathname === path
@@ -39,12 +42,19 @@ export function Header() {
   }
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('vi-VN', {
+    const weekday = date.toLocaleDateString('en-US', {
       weekday: 'short',
+      timeZone: 'Asia/Ho_Chi_Minh'
+    })
+    const day = date.toLocaleDateString('en-GB', {
       day: '2-digit',
+      timeZone: 'Asia/Ho_Chi_Minh'
+    })
+    const month = date.toLocaleDateString('en-GB', {
       month: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh'
     })
+    return `${weekday}, ${day}/${month}`
   }
 
   return (
@@ -130,44 +140,44 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Market Status */}
-          <div className="hidden lg:flex items-center space-x-4">
-            {/* Market Status */}
-            <div className="flex items-center space-x-3">
+          {/* Desktop Right: Market Status, Time & User Profile */}
+          <div className="hidden md:flex items-center space-x-3">
+            {/* Market Status (Shown on lg+) */}
+            <div className="hidden lg:flex items-center space-x-3">
               {mounted && marketStatus ? (
                 marketStatus.is_open ? (
-                  <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
+                  <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Market open">
                     <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-bold text-green-800">
-                      {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "MỞ"}
+                    <span className="text-xs font-bold text-green-800 notranslate" translate="no">
+                      {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "OPEN"}
                     </span>
                     <Play className="w-3.5 h-3.5 text-green-700" />
                   </div>
                 ) : marketStatus.status_code === "LUNCH_BREAK" ? (
-                  <div className="flex items-center space-x-2 bg-amber-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
+                  <div className="flex items-center space-x-2 bg-amber-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Lunch break">
                     <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
-                    <span className="text-xs font-bold text-amber-800">NGHỈ TRƯA</span>
+                    <span className="text-xs font-bold text-amber-800 notranslate" translate="no">LUNCH BREAK</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2 bg-red-100 px-3 py-1.5 rounded-full cursor-help" title={marketStatus.label}>
+                  <div className="flex items-center space-x-2 bg-red-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Market closed">
                     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                    <span className="text-xs font-bold text-red-800">ĐÓNG</span>
+                    <span className="text-xs font-bold text-red-800 notranslate" translate="no">CLOSED</span>
                     <Square className="w-3.5 h-3.5 text-red-700" />
                   </div>
                 )
               ) : (
-                <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full notranslate" translate="no">
                   <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-xs font-bold text-gray-700">—</span>
+                  <span className="text-xs font-bold text-gray-700 notranslate" translate="no">—</span>
                 </div>
               )}
             </div>
 
             {/* Divider */}
-            <div className="w-px h-8 bg-gray-300"></div>
+            <div className="hidden lg:block w-px h-8 bg-gray-300"></div>
 
-            {/* Time */}
-            <div className="flex items-center space-x-3">
+            {/* Time (Shown on lg+) */}
+            <div className="hidden lg:flex items-center space-x-3">
               <Clock className="w-4 h-4 text-gray-600" />
               <div className="text-right">
                 <div className="text-sm font-mono font-bold text-gray-900">
@@ -178,21 +188,33 @@ export function Header() {
                 </div>
               </div>
             </div>
+
+            {/* Divider */}
+            <div className="hidden lg:block w-px h-8 bg-gray-300"></div>
+
+            {/* User Auth / Profile */}
+            <div className="flex items-center pl-1">
+              {user ? <UserNav /> : <GoogleSignInButton />}
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+          {/* Mobile Right: Auth & Menu Button */}
+          <div className="flex md:hidden items-center space-x-2">
+            {user ? <UserNav /> : <GoogleSignInButton size="small" />}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -204,29 +226,29 @@ export function Header() {
                 <div className="flex items-center space-x-3">
                   {mounted && marketStatus ? (
                     marketStatus.is_open ? (
-                      <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full" title={marketStatus.label}>
+                      <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full notranslate" translate="no" title="Market open">
                         <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs font-bold text-green-800">
-                          {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "MỞ"}
+                        <span className="text-xs font-bold text-green-800 notranslate" translate="no">
+                          {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "OPEN"}
                         </span>
                         <Play className="w-3.5 h-3.5 text-green-700" />
                       </div>
                     ) : marketStatus.status_code === "LUNCH_BREAK" ? (
-                      <div className="flex items-center space-x-2 bg-amber-100 px-3 py-2 rounded-full" title={marketStatus.label}>
+                      <div className="flex items-center space-x-2 bg-amber-100 px-3 py-2 rounded-full notranslate" translate="no" title="Lunch break">
                         <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
-                        <span className="text-xs font-bold text-amber-800">NGHỈ TRƯA</span>
+                        <span className="text-xs font-bold text-amber-800 notranslate" translate="no">LUNCH BREAK</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2 bg-red-100 px-3 py-2 rounded-full" title={marketStatus.label}>
+                      <div className="flex items-center space-x-2 bg-red-100 px-3 py-2 rounded-full notranslate" translate="no" title="Market closed">
                         <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                        <span className="text-xs font-bold text-red-800">ĐÓNG</span>
+                        <span className="text-xs font-bold text-red-800 notranslate" translate="no">CLOSED</span>
                         <Square className="w-3.5 h-3.5 text-red-700" />
                       </div>
                     )
                   ) : (
-                    <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-full">
+                    <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-full notranslate" translate="no">
                       <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                      <span className="text-xs font-bold text-gray-700">—</span>
+                      <span className="text-xs font-bold text-gray-700 notranslate" translate="no">—</span>
                     </div>
                   )}
                 </div>

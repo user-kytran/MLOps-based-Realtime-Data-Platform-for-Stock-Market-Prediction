@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header"
 import { NewsFilters } from "@/components/news/news-filters"
 import { NewsList } from "@/components/news/news-list"
 import { NewsStatistics } from "@/components/news/news-statistics"
+import { AuthGuard } from "@/components/auth"
 
 export default function NewsPage() {
   const [filters, setFilters] = useState({
@@ -16,46 +17,51 @@ export default function NewsPage() {
   })
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/img_bg.png')",
-          opacity: 0.1,
-          zIndex: -1, 
-        }}
-      ></div>
+    <AuthGuard
+      title="Tin tức & Phân tích Thị trường"
+      description="Vui lòng đăng nhập với tài khoản Google để xem toàn bộ tin tức kinh tế, thống kê phân tích chuyên sâu và sự kiện tài chính."
+    >
+      <div className="min-h-screen relative overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/img_bg.png')",
+            opacity: 0.1,
+            zIndex: -1, 
+          }}
+        ></div>
 
-      <Header />
+        <Header />
 
-      <main className="w-full px-3 py-4 relative z-10">
-        {/* Page Header */}
-        <section className="text-center mb-3">
-          <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
-            NEWS & 
-            <span className="text-cyan-900"> ANALYSIS</span>
-          </h1>
-          <p className="text-black text-xs font-semibold text-pretty max-w-2xl mx-auto">
-            Update news and analysis of the stock market
-          </p>
-        </section>
+        <main className="w-full px-3 py-4 relative z-10">
+          {/* Page Header */}
+          <section className="text-center mb-3">
+            <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
+              NEWS & 
+              <span className="text-cyan-900"> ANALYSIS</span>
+            </h1>
+            <p className="text-black text-xs font-semibold text-pretty max-w-2xl mx-auto">
+              Update news and analysis of the stock market
+            </p>
+          </section>
 
-        {/* News Filters */}
-        <NewsFilters filters={filters} setFilters={setFilters} />
+          {/* News Filters */}
+          <NewsFilters filters={filters} setFilters={setFilters} />
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3 w-full">
-          {/* Left Column - News List */}
-          <div className="lg:col-span-2">
-            <NewsList filters={filters} />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3 w-full">
+            {/* Left Column - News List */}
+            <div className="lg:col-span-2">
+              <NewsList filters={filters} />
+            </div>
+
+            {/* Right Column - Statistics */}
+            <div className="space-y-3">
+              <NewsStatistics filters={filters} />
+            </div>
           </div>
-
-          {/* Right Column - Statistics */}
-          <div className="space-y-3">
-            <NewsStatistics filters={filters} />
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   )
 }

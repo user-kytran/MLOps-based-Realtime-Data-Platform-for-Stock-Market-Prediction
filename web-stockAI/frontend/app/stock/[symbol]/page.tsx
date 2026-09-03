@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StockHeader, StockInfoSidebar, MatchedOrdersSidebar } from "@/components/stock"
 import { useStockData } from "@/hooks/useStockData"
+import { AuthGuard } from "@/components/auth"
 import { useState, useEffect } from "react"
 
 const StockChart = dynamic(() => import("@/components/charts").then(m => ({ default: m.StockChart })), { ssr: false })
@@ -15,9 +16,8 @@ const StockCompanyInfo = dynamic(() => import("@/components/stock").then(m => ({
 const StockFinancialInfo = dynamic(() => import("@/components/stock").then(m => ({ default: m.StockFinancialInfo })), { ssr: false })
 const StockStatistics = dynamic(() => import("@/components/stock").then(m => ({ default: m.StockStatistics })), { ssr: false })
 
-export default function StockDetailPage({ params }: { params: { symbol: string } }) {
+function StockDetailContent({ symbol }: { symbol: string }) {
   const [isMounted, setIsMounted] = useState(false)
-  const symbol = params.symbol.toUpperCase()
   const { stockInfo, stockRealtime, reference, matchedOrders, loading, error } = useStockData(symbol)
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
 
         <Header />
         <div className="container mx-auto px-4 py-8 text-center relative z-10">
-          <p className="text-gray-600">Đang tải...</p>
+          <p className="text-gray-600">Đang tải dữ liệu {symbol}...</p>
         </div>
       </div>
     )
@@ -68,18 +68,17 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
   }
 
   if (!isMounted) {
-    // Có thể trả về null, hoặc một div loading rất đơn giản, không gây mismatch
     return null 
   }
 
   if (!stockInfo) {
     return (
-        <div className="min-h-screen relative overflow-hidden">
-            <Header />
-            <div className="container mx-auto px-4 py-8 text-center relative z-10">
-                <p className="text-gray-600">Không tìm thấy dữ liệu hoặc thị trường chưa mở.</p>
-            </div>
+      <div className="min-h-screen relative overflow-hidden">
+        <Header />
+        <div className="container mx-auto px-4 py-8 text-center relative z-10">
+          <p className="text-gray-600">Không tìm thấy dữ liệu hoặc thị trường chưa mở.</p>
         </div>
+      </div>
     )
   }
 
@@ -125,24 +124,22 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
               </div>
 
               <div className="lg:col-span-6">
-                {/* <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} /> */}
                 {hasRealtimeData ? (
-                 <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
+                  <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
                 ) : (
-                    <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
-                        <p>Biểu đồ realtime không khả dụng.</p>
-                    </div>
+                  <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
+                    <p>Biểu đồ realtime không khả dụng.</p>
+                  </div>
                 )}
               </div>
 
               <div className="lg:col-span-3">
-                {/* <MatchedOrdersSidebar matchedOrders={matchedOrders} /> */}
                 {hasRealtimeData ? (
                   <MatchedOrdersSidebar matchedOrders={matchedOrders} />
                 ) : (
-                    <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
-                        <p>Sổ lệnh realtime không khả dụng.</p>
-                    </div>
+                  <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
+                    <p>Sổ lệnh realtime không khả dụng.</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -174,5 +171,18 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
         </Tabs>
       </div>
     </div>
+  )
+}
+
+export default function StockDetailPage({ params }: { params: { symbol: string } }) {
+  const symbol = params.symbol.toUpperCase()
+
+  return (
+    <AuthGuard
+      title={`Chi tiết & Dự đoán Cổ phiếu ${symbol}`}
+      description={`Vui lòng đăng nhập với tài khoản Google để theo dõi biểu đồ realtime, sổ khớp lệnh và mô hình dự đoán giá AI của ${symbol}.`}
+    >
+      <StockDetailContent symbol={symbol} />
+    </AuthGuard>
   )
 }

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import { StockWSProvider } from "@/lib/stockWSContext"
+import { AuthProvider } from "@/lib/authContext"
 import { AgentationDev } from "@/components/agentation-dev"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -24,11 +25,13 @@ export default function RootLayout({
   return (
     <html lang="vi" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider>
-          <StockWSProvider>
-            {children}
-          </StockWSProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <StockWSProvider>
+              {children}
+            </StockWSProvider>
+          </ThemeProvider>
+        </AuthProvider>
         <AgentationDev />
       </body>
     </html>
