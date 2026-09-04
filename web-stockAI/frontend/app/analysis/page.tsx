@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic"
 import { Header } from "@/components/layout/header"
-import { BarChart3 } from "lucide-react"
 import { AuthGuard } from "@/components/auth"
 
 const MarketSummary = dynamic(() => import("@/components/analysis/market-summary").then(m => ({ default: m.MarketSummary })), { ssr: false })
@@ -24,15 +23,12 @@ export default function AnalysisPage() {
         <Header />
 
         <main className="w-full px-4 py-5">
-          <section className="mb-5 text-center">
-            <div className="mb-2 flex items-center justify-center gap-2">
-              <BarChart3 className="h-6 w-6 text-cyan-600" />
-              <h1 className="text-2xl font-extrabold text-black text-balance md:text-3xl">
-                MARKET
-                <span className="text-cyan-900"> ANALYSIS</span>
-              </h1>
-            </div>
-            <p className="mx-auto max-w-2xl text-sm font-semibold text-black text-pretty">
+          <section className="text-center mb-3">
+            <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
+              MARKET
+              <span className="text-cyan-900"> ANALYSIS</span>
+            </h1>
+            <p className="text-black text-sm font-semibold mb-3 text-pretty max-w-xl mx-auto">
               Deep analysis of the Vietnamese stock market
             </p>
           </section>

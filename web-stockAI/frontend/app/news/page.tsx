@@ -40,7 +40,7 @@ export default function NewsPage() {
               NEWS & 
               <span className="text-cyan-900"> ANALYSIS</span>
             </h1>
-            <p className="text-black text-xs font-semibold text-pretty max-w-2xl mx-auto">
+            <p className="text-black text-sm font-semibold mb-3 text-pretty max-w-xl mx-auto">
               Update news and analysis of the stock market
             </p>
           </section>
