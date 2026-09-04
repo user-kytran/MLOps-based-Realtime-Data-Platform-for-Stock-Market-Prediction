@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Clock, Play, Square } from "lucide-react"
+import { Clock } from "lucide-react"
 
 import { useMarketStatus } from "@/hooks/useMarketStatus"
 import { useAuth } from "@/lib/authContext"
@@ -142,55 +140,68 @@ export function Header() {
 
           {/* Desktop Right: Market Status, Time & User Profile */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Market Status (Shown on lg+) */}
+            {/* Market Status (Shown on lg+) - Clean Professional Financial Pill */}
             <div className="hidden lg:flex items-center space-x-3">
               {mounted && marketStatus ? (
                 marketStatus.is_open ? (
-                  <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Market open">
-                    <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-bold text-green-800 notranslate" translate="no">
+                  <div
+                    className="flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50/80 px-2.5 py-1 text-xs transition-colors cursor-default"
+                    title={marketStatus.label || "HOSE: Market Open"}
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+                    </span>
+                    <span className="text-slate-600 font-medium">HOSE</span>
+                    <span className="font-bold text-green-700">
                       {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "OPEN"}
                     </span>
-                    <Play className="w-3.5 h-3.5 text-green-700" />
                   </div>
                 ) : marketStatus.status_code === "LUNCH_BREAK" ? (
-                  <div className="flex items-center space-x-2 bg-amber-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Lunch break">
-                    <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
-                    <span className="text-xs font-bold text-amber-800 notranslate" translate="no">LUNCH BREAK</span>
+                  <div
+                    className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-xs transition-colors cursor-default"
+                    title={marketStatus.label || "HOSE: Lunch Break"}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-amber-500 inline-block"></span>
+                    <span className="text-slate-600 font-medium">HOSE</span>
+                    <span className="font-bold text-amber-700">INTERMISSION</span>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2 bg-red-100 px-3 py-1.5 rounded-full cursor-help notranslate" translate="no" title="Market closed">
-                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                    <span className="text-xs font-bold text-red-800 notranslate" translate="no">CLOSED</span>
-                    <Square className="w-3.5 h-3.5 text-red-700" />
+                  <div
+                    className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs transition-colors cursor-default"
+                    title={marketStatus.label || "HOSE: Market Closed"}
+                  >
+                    <span className="h-2 w-2 rounded-full bg-slate-400 inline-block"></span>
+                    <span className="text-slate-600 font-medium">HOSE</span>
+                    <span className="font-semibold text-slate-500">CLOSED</span>
                   </div>
                 )
               ) : (
-                <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1.5 rounded-full notranslate" translate="no">
-                  <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-xs font-bold text-gray-700 notranslate" translate="no">—</span>
+                <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs">
+                  <span className="h-2 w-2 rounded-full bg-slate-300 inline-block"></span>
+                  <span className="text-slate-400 font-medium">HOSE —</span>
                 </div>
               )}
             </div>
 
             {/* Divider */}
-            <div className="hidden lg:block w-px h-8 bg-gray-300"></div>
+            <div className="hidden lg:block w-px h-6 bg-gray-200"></div>
 
             {/* Time (Shown on lg+) */}
-            <div className="hidden lg:flex items-center space-x-3">
-              <Clock className="w-4 h-4 text-gray-600" />
+            <div className="hidden lg:flex items-center space-x-2">
+              <Clock className="w-3.5 h-3.5 text-gray-400" />
               <div className="text-right">
-                <div className="text-sm font-mono font-bold text-gray-900">
+                <div className="text-xs font-mono font-bold text-gray-800 leading-tight">
                   {mounted ? formatTime(currentTime) : "--:--:--"}
                 </div>
-                <div className="text-xs text-gray-500 font-medium">
+                <div className="text-[10px] text-gray-500 font-medium leading-tight">
                   {mounted ? formatDate(currentTime) : "--/--"}
                 </div>
               </div>
             </div>
 
             {/* Divider */}
-            <div className="hidden lg:block w-px h-8 bg-gray-300"></div>
+            <div className="hidden lg:block w-px h-6 bg-gray-200"></div>
 
             {/* User Auth / Profile */}
             <div className="flex items-center pl-1">
@@ -221,55 +232,68 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200/50 bg-white/95 backdrop-blur-md">
             {/* Mobile Market Status */}
-            <div className="px-4 py-4 mb-4 mx-4">
+            <div className="px-4 py-3 mb-3 mx-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {mounted && marketStatus ? (
                     marketStatus.is_open ? (
-                      <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-full notranslate" translate="no" title="Market open">
-                        <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs font-bold text-green-800 notranslate" translate="no">
+                      <div
+                        className="flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50/80 px-2.5 py-1 text-xs"
+                        title={marketStatus.label || "HOSE: Market Open"}
+                      >
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+                        </span>
+                        <span className="text-slate-600 font-medium">HOSE</span>
+                        <span className="font-bold text-green-700">
                           {marketStatus.status_code === "ATO" ? "ATO" : marketStatus.status_code === "ATC" ? "ATC" : "OPEN"}
                         </span>
-                        <Play className="w-3.5 h-3.5 text-green-700" />
                       </div>
                     ) : marketStatus.status_code === "LUNCH_BREAK" ? (
-                      <div className="flex items-center space-x-2 bg-amber-100 px-3 py-2 rounded-full notranslate" translate="no" title="Lunch break">
-                        <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
-                        <span className="text-xs font-bold text-amber-800 notranslate" translate="no">LUNCH BREAK</span>
+                      <div
+                        className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-xs"
+                        title={marketStatus.label || "HOSE: Lunch Break"}
+                      >
+                        <span className="h-2 w-2 rounded-full bg-amber-500 inline-block"></span>
+                        <span className="text-slate-600 font-medium">HOSE</span>
+                        <span className="font-bold text-amber-700">INTERMISSION</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2 bg-red-100 px-3 py-2 rounded-full notranslate" translate="no" title="Market closed">
-                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                        <span className="text-xs font-bold text-red-800 notranslate" translate="no">CLOSED</span>
-                        <Square className="w-3.5 h-3.5 text-red-700" />
+                      <div
+                        className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs"
+                        title={marketStatus.label || "HOSE: Market Closed"}
+                      >
+                        <span className="h-2 w-2 rounded-full bg-slate-400 inline-block"></span>
+                        <span className="text-slate-600 font-medium">HOSE</span>
+                        <span className="font-semibold text-slate-500">CLOSED</span>
                       </div>
                     )
                   ) : (
-                    <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-full notranslate" translate="no">
-                      <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                      <span className="text-xs font-bold text-gray-700 notranslate" translate="no">—</span>
+                    <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs">
+                      <span className="h-2 w-2 rounded-full bg-slate-300 inline-block"></span>
+                      <span className="text-slate-400 font-medium">HOSE —</span>
                     </div>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-mono font-bold text-gray-900">
+                  <div className="text-xs font-mono font-bold text-gray-800 leading-tight">
                     {mounted ? formatTime(currentTime) : "--:--:--"}
                   </div>
-                  <div className="text-xs text-gray-500 font-medium">
+                  <div className="text-[10px] text-gray-500 font-medium leading-tight">
                     {mounted ? formatDate(currentTime) : "--/--"}
                   </div>
                 </div>
               </div>
             </div>
 
-            <nav className="flex flex-col space-y-2">
+            <nav className="flex flex-col space-y-1 px-4">
               <Link
                 href="/"
                 onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
+                className={`px-3 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
                   isActive("/")
-                    ? "text-cyan-600 bg-cyan-50"
+                    ? "text-cyan-700 bg-cyan-50"
                     : "text-gray-700 hover:text-cyan-600 hover:bg-gray-50"
                 }`}
               >
@@ -278,9 +302,9 @@ export function Header() {
               <Link
                 href="/stocks"
                 onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
+                className={`px-3 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
                   isActive("/stocks")
-                    ? "text-cyan-600 bg-cyan-50"
+                    ? "text-cyan-700 bg-cyan-50"
                     : "text-gray-700 hover:text-cyan-600 hover:bg-gray-50"
                 }`}
               >
@@ -289,9 +313,9 @@ export function Header() {
               <Link
                 href="/news"
                 onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
+                className={`px-3 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
                   isActive("/news")
-                    ? "text-cyan-600 bg-cyan-50"
+                    ? "text-cyan-700 bg-cyan-50"
                     : "text-gray-700 hover:text-cyan-600 hover:bg-gray-50"
                 }`}
               >
@@ -300,9 +324,9 @@ export function Header() {
               <Link
                 href="/analysis"
                 onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
+                className={`px-3 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
                   isActive("/analysis")
-                    ? "text-cyan-600 bg-cyan-50"
+                    ? "text-cyan-700 bg-cyan-50"
                     : "text-gray-700 hover:text-cyan-600 hover:bg-gray-50"
                 }`}
               >

@@ -5,42 +5,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 export const chartColors = {
-  positive: "#059669",
-  negative: "#dc2626",
-  neutral: "#64748b",
-  accent: "#0f766e",
+  positive: "#16a34a", // green-600
+  positiveDark: "#15803d",
+  negative: "#dc2626", // red-600
+  negativeDark: "#b91c1c",
+  neutral: "#64748b", // slate-500
+  accent: "#0891b2", // cyan-600 (brand)
+  cyanDark: "#0e7490",
   amber: "#d97706",
-  grid: "#e2e8f0",
+  grid: "#f1f5f9",
   axis: "#64748b",
 }
 
 export const sectorPalette = [
-  "#0f766e",
-  "#2563eb",
-  "#7c3aed",
-  "#db2777",
-  "#dc2626",
-  "#d97706",
-  "#65a30d",
-  "#0891b2",
-  "#4f46e5",
-  "#475569",
+  "#0891b2", // cyan-600
+  "#2563eb", // blue-600
+  "#059669", // emerald-600
+  "#7c3aed", // violet-600
+  "#ea580c", // orange-600
+  "#dc2626", // red-600
+  "#0284c7", // sky-600
+  "#4f46e5", // indigo-600
+  "#ca8a04", // yellow-600
+  "#db2777", // pink-600
+  "#475569", // slate-600
 ]
 
 export const tooltipStyle = {
   backgroundColor: "#ffffff",
-  border: "1px solid #cbd5e1",
-  borderRadius: "8px",
-  boxShadow: "0 12px 28px rgba(15, 23, 42, 0.12)",
+  border: "1px solid #e2e8f0",
+  borderRadius: "6px",
+  boxShadow: "0 8px 20px -4px rgba(0, 0, 0, 0.08)",
   color: "#0f172a",
   fontSize: "12px",
-  fontWeight: 600,
+  fontWeight: 500,
+  padding: "8px 12px",
 }
 
 export const axisTick = {
-  fill: chartColors.axis,
+  fill: "#64748b",
   fontSize: 11,
-  fontWeight: 600,
+  fontWeight: 500,
 }
 
 interface AnalysisPanelProps {
@@ -61,19 +66,21 @@ export function AnalysisPanel({
   contentClassName,
 }: AnalysisPanelProps) {
   return (
-    <Card className={cn("gap-0 rounded-lg border-slate-200 bg-white shadow-sm", className)}>
-      <CardHeader className="flex flex-row items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
+    <Card className={cn("rounded-xl border-slate-200 bg-white shadow-xs transition-shadow duration-200 hover:shadow-sm overflow-hidden", className)}>
+      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3">
         <div className="min-w-0">
           {eyebrow ? (
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800 mb-0.5">
               {eyebrow}
             </p>
           ) : null}
-          <CardTitle className="truncate text-sm font-bold text-slate-950">{title}</CardTitle>
+          <CardTitle className="truncate text-sm md:text-base font-bold text-slate-900">
+            {title}
+          </CardTitle>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </CardHeader>
-      <CardContent className={cn("px-4 py-4", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("p-4", contentClassName)}>{children}</CardContent>
     </Card>
   )
 }
@@ -81,26 +88,27 @@ export function AnalysisPanel({
 interface MetricTileProps {
   label: string
   value: ReactNode
-  icon?: ReactNode
+  subtext?: ReactNode
   tone?: "positive" | "negative" | "neutral" | "accent" | "amber"
+  className?: string
 }
 
 const tileTone = {
-  positive: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  negative: "border-red-200 bg-red-50 text-red-700",
-  neutral: "border-slate-200 bg-slate-50 text-slate-700",
-  accent: "border-teal-200 bg-teal-50 text-teal-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  positive: "border-green-200 bg-green-50/50 text-green-800",
+  negative: "border-red-200 bg-red-50/50 text-red-800",
+  neutral: "border-slate-200 bg-slate-50 text-slate-800",
+  accent: "border-cyan-200 bg-cyan-50/50 text-cyan-900",
+  amber: "border-amber-200 bg-amber-50/50 text-amber-800",
 }
 
-export function MetricTile({ label, value, icon, tone = "neutral" }: MetricTileProps) {
+export function MetricTile({ label, value, subtext, tone = "neutral", className }: MetricTileProps) {
   return (
-    <div className={cn("rounded-lg border px-3 py-3", tileTone[tone])}>
-      <div className="mb-2 flex items-center justify-between gap-2 text-slate-600">
-        <p className="truncate text-[11px] font-semibold uppercase tracking-[0.04em]">{label}</p>
-        {icon ? <div className="shrink-0">{icon}</div> : null}
-      </div>
-      <p className="truncate font-mono text-xl font-bold leading-none">{value}</p>
+    <div className={cn("rounded-lg border px-3.5 py-2.5 transition-all", tileTone[tone], className)}>
+      <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">{label}</p>
+      <p className="truncate font-bold text-lg md:text-xl text-slate-900 tracking-tight leading-none">
+        {value}
+      </p>
+      {subtext ? <p className="text-[11px] text-slate-500 mt-1 font-normal">{subtext}</p> : null}
     </div>
   )
 }
