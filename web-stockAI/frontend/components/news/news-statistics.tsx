@@ -8,6 +8,28 @@ import { Button } from "@/components/ui/button"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { API_URL } from "@/lib/api"
 
+const RADIAN = Math.PI / 180
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  if (percent < 0.05) return null
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#ffffff"
+      textAnchor="middle"
+      dominantBaseline="central"
+      className="font-mono font-bold text-[11px] pointer-events-none select-none"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  )
+}
+
+
 interface NewsItem {
   stock_code: string
   article_id: string
@@ -199,16 +221,15 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                   data={stats.map(s => ({ name: s.sectorLabel, value: s.total, color: s.color }))}
                   cx="50%"
                   cy="50%"
-                  innerRadius={38}
-                  outerRadius={70}
+                  innerRadius={40}
+                  outerRadius={74}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({percent }: any) => `${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
-                  style={{ fontSize: 11, fontWeight: 'bold' }}
+                  label={renderCustomizedLabel}
                 >
                   {stats.map((stat, index) => (
-                    <Cell key={`cell-${index}`} fill={stat.color} />
+                    <Cell key={`cell-${index}`} fill={stat.color} stroke="#ffffff" strokeWidth={1.5} />
                   ))}
                 </Pie>
                 <Tooltip 
