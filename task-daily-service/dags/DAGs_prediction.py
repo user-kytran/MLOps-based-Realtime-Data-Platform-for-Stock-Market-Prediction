@@ -1,6 +1,5 @@
 import logging
-import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 import holidays
 import pendulum
 from airflow import DAG
@@ -18,58 +17,38 @@ default_args = {
 }
 
 
-def check_tomorrow_trading_day(**context):
-    """
-    Kiểm tra xem ngày mai có phải là ngày giao dịch hay không.
-    Nếu ngày mai là cuối tuần (Thứ 7, CN) hoặc ngày nghỉ lễ VN -> Trả về False (Skip các task tiếp theo).
-    Nếu ngày mai là ngày giao dịch -> Trả về True (Tiếp tục chạy dự đoán).
-    """
+def check_today_trading_day(**context):
     vn_holidays = holidays.country_holidays('VN')
-    current_date = pendulum.now(tz=local_tz).date()
-    tomorrow = current_date + timedelta(days=1)
+    today = pendulum.now(tz=local_tz).date()
 
-    # 1. Kiểm tra cuối tuần (Thứ 7 = 5, Chủ Nhật = 6)
-    if tomorrow.weekday() >= 5:
-        weekday_name = "Thứ Bảy" if tomorrow.weekday() == 5 else "Chủ Nhật"
-        logger.info(f"[ShortCircuit] Ngày mai ({tomorrow}) là {weekday_name} (cuối tuần). Bỏ qua phiên dự đoán.")
+    if today.weekday() >= 5 or today in vn_holidays:
+        logger.info(f"[ShortCircuit] {today} là ngày nghỉ/lễ. Bỏ qua dự đoán.")
         return False
 
-    # 2. Kiểm tra ngày nghỉ lễ Việt Nam
-    if tomorrow in vn_holidays:
-        holiday_name = vn_holidays.get(tomorrow)
-        logger.info(f"[ShortCircuit] Ngày mai ({tomorrow}) là ngày lễ '{holiday_name}'. Bỏ qua phiên dự đoán.")
-        return False
-
-    logger.info(f"[ShortCircuit] Ngày mai ({tomorrow}) là ngày giao dịch hợp lệ. Tiếp tục chạy dự đoán.")
     return True
 
 
 with DAG(
     dag_id='DAGs_prediction',
     default_args=default_args,
-    description='Daily TradingAgents Multi-Agents Prediction for VN30',
-    schedule_interval='0 17 * * 1-5',  # 17:00 Thứ 2 -> Thứ 6 (Sau khi DAGs_warehouse hoàn tất)
+    description='Daily TradingAgents VN30 Prediction (02:00 AM)',
+    schedule_interval='0 2 * * 1-5',
     start_date=pendulum.datetime(2025, 1, 1, tz=local_tz),
     catchup=False,
     tags=['DAGs_prediction', 'prediction', 'tradingagents', 'daily'],
 ) as dag:
 
     check_trading_day_task = ShortCircuitOperator(
-        task_id='Check_If_Tomorrow_Is_Trading_Day',
-        python_callable=check_tomorrow_trading_day,
+        task_id='Check_If_Today_Is_Trading_Day',
+        python_callable=check_today_trading_day,
     )
 
     predict_vn30_task = BashOperator(
         task_id='TradingAgents_VN30_Prediction',
         bash_command="""
         export PYTHONUNBUFFERED=1
-        export TARGET_DATE=$(python -c "
-import pendulum, datetime
-current = pendulum.now(tz='Asia/Ho_Chi_Minh').date()
-target = current + datetime.timedelta(days=1)
-print(target.strftime('%Y-%m-%d'))
-")
-        echo "[Airflow] Khởi chạy TradingAgents phân tích dự đoán cho ngày: $TARGET_DATE"
+        export TARGET_DATE=$(python -c "import pendulum; print(pendulum.now(tz='Asia/Ho_Chi_Minh').date().strftime('%Y-%m-%d'))")
+        echo "[Airflow] Chạy TradingAgents dự đoán cho ngày: $TARGET_DATE"
         python -u /opt/TradingAgents/main.py --date "$TARGET_DATE" --symbols all --workers 2
         """,
         execution_timeout=timedelta(hours=4),
