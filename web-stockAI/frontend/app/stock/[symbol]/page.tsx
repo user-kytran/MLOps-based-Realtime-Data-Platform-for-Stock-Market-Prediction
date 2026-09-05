@@ -7,6 +7,7 @@ import { StockHeader, StockInfoSidebar, MatchedOrdersSidebar } from "@/component
 import { useStockData } from "@/hooks/useStockData"
 import { AuthGuard } from "@/components/auth"
 import { useState, useEffect } from "react"
+import { useOnboarding } from "@/lib/onboardingContext"
 
 const StockChart = dynamic(() => import("@/components/charts").then(m => ({ default: m.StockChart })), { ssr: false })
 const HistoricalChart = dynamic(() => import("@/components/charts").then(m => ({ default: m.HistoricalChart })), { ssr: false })
@@ -19,16 +20,24 @@ const StockStatistics = dynamic(() => import("@/components/stock").then(m => ({ 
 function StockDetailContent({ symbol }: { symbol: string }) {
   const [isMounted, setIsMounted] = useState(false)
   const { stockInfo, stockRealtime, reference, matchedOrders, loading, error } = useStockData(symbol)
+  const { activeTabOverride } = useOnboarding()
+  const [selectedTab, setSelectedTab] = useState("trading")
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (activeTabOverride) {
+      setSelectedTab(activeTabOverride)
+    }
+  }, [activeTabOverride])
+
   if (loading && !error) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="fixed inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/img_bg.png')",
             opacity: 0.1,
@@ -46,9 +55,9 @@ function StockDetailContent({ symbol }: { symbol: string }) {
 
   if (error && !loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="fixed inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/img_bg.png')",
             opacity: 0.1,
@@ -73,7 +82,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
 
   if (!stockInfo) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative">
         <Header />
         <div className="container mx-auto px-4 py-8 text-center relative z-10">
           <p className="text-gray-600">No quote data found or market not in session.</p>
@@ -85,9 +94,9 @@ function StockDetailContent({ symbol }: { symbol: string }) {
   const hasRealtimeData = !!stockRealtime;
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="fixed inset-0 bg-cover bg-center pointer-events-none"
         style={{
           backgroundImage: "url('/img_bg.png')",
           opacity: 0.1,
@@ -100,7 +109,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
       <div className="w-full px-4 py-4 relative z-10">
         <StockHeader symbol={stockInfo.symbol} name={stockInfo.shortName} />
 
-        <Tabs defaultValue="trading" className="w-full">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <div className="mb-3 overflow-x-auto">
             <TabsList className="min-w-max justify-start border border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm">
               <TabsTrigger value="trading" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Trading</TabsTrigger>
@@ -146,27 +155,27 @@ function StockDetailContent({ symbol }: { symbol: string }) {
           </TabsContent>
 
           <TabsContent value="history">
-            <HistoricalChart symbol={stockInfo.symbol} />
+            {selectedTab === "history" && <HistoricalChart symbol={stockInfo.symbol} />}
           </TabsContent>
 
           <TabsContent value="statistics">
-            <StockStatistics stockInfo={stockInfo} />
+            {selectedTab === "statistics" && <StockStatistics stockInfo={stockInfo} />}
           </TabsContent>
 
           <TabsContent value="financial">
-            <StockFinancialInfo stockInfo={stockInfo} />
+            {selectedTab === "financial" && <StockFinancialInfo stockInfo={stockInfo} />}
           </TabsContent>
 
           <TabsContent value="company">
-            <StockCompanyInfo stockInfo={stockInfo} />
+            {selectedTab === "company" && <StockCompanyInfo stockInfo={stockInfo} />}
           </TabsContent>
 
           <TabsContent value="predict">
-            <StockPrediction symbol={stockInfo.symbol} />
+            {selectedTab === "predict" && <StockPrediction symbol={stockInfo.symbol} />}
           </TabsContent>
 
           <TabsContent value="news">
-            <StockNews symbol={stockInfo.symbol} />
+            {selectedTab === "news" && <StockNews symbol={stockInfo.symbol} />}
           </TabsContent>
         </Tabs>
       </div>

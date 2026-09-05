@@ -1,4 +1,5 @@
 import { API_URL } from '@/lib/api';
+import { cachedFetch } from '@/lib/apiCache';
 import { useEffect, useState } from 'react';
 
 interface Prediction {
@@ -42,14 +43,11 @@ export function usePredictions(): Record<string, StockPrediction> {
       if (cached && Object.keys(cached).length > 0) setPredictions(cached)
 
       try {
-        const [predictionsRes, stocksRes] = await Promise.all([
-          fetch(`${API_URL}/stocks/stock_predictions`),
-          fetch(`${API_URL}/stocks/get_reference`)
+        const [predictionsData, stocksData] = await Promise.all([
+          cachedFetch(`${API_URL}/stocks/stock_predictions`, 10 * 60 * 1000).catch(() => []),
+          cachedFetch(`${API_URL}/stocks/get_reference`, 30 * 60 * 1000).catch(() => []),
         ]);
-        if (!predictionsRes.ok || !stocksRes.ok) return;
-
-        const predictionsData: Prediction[] = await predictionsRes.json();
-        const stocksData = await stocksRes.json();
+        if (!Array.isArray(predictionsData) || !Array.isArray(stocksData)) return;
 
         const closePrices: Record<string, number> = {};
         stocksData.forEach((stock: any) => {

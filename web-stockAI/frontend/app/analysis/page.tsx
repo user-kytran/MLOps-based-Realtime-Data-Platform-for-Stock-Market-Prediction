@@ -16,13 +16,22 @@ const PredictionAccuracy = dynamic(() => import("@/components/analysis/predictio
 export default function AnalysisPage() {
   return (
     <AuthGuard
-      title="Phân tích Thị trường & Độ chính xác AI"
-      description="Vui lòng đăng nhập với tài khoản Google để truy cập đầy đủ biểu đồ phân phối ngành, thống kê độ chính xác dự đoán AI và xu hướng giá chuyên sâu."
+      title="Market Analysis & AI Accuracy"
+      description="Please sign in with Google to access market breadth distribution, sector capital flows, and AI empirical accuracy backtests."
     >
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen relative">
+        <div
+          className="fixed inset-0 bg-cover bg-center pointer-events-none"
+          style={{
+            backgroundImage: "url('/img_bg.png')",
+            opacity: 0.2,
+            zIndex: -1,
+          }}
+        ></div>
+
         <Header />
 
-        <main className="w-full px-4 py-5">
+        <main className="w-full px-4 py-5 relative z-10">
           <section className="text-center mb-3">
             <h1 className="text-black text-2xl md:text-3xl font-extrabold mb-2 text-balance">
               MARKET

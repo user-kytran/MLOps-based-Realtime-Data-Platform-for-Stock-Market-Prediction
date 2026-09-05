@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Icons } from "@/components/icons"
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useStocksRealtimeWS } from "@/hooks/useStocksRealtimeWS"
 import { PredictionCell } from "@/components/market/PredictionCell"
 import { usePredictions } from "@/hooks/usePredictions"
@@ -120,15 +120,24 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
     }
   }, [stocks]);
 
-  const filteredStocks = (() => {
+  const vn30Set = useMemo(() => new Set(VN30_LIST), []);
+  const sectorMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const [key, symbols] of Object.entries(SECTOR_SYMBOLS)) {
+      map.set(key, new Set(symbols));
+    }
+    return map;
+  }, []);
+
+  const filteredStocks = useMemo(() => {
     let list = stocks;
-    if (mode === "VN30") list = list.filter(s => VN30_LIST.includes(s.symbol));
+    if (mode === "VN30") list = list.filter(s => vn30Set.has(s.symbol));
     if (sector !== "all") {
-      const symbols = SECTOR_SYMBOLS[sector] || [];
-      list = list.filter(s => symbols.includes(s.symbol));
+      const symbols = sectorMap.get(sector);
+      if (symbols) list = list.filter(s => symbols.has(s.symbol));
     }
     return list;
-  })();
+  }, [stocks, mode, sector, vn30Set, sectorMap]);
 
   return (
     <Card className="bg-white/95 backdrop-blur-md border-0 shadow-lg rounded-xl overflow-hidden !py-0 !gap-0">

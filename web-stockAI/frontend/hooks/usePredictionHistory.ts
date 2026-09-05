@@ -1,4 +1,5 @@
 import { API_URL } from '@/lib/api';
+import { cachedFetch } from '@/lib/apiCache';
 import { useEffect, useState } from 'react';
 
 export interface PredictionHistoryItem {

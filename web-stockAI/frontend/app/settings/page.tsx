@@ -10,13 +10,22 @@ import { AuthGuard } from "@/components/auth"
 export default function SettingsPage() {
   return (
     <AuthGuard
-      title="Cài đặt Tài khoản"
-      description="Vui lòng đăng nhập với tài khoản Google để xem và quản lý thông tin tài khoản, cài đặt thông báo và bảo mật."
+      title="Account Settings"
+      description="Please sign in with your Google account to manage your profile details, notification preferences, and security settings."
     >
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div
+          className="fixed inset-0 bg-cover bg-center pointer-events-none"
+          style={{
+            backgroundImage: "url('/img_bg.png')",
+            opacity: 0.15,
+            zIndex: -1,
+          }}
+        ></div>
+
         <Header />
 
-        <main className="container mx-auto px-4 py-5">
+        <main className="container mx-auto px-4 py-5 relative z-10">
           {/* Page Header */}
           <div className="mb-4">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Settings</h1>

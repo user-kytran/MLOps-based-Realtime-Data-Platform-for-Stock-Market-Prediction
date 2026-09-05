@@ -21,9 +21,9 @@ export default function NewsPage() {
       title="Financial News & Market Analysis"
       description="Please sign in with Google to access economic news, in-depth sector statistics, and financial market events."
     >
-      <div className="min-h-screen relative overflow-hidden">
+      <div className="min-h-screen relative">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="fixed inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/img_bg.png')",
             opacity: 0.1,

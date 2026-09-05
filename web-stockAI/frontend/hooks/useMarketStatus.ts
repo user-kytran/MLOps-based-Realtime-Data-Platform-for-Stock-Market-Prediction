@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { API_URL } from "@/lib/api";
+import { cachedFetch } from "@/lib/apiCache";
 
 export interface MarketStatus {
   is_open: boolean;
@@ -21,9 +22,7 @@ export function useMarketStatus() {
 
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`${API_URL}/stocks/market_status`);
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await cachedFetch(`${API_URL}/stocks/market_status`, 15000);
         if (isMounted) {
           setStatus(data);
           setIsLoading(false);

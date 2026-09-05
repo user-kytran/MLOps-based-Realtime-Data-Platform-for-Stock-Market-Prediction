@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -40,8 +41,7 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
   useEffect(() => {
     const fetchSectors = async () => {
       try {
-        const response = await fetch(`${API_URL}/news/sectors`)
-        const data = await response.json()
+        const data = await cachedFetch(`${API_URL}/news/sectors`, 60 * 60 * 1000)
         const list = Array.isArray(data) ? data : []
         setSectors(list)
       } catch {

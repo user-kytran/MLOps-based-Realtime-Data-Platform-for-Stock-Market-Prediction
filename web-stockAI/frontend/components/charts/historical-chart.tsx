@@ -20,6 +20,7 @@ import { Maximize2, Minimize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getApiUrl } from "@/lib/config"
+import { cachedFetch } from "@/lib/apiCache"
 
 interface HistoricalChartProps {
   symbol: string
@@ -221,19 +222,15 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
     setError("")
     setData([])
 
-    fetch(`${getApiUrl()}/stocks/stock_daily_by_symbol?symbol=${encodeURIComponent(symbol)}`, {
-      signal: controller.signal,
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json()
+    cachedFetch(`${getApiUrl()}/stocks/stock_daily_by_symbol?symbol=${encodeURIComponent(symbol)}`, 10 * 60 * 1000)
+      .then((result: ApiDailyData[]) => {
+        setData(toTechnicalData(Array.isArray(result) ? result : []))
       })
-      .then((result: ApiDailyData[]) => setData(toTechnicalData(Array.isArray(result) ? result : [])))
       .catch((fetchError) => {
-        if (fetchError.name !== "AbortError") setError("Unable to load chart data.")
+        setError("Unable to load chart data.")
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
+        setLoading(false)
       })
 
     return () => controller.abort()

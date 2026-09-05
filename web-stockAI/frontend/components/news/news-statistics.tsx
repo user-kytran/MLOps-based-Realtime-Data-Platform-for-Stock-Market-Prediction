@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 
 const RADIAN = Math.PI / 180
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
@@ -134,10 +135,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
       }
       if (filters.searchQuery) params.append('search_query', filters.searchQuery)
 
-      const response = await fetch(`${API_URL}/news/news_time_filtered?${params.toString()}`)
-      if (!response.ok) throw new Error('Failed to fetch news')
-      
-      const data: NewsItem[] = await response.json()
+      const data: NewsItem[] = await cachedFetch(`${API_URL}/news/news_time_filtered?${params.toString()}`, 30000)
       setTotalNews(data.length)
       
       // Tính toán thống kê

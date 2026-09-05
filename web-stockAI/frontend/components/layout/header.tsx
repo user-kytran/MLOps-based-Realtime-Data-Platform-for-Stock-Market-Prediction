@@ -211,6 +211,8 @@ export function Header() {
             {/* Divider */}
             <div className="hidden lg:block w-px h-6 bg-gray-200"></div>
 
+
+
             {/* User Auth / Profile */}
             <div className="flex items-center pl-1">
               {user ? <UserNav /> : <GoogleSignInButton />}
@@ -294,6 +296,8 @@ export function Header() {
                 </div>
               </div>
             </div>
+
+
 
             <nav className="flex flex-col space-y-1 px-4">
               <Link

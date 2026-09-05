@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import type { StockInfo, StockRealtime, MatchedOrder } from "@/types/stock"
 import { getApiUrl } from "@/lib/config"
@@ -16,68 +18,71 @@ export function useStockData(symbol: string) {
 
   useEffect(() => {
     const upperSymbol = symbol.toUpperCase()
-    setLoading(true)
-    setError("")
     if (!isValidStockSymbol(upperSymbol)) {
-      setError("Không có dữ liệu cho mã này")
+      setError("No data found for this symbol")
       setLoading(false)
       return
     }
-    fetch(`${getApiUrl()}/stocks/stock_info/${upperSymbol}`)
-      .then(res => res.json())
-      .then((data) => {
-        if (!data.error) setStockInfo(data)
-        else setError("Không có dữ liệu cho mã này")
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [symbol])
 
-  useEffect(() => {
-    fetch(`${getApiUrl()}/stocks/get_reference`)
-      .then(res => res.json())
-      .then((data) => {
-        const item = data.find((d: any) => d.symbol === symbol)
-        if (item) setReference(item.close)
-      })
-      .catch(() => {})
-  }, [symbol])
+    setLoading(true)
+    setError("")
 
-  useEffect(() => {
-    cachedFetch(`${getApiUrl()}/stocks/stocks_latest`)
-      .then((data) => {
-        const stock = data.find((s: any) => s.symbol.split(".")[0] === symbol)
-        if (stock) {
-          setStockRealtime({
-            symbol: stock.symbol.split(".")[0],
-            price: stock.price,
-            change: stock.change,
-            change_percent: stock.change_percent,
-            day_volume: stock.day_volume,
-            last_size: stock.last_size,
-          })
+    const apiUrl = getApiUrl()
+
+    // 1. Parallel fetch for stock info, reference price, and latest realtime snapshot (Cached)
+    Promise.all([
+      cachedFetch(`${apiUrl}/stocks/stock_info/${upperSymbol}`, 10 * 60 * 1000).catch(() => null),
+      cachedFetch(`${apiUrl}/stocks/get_reference`, 30 * 60 * 1000).catch(() => []),
+      cachedFetch(`${apiUrl}/stocks/stocks_latest`, 2000).catch(() => []),
+    ])
+      .then(([infoData, refData, latestData]) => {
+        if (infoData && !infoData.error) {
+          setStockInfo(infoData)
+        } else {
+          setError("No data found for this symbol")
+        }
+
+        if (Array.isArray(refData)) {
+          const item = refData.find((d: any) => d.symbol === upperSymbol)
+          if (item) setReference(item.close)
+        }
+
+        if (Array.isArray(latestData)) {
+          const stock = latestData.find((s: any) => s.symbol.split(".")[0] === upperSymbol)
+          if (stock) {
+            setStockRealtime({
+              symbol: stock.symbol.split(".")[0],
+              price: stock.price,
+              change: stock.change,
+              change_percent: stock.change_percent,
+              day_volume: stock.day_volume,
+              last_size: stock.last_size,
+            })
+          }
         }
       })
-      .catch(() => {})
-  }, [symbol])
+      .finally(() => {
+        setLoading(false)
+      })
 
-  useEffect(() => {
-    fetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${symbol}`)
-      .then(res => res.json())
+    // 2. Fetch matched orders (Cached & Deduplicated, slice top 100 for high rendering performance)
+    cachedFetch(`${apiUrl}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(upperSymbol)}`, 2000)
       .then((data) => {
-        if (data && data.length > 0) {
-          const orders: MatchedOrder[] = data.map((item: any) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const sliceData = data.slice(-100)
+          const orders: MatchedOrder[] = sliceData.map((item: any) => {
             const tsMs = Number(item.timestamp)
             const timestamp = new Date(tsMs)
             const timeStr = `${timestamp.getHours().toString().padStart(2, '0')}:${timestamp.getMinutes().toString().padStart(2, '0')}:${timestamp.getSeconds().toString().padStart(2, '0')}`
             return { time: timeStr, price: item.price, last_size: item.last_size, change: item.change }
-          }).sort((a: MatchedOrder, b: MatchedOrder) => b.time.localeCompare(a.time))
+          }).reverse()
           setMatchedOrders(orders)
         }
       })
       .catch(() => {})
   }, [symbol])
 
+  // Real-time WebSocket subscription for live tick updates
   useEffect(() => {
     const id = `useStockData_${symbol}`
     subscribe(id, (data) => {
@@ -110,11 +115,10 @@ export function useStockData(symbol: string) {
         const now = new Date()
         timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`
       }
-      setMatchedOrders(prev => [{ time: timeStr, price: data.price, last_size: data.last_size, change: data.change }, ...prev])
+      setMatchedOrders(prev => [{ time: timeStr, price: data.price, last_size: data.last_size, change: data.change }, ...prev.slice(0, 99)])
     })
     return () => unsubscribe(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbol])
+  }, [symbol, subscribe, unsubscribe])
 
   return { stockInfo, stockRealtime, reference, matchedOrders, loading, error }
 }

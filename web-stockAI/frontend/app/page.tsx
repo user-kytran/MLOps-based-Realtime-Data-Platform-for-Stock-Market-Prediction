@@ -5,9 +5,9 @@ import { StockWidgetsSection } from "@/components/market/stock-widgets-section";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="fixed inset-0 bg-cover bg-center pointer-events-none"
         style={{
           backgroundImage: "url('/img_bg.png')",
           opacity: 0.2,

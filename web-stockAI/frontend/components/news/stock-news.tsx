@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText } from "lucide-react"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 
 interface NewsItem {
   stock_code: string
@@ -31,8 +32,7 @@ export function StockNews({ symbol }: StockNewsProps) {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`${API_URL}/news/news_by_symbol?symbol=${symbol}`)
-      .then(res => res.json())
+    cachedFetch(`${API_URL}/news/news_by_symbol?symbol=${symbol}`, 5 * 60 * 1000)
       .then((data) => {
         if (data && Array.isArray(data)) {
           const sortedData = data.sort((a: NewsItem, b: NewsItem) => {
@@ -42,7 +42,7 @@ export function StockNews({ symbol }: StockNewsProps) {
         }
         setLoading(false)
       })
-      .catch(err => {
+      .catch(() => {
         setLoading(false)
       })
   }, [symbol])

@@ -1,3 +1,4 @@
+import { cachedFetch } from '@/lib/apiCache';
 import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/api";
 import { useStockWSContext } from "@/lib/stockWSContext";
@@ -35,9 +36,8 @@ export function useTopMoversWS() {
 
         subscribe("useTopMoversWS", handleMessage);
 
-        fetch(`${API_URL}/stocks/stocks_gainers_losers`)
-            .then(res => res.json())
-            .then((data) => {
+        cachedFetch(`${API_URL}/stocks/stocks_gainers_losers`, 3000)
+            .then((data: any) => {
                 if (!isMounted) return;
                 if (data.gainers && data.losers) {
                     setGainers(data.gainers);

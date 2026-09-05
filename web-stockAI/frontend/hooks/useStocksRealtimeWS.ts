@@ -129,21 +129,19 @@ export function useStocksRealtimeWS() {
         subscribe("useStocksRealtimeWS", handleMessage);
 
         async function fetchInitialData() {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
             try {
-                // Fetch reference riêng trước — phải xong trước khi tính ceiling/floor
-                const refData = await fetch(`${API_URL}/stocks/get_reference`, { signal: controller.signal }).then(r => r.json());
-                const refMap = new Map<string, number>();
-                refData.forEach((item: any) => refMap.set(item.symbol, item.close));
-                referencesRef.current = refMap;
-
-                // Sau khi có reference mới fetch song song daily + latest
-                const [dailyData, latestData] = await Promise.all([
-                    fetch(`${API_URL}/stocks/get_stocks`, { signal: controller.signal }).then(r => r.json()),
-                    cachedFetch(`${API_URL}/stocks/stocks_latest`),
+                // Fetch reference, daily high/low, and latest quotes all in parallel with cachedFetch
+                const [refData, dailyData, latestData] = await Promise.all([
+                    cachedFetch(`${API_URL}/stocks/get_reference`, 30 * 60 * 1000).catch(() => []),
+                    cachedFetch(`${API_URL}/stocks/get_stocks`, 60 * 1000).catch(() => []),
+                    cachedFetch(`${API_URL}/stocks/stocks_latest`, 2000).catch(() => []),
                 ]);
-                clearTimeout(timeoutId);
+
+                const refMap = new Map<string, number>();
+                if (Array.isArray(refData)) {
+                    refData.forEach((item: any) => refMap.set(item.symbol, item.close));
+                }
+                referencesRef.current = refMap;
 
                 interface DailyValues { high: number; low: number }
                 const dailyMap = new Map<string, DailyValues>(dailyData.map((item: any) => [
@@ -197,8 +195,7 @@ export function useStocksRealtimeWS() {
                     filtered.forEach(s => { stocksRef.current[s.symbol] = s; });
                 }
             } catch {
-                clearTimeout(timeoutId);
-            }
+                            }
         }
 
         fetchInitialData();

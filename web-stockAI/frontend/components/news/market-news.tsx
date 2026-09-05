@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Clock, ExternalLink, Newspaper } from "lucide-react"
 import { useState, useEffect } from "react"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 
 interface NewsItem {
   stock_code: string
@@ -23,8 +24,7 @@ export function MarketNews() {
 
   const fetchNews = async () => {
     try {
-      const response = await fetch(`${API_URL}/news/news_new`)
-      const data = await response.json()
+      const data = await cachedFetch(`${API_URL}/news/news_new`, 60000)
       setNews(data)
     } catch {
       // Silent on news fetch error

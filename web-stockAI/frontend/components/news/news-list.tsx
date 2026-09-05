@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { API_URL } from "@/lib/api"
+import { cachedFetch } from "@/lib/apiCache"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, FileText, ChevronLeft, ChevronRight } from "lucide-react"

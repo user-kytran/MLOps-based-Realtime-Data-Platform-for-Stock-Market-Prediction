@@ -18,6 +18,7 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getApiUrl } from "@/lib/config"
+import { cachedFetch } from "@/lib/apiCache"
 import { useStockWSContext, type StockWSConnectionStatus } from "@/lib/stockWSContext"
 import type { StockInfo } from "@/types/stock"
 
@@ -232,11 +233,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
     const loadData = async (showLoading = false) => {
       if (showLoading) setLoading(true)
       try {
-        const response = await fetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(symbol)}`, {
-          signal: controller.signal,
-        })
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const result = await response.json()
+        const result = await cachedFetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(symbol)}`, 2000)
         if (mounted) {
           setChartData(aggregateTicks(Array.isArray(result) ? result : []))
           setError("")
