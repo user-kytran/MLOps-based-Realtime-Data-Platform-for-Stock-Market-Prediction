@@ -38,7 +38,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
 
         <Header />
         <div className="container mx-auto px-4 py-8 text-center relative z-10">
-          <p className="text-gray-600">Đang tải dữ liệu {symbol}...</p>
+          <p className="text-gray-600">Loading market data for {symbol}...</p>
         </div>
       </div>
     )
@@ -76,7 +76,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
       <div className="min-h-screen relative overflow-hidden">
         <Header />
         <div className="container mx-auto px-4 py-8 text-center relative z-10">
-          <p className="text-gray-600">Không tìm thấy dữ liệu hoặc thị trường chưa mở.</p>
+          <p className="text-gray-600">No quote data found or market not in session.</p>
         </div>
       </div>
     )
@@ -128,7 +128,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
                   <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
                 ) : (
                   <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
-                    <p>Biểu đồ realtime không khả dụng.</p>
+                    <p>Real-time chart currently unavailable.</p>
                   </div>
                 )}
               </div>
@@ -138,7 +138,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
                   <MatchedOrdersSidebar matchedOrders={matchedOrders} />
                 ) : (
                   <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
-                    <p>Sổ lệnh realtime không khả dụng.</p>
+                    <p>Matched order feed currently unavailable.</p>
                   </div>
                 )}
               </div>
@@ -179,8 +179,8 @@ export default function StockDetailPage({ params }: { params: { symbol: string }
 
   return (
     <AuthGuard
-      title={`Chi tiết & Dự đoán Cổ phiếu ${symbol}`}
-      description={`Vui lòng đăng nhập với tài khoản Google để theo dõi biểu đồ realtime, sổ khớp lệnh và mô hình dự đoán giá AI của ${symbol}.`}
+      title={`Stock Overview & AI Forecast: ${symbol}`}
+      description={`Please sign in with Google to view real-time charts, order book, and AI price prediction models for ${symbol}.`}
     >
       <StockDetailContent symbol={symbol} />
     </AuthGuard>

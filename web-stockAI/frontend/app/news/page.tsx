@@ -18,8 +18,8 @@ export default function NewsPage() {
 
   return (
     <AuthGuard
-      title="Tin tức & Phân tích Thị trường"
-      description="Vui lòng đăng nhập với tài khoản Google để xem toàn bộ tin tức kinh tế, thống kê phân tích chuyên sâu và sự kiện tài chính."
+      title="Financial News & Market Analysis"
+      description="Please sign in with Google to access economic news, in-depth sector statistics, and financial market events."
     >
       <div className="min-h-screen relative overflow-hidden">
         <div

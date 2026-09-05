@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Brain, TrendingUp, TrendingDown, Minus } from "lucide-react"
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import { useAccuracy } from "@/hooks/useAccuracy"
 import { usePredictionHistory, type PredictionHistoryItem } from "@/hooks/usePredictionHistory"
@@ -20,11 +20,7 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
   const correctCount = accuracyData[symbol]?.correct || 0
   const totalCount = accuracyData[symbol]?.total || 0
 
-  const getTrendIcon = (trend: "up" | "down" | "neutral" | null) => {
-    if (trend === "up") return <TrendingUp className="h-5 w-5" />
-    if (trend === "down") return <TrendingDown className="h-5 w-5" />
-    return <Minus className="h-5 w-5" />
-  }
+
 
   const getTrendColor = (trend: "up" | "down" | "neutral" | null) => {
     if (trend === "up") return "text-green-600 bg-green-50"
@@ -43,7 +39,6 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
       <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
         <CardHeader className="py-3">
           <CardTitle className="flex items-center gap-2 text-sm font-bold text-gray-900">
-            <Brain className="h-5 w-5 text-purple-600" />
             AI Prediction for {symbol}
           </CardTitle>
         </CardHeader>
@@ -51,9 +46,8 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div className={`text-center p-3 rounded-lg border-2 ${getTrendColor(nextDayPrediction.trend)}`}>
               <div className="text-xs font-semibold mb-2">Predicted Trend</div>
-              <div className="flex items-center justify-center gap-2 mb-1">
-                {getTrendIcon(nextDayPrediction.trend)}
-                <span className="text-xl font-bold">{getTrendLabel(nextDayPrediction.trend)}</span>
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="text-2xl font-extrabold">{getTrendLabel(nextDayPrediction.trend)}</span>
               </div>
               <div className="text-xs text-gray-600">Date {nextDayPrediction.date || "—"}</div>
             </div>
@@ -71,7 +65,7 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
             </div>
           </div>
 
-          <div className="h-[350px] w-full mb-6">
+          <div className="h-[200px] w-full mb-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -129,7 +123,7 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
                   }}
                 />
                 <Legend 
-                  wrapperStyle={{ paddingTop: "20px" }}
+                  wrapperStyle={{ paddingTop: "6px" }}
                   iconType="line"
                 />
                 <Line
@@ -163,24 +157,16 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
                     
                     if (payload.is_correct === true) {
                       return (
-                        <g>
-                          <circle cx={cx} cy={cy} r={12} fill="#10b981" fillOpacity={0.2} />
-                          <circle cx={cx} cy={cy} r={8} fill="#10b981" stroke="#fff" strokeWidth={2.5} />
-                          <text x={cx} y={cy + 1} textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">✓</text>
-                        </g>
+                        <circle cx={cx} cy={cy} r={5.5} fill="#16a34a" stroke="#ffffff" strokeWidth={2} />
                       )
                     } else if (payload.is_correct === false) {
                       return (
-                        <g>
-                          <circle cx={cx} cy={cy} r={12} fill="#ef4444" fillOpacity={0.2} />
-                          <circle cx={cx} cy={cy} r={8} fill="#ef4444" stroke="#fff" strokeWidth={2.5} />
-                          <text x={cx} y={cy + 1} textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">✗</text>
-                        </g>
+                        <circle cx={cx} cy={cy} r={5.5} fill="#dc2626" stroke="#ffffff" strokeWidth={2} />
                       )
                     }
                     
                     return (
-                      <circle cx={cx} cy={cy} r={6} fill="#3b82f6" stroke="#fff" strokeWidth={2} />
+                      <circle cx={cx} cy={cy} r={4.5} fill="#2563eb" stroke="#ffffff" strokeWidth={1.5} />
                     )
                   }}
                   activeDot={{ r: 10 }}
@@ -190,30 +176,26 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
             </ResponsiveContainer>
           </div>
 
-          <div className="text-xs text-gray-600 text-center">
+          <div className="text-xs text-slate-600 text-center">
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-purple-500 rounded-full"></div>
                 <span>Predicted</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
                 <span>Actual</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="relative">
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-[10px]">✓</div>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-green-600 rounded-full"></div>
                 <span>Correct</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="relative">
-                  <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-[10px]">✗</div>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-red-600 rounded-full"></div>
                 <span>Wrong</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-slate-400 rounded-full"></div>
                 <span>No Prediction</span>
               </div>
             </div>

@@ -133,8 +133,7 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
   return (
     <Card className="bg-white/95 backdrop-blur-md border-0 shadow-lg rounded-xl overflow-hidden !py-0 !gap-0">
       <CardHeader className="place-items-center bg-white text-cyan-700 !py-1.5 !px-2">
-        <CardTitle className="flex w-full items-center justify-center gap-1.5 text-sm font-bold">
-          <Icons.TrendingUp className="h-3.5 w-3.5" />
+        <CardTitle className="flex w-full items-center justify-center text-[15.5px] font-bold tracking-wide">
           {mode === "VN30" ? "VN30 STOCKS" : "ALL STOCKS"}
         </CardTitle>
       </CardHeader>
@@ -156,20 +155,40 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
             </colgroup>
             <thead className="sticky top-0 z-20 bg-gray-200 shadow-sm">
               <tr>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">STOCK</th>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">CEIL</th>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">FLOOR</th>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">REF</th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[38px]">STOCK</span>
+                </th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">CEIL</span>
+                </th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">FLOOR</span>
+                </th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">REF</span>
+                </th>
                 <th colSpan={4} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">MATCH</th>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">HIGH</th>
-                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">LOW</th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">HIGH</span>
+                </th>
+                <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">LOW</span>
+                </th>
                 <th rowSpan={2} className="text-gray-800 text-center py-1 px-0.5 font-bold text-[10px] border border-gray-300 bg-gray-200 whitespace-nowrap">PREDICT</th>
               </tr>
               <tr>
-                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">PRICE</th>
-                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">VOL</th>
-                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">+/-</th>
-                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">%</th>
+                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">PRICE</span>
+                </th>
+                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[44px]">VOL</span>
+                </th>
+                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[44px]">+/-</span>
+                </th>
+                <th className="text-gray-700 text-center py-1 px-0.5 font-bold text-[11px] border border-gray-300 bg-gray-200 whitespace-nowrap">
+                  <span className="inline-block text-left min-w-[46px]">%</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -190,34 +209,46 @@ export function StockTable({ mode = "VN30" as "ALL" | "VN30", sector = "all" as 
                 return (
                   <tr key={stock.symbol} className="odd:bg-gray-50 even:bg-white hover:bg-cyan-50 transition-colors cursor-pointer">
                     <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${priceColor}`}>
-                      <Link href={`/stock/${stock.symbol}`}><span className="hover:underline">{stock.symbol}</span></Link>
+                      <Link href={`/stock/${stock.symbol}`}><span className="inline-block text-left min-w-[38px] hover:underline">{stock.symbol}</span></Link>
                     </td>
-                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-purple-600 border border-gray-300 whitespace-nowrap">
-                      {stock.ceiling?.toLocaleString("vi-VN")}
+                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums text-purple-600 border border-gray-300 whitespace-nowrap">
+                      <span className="inline-block text-left min-w-[46px]">{stock.ceiling?.toLocaleString("vi-VN")}</span>
                     </td>
-                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-cyan-700 border border-gray-300 whitespace-nowrap">
-                      {stock.floor?.toLocaleString("vi-VN")}
+                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums text-cyan-700 border border-gray-300 whitespace-nowrap">
+                      <span className="inline-block text-left min-w-[46px]">{stock.floor?.toLocaleString("vi-VN")}</span>
                     </td>
-                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-amber-600 border border-gray-300 whitespace-nowrap">
-                      {stock.reference?.toLocaleString("vi-VN")}
+                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums text-amber-600 border border-gray-300 whitespace-nowrap">
+                      <span className="inline-block text-left min-w-[46px]">{stock.reference?.toLocaleString("vi-VN")}</span>
                     </td>
-                    <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${flashPrice ? "" : priceColor} ${flashCellClass(flashPrice)}`}>
-                      {stock.match.price ? stock.match.price.toLocaleString("vi-VN") : ""}
+                    <td className={`py-1 px-0.5 text-center font-bold text-[11px] tabular-nums border border-gray-300 whitespace-nowrap ${flashPrice ? "" : priceColor} ${flashCellClass(flashPrice)}`}>
+                      <span className="inline-block text-left min-w-[46px]">{stock.match.price ? stock.match.price.toLocaleString("vi-VN") : ""}</span>
                     </td>
-                    <td className={`py-1 px-0.5 text-center font-semibold text-[11px] border border-gray-300 whitespace-nowrap ${flashVol ? "" : "text-gray-700"} ${flashCellClass(flashVol)}`}>
-                      {stock.match.volume > 0 ? formatVolume(stock.match.volume) : ""}
+                    <td className={`py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums border border-gray-300 whitespace-nowrap ${flashVol ? "" : "text-gray-700"} ${flashCellClass(flashVol)}`}>
+                      <span className="inline-block text-left min-w-[44px]">{stock.match.volume > 0 ? formatVolume(stock.match.volume) : ""}</span>
                     </td>
-                    <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${flashChg ? "" : changeColor} ${flashCellClass(flashChg)}`}>
-                      {displayChange != null ? (displayChange > 0 ? "+" : "") + displayChange : ""}
+                    <td className={`py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums border border-gray-300 whitespace-nowrap ${flashChg ? "" : changeColor} ${flashCellClass(flashChg)}`}>
+                      {displayChange != null ? (
+                        displayChange === 0 ? (
+                          <span className="inline-block text-center">0</span>
+                        ) : (
+                          <span className="inline-block text-left min-w-[44px]">{(displayChange > 0 ? "+" : "") + displayChange}</span>
+                        )
+                      ) : ""}
                     </td>
-                    <td className={`py-1 px-0.5 text-center font-bold text-[11px] border border-gray-300 whitespace-nowrap ${flashPct ? "" : changeColor} ${flashCellClass(flashPct)}`}>
-                      {displayChangePct != null ? (displayChangePct > 0 ? "+" : "") + displayChangePct + "%" : ""}
+                    <td className={`py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums border border-gray-300 whitespace-nowrap ${flashPct ? "" : changeColor} ${flashCellClass(flashPct)}`}>
+                      {displayChangePct != null ? (
+                        displayChangePct === 0 ? (
+                          <span className="inline-block text-center">0%</span>
+                        ) : (
+                          <span className="inline-block text-left min-w-[46px]">{(displayChangePct > 0 ? "+" : "") + displayChangePct + "%"}</span>
+                        )
+                      ) : ""}
                     </td>
-                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-gray-700 border border-gray-300 whitespace-nowrap">
-                      {stock.high > 0 ? stock.high.toLocaleString("vi-VN") : "-"}
+                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums text-gray-700 border border-gray-300 whitespace-nowrap">
+                      <span className="inline-block text-left min-w-[46px]">{stock.high > 0 ? stock.high.toLocaleString("vi-VN") : "-"}</span>
                     </td>
-                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] text-gray-700 border border-gray-300 whitespace-nowrap">
-                      {stock.low > 0 ? stock.low.toLocaleString("vi-VN") : "-"}
+                    <td className="py-1 px-0.5 text-center font-semibold text-[11px] tabular-nums text-gray-700 border border-gray-300 whitespace-nowrap">
+                      <span className="inline-block text-left min-w-[46px]">{stock.low > 0 ? stock.low.toLocaleString("vi-VN") : "-"}</span>
                     </td>
                     <td className="py-0.5 px-0.5 text-center text-[11px] border border-gray-300">
                       <PredictionCell

@@ -135,7 +135,7 @@ export function NewsList({ filters }: NewsListProps) {
     return (
       <div className="space-y-3">
         <div className="py-6 text-center">
-          <div className="text-red-600 text-sm">Lỗi: {error}</div>
+          <div className="text-red-600 text-sm">Error: {error}</div>
         </div>
       </div>
     )
@@ -220,7 +220,7 @@ export function NewsList({ filters }: NewsListProps) {
             className="h-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
-            Trước
+            Previous
           </Button>
 
           <div className="flex items-center gap-1">
@@ -262,7 +262,7 @@ export function NewsList({ filters }: NewsListProps) {
             disabled={currentPage === totalPages}
             className="h-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           >
-            Sau
+            Next
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>

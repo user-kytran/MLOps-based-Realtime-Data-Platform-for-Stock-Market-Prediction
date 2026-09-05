@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { Maximize2, Minimize2, TrendingUp } from "lucide-react"
+import { Maximize2, Minimize2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -286,9 +286,8 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
     <Card className={cardClassName}>
       <CardHeader className="gap-3 pb-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className={`flex items-center gap-2 font-extrabold text-slate-950 ${expanded ? "text-xl sm:text-2xl" : "text-lg sm:text-xl"}`}>
-            <TrendingUp className="h-5 w-5 text-blue-600" />
-            <span>{symbol} Technical Analysis</span>
+          <CardTitle className={`font-bold text-slate-900 ${expanded ? "text-lg sm:text-xl" : "text-base sm:text-lg"}`}>
+            {symbol} Technical Analysis
           </CardTitle>
           <Button
             type="button"

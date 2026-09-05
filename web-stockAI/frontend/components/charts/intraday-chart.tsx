@@ -45,8 +45,7 @@ export function IntradayChart({ symbol }: IntradayChartProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm font-bold">
-          <Icons.Clock className="h-5 w-5 text-primary" />
-          Biến động giá trong ngày
+          Intraday Price Movement
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -101,9 +100,9 @@ export function IntradayChart({ symbol }: IntradayChartProps) {
 
         {/* Summary Info */}
         <div className="flex justify-between items-center text-sm text-muted-foreground">
-          <span>Cao nhất: <span className="font-mono font-semibold text-green-600">{maxPrice.toLocaleString("vi-VN")}</span></span>
-          <span>Thấp nhất: <span className="font-mono font-semibold text-red-600">{minPrice.toLocaleString("vi-VN")}</span></span>
-          <span>Biến động: <span className="font-mono font-semibold">{Math.round(((maxPrice - minPrice) / minPrice) * 100 * 100) / 100}%</span></span>
+          <span>High: <span className="font-mono font-semibold text-green-600">{maxPrice.toLocaleString("vi-VN")}</span></span>
+          <span>Low: <span className="font-mono font-semibold text-red-600">{minPrice.toLocaleString("vi-VN")}</span></span>
+          <span>Change: <span className="font-mono font-semibold">{Math.round(((maxPrice - minPrice) / minPrice) * 100 * 100) / 100}%</span></span>
         </div>
       </CardContent>
     </Card>

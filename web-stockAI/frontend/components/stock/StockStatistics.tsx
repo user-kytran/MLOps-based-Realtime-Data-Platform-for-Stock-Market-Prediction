@@ -65,21 +65,24 @@ export function StockStatistics({ stockInfo }: StockStatisticsProps) {
           {stockInfo.fiftyTwoWeekLow && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">Lowest 52 weeks</span>
-              <span className="font-extrabold text-sm text-cyan-600">{formatCurrency(stockInfo.fiftyTwoWeekLow)}</span>
+              <span className="font-bold text-sm text-rose-600">{formatCurrency(stockInfo.fiftyTwoWeekLow)}</span>
             </div>
           )}
           {stockInfo.fiftyTwoWeekHigh && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">Highest 52 weeks</span>
-              <span className="font-extrabold text-sm text-purple-600">{formatCurrency(stockInfo.fiftyTwoWeekHigh)}</span>
+              <span className="font-bold text-sm text-emerald-600">{formatCurrency(stockInfo.fiftyTwoWeekHigh)}</span>
             </div>
           )}
           {stockInfo.fiftyTwoWeekLow && stockInfo.fiftyTwoWeekHigh && (
-            <div className="mt-4">
-              <div className="text-sm text-gray-500 mb-2">52 weeks range</div>
-              <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-4 pt-1">
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>52 weeks range</span>
+                <span className="font-medium text-slate-700">Current: <strong className="text-slate-900">{formatCurrency(stockInfo.currentPrice)}</strong></span>
+              </div>
+              <div className="relative h-2.5 bg-slate-200 rounded-full overflow-visible">
                 <div 
-                  className="absolute h-full bg-gradient-to-r from-cyan-500 to-purple-500"
+                  className="absolute h-full rounded-full bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-500"
                   style={{
                     left: 0,
                     right: 0,
@@ -87,11 +90,17 @@ export function StockStatistics({ stockInfo }: StockStatisticsProps) {
                   }}
                 />
                 <div 
-                  className="absolute h-4 w-1 bg-blue-600 top-1/2 -translate-y-1/2"
+                  className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center"
                   style={{
-                    left: `${((stockInfo.currentPrice - stockInfo.fiftyTwoWeekLow) / (stockInfo.fiftyTwoWeekHigh - stockInfo.fiftyTwoWeekLow)) * 100}%`
+                    left: `${Math.max(0, Math.min(100, ((stockInfo.currentPrice - stockInfo.fiftyTwoWeekLow) / (stockInfo.fiftyTwoWeekHigh - stockInfo.fiftyTwoWeekLow)) * 100))}%`
                   }}
-                />
+                >
+                  <div className="w-3.5 h-3.5 bg-slate-900 border-2 border-white rounded-full shadow-md" />
+                </div>
+              </div>
+              <div className="flex justify-between text-[11px] text-gray-400 mt-2 font-mono">
+                <span>Low: {formatCurrency(stockInfo.fiftyTwoWeekLow)}</span>
+                <span>High: {formatCurrency(stockInfo.fiftyTwoWeekHigh)}</span>
               </div>
             </div>
           )}

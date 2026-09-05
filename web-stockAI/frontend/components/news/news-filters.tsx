@@ -5,22 +5,7 @@ import { API_URL } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, Calendar, Globe, Building, TrendingUp, Briefcase, DollarSign, Zap, Home, Factory } from "lucide-react"
-
-const sectorIcons = {
-  all: Globe,
-  Consumer_Cyclical: Building,
-  Consumer_Defensive: Briefcase,
-  Basic_Materials: Factory,
-  Financial_Services: DollarSign,
-  Communication_Services: Zap,
-  Real_Estate: Home,
-  Utilities: TrendingUp,
-  Industrials: Factory,
-  Technology: Zap,
-  Healthcare: Briefcase,
-  Energy: TrendingUp
-}
+import { Search, X } from "lucide-react"
 
 const timeFilters = [
   { id: "today", label: "Today" },
@@ -83,17 +68,24 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
     }
   }
 
+  const hasActiveFilters =
+    filters.sector !== "all" ||
+    (filters.timeFilter && filters.timeFilter !== "today") ||
+    !!filters.fromDate ||
+    !!filters.toDate ||
+    !!filters.searchQuery.trim()
+
   return (
     <div className="space-y-3">
       {/* Search Bar */}
       <div className="relative max-w-xl mx-auto">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 transform -translate-y-1/2 text-cyan-600" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 transform -translate-y-1/2 text-black" />
         <Input
           type="text"
-          placeholder="Tìm kiếm tin tức..."
+          placeholder="Search by stock symbol or company name..."
           value={filters.searchQuery}
           onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
-          className="h-9 rounded-md border-gray-300 bg-white/95 pl-9 pr-3 py-2 text-sm text-gray-900 shadow-sm backdrop-blur-sm placeholder:text-gray-500 focus:border-cyan-500"
+          className="h-8 pl-9 pr-3 py-1.5 text-sm rounded-lg border-2 border-gray-600 hover:border-gray-500 text-black bg-white"
         />
       </div>
 
@@ -101,42 +93,36 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
       <div className="space-y-3">
         {/* Sector Filters - Full Width */}
         <div>
-          <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-            <Filter className="h-3.5 w-3.5 text-cyan-600" />
+          <h3 className="mb-2 text-xs font-semibold text-gray-700">
             Stock Sectors
           </h3>
           <div className="flex flex-wrap gap-1.5">
             {loading ? (
               <div className="text-xs text-gray-500">Loading sectors...</div>
             ) : (
-              sectors.map((sector) => {
-                const Icon = sectorIcons[sector.id as keyof typeof sectorIcons] || Globe
-                return (
-                  <Button
-                    key={sector.id}
-                    variant={filters.sector === sector.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setFilters({ ...filters, sector: sector.id })}
-                    className={`h-7 gap-1 px-2 text-[11px] ${filters.sector === sector.id ? 'bg-cyan-600 text-white hover:bg-cyan-700' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900'}`}
-                  >
-                    <Icon className="h-3 w-3" />
-                    {sector.label}
-                    <Badge variant="secondary" className="ml-0.5 h-3.5 px-1 py-0 text-[9px] bg-gray-200 text-gray-700">
-                      {sector.count}
-                    </Badge>
-                  </Button>
-                )
-              })
+              sectors.map((sector) => (
+                <Button
+                  key={sector.id}
+                  variant={filters.sector === sector.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilters({ ...filters, sector: sector.id })}
+                  className={`h-7 px-2.5 text-[11px] font-medium ${filters.sector === sector.id ? 'bg-cyan-600 text-white hover:bg-cyan-700' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900'}`}
+                >
+                  {sector.label}
+                  <Badge variant="secondary" className="ml-1 h-3.5 px-1 py-0 text-[9px] bg-gray-200 text-gray-700">
+                    {sector.count}
+                  </Badge>
+                </Button>
+              ))
             )}
           </div>
         </div>
 
         {/* Time and Date Range - Side by Side */}
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 items-end">
           {/* Time Filters */}
           <div>
-            <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <Calendar className="h-3.5 w-3.5 text-cyan-600" />
+            <h3 className="mb-1.5 text-xs font-semibold text-gray-700">
               Time
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -146,7 +132,7 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
                   variant={filters.timeFilter === filter.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilters({ ...filters, timeFilter: filter.id })}
-                  className={`h-7 px-2 text-[11px] ${filters.timeFilter === filter.id ? 'bg-cyan-600 text-white hover:bg-cyan-700' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900'}`}
+                  className={`h-7 px-2.5 text-[11px] font-medium ${filters.timeFilter === filter.id ? 'bg-cyan-600 text-white hover:bg-cyan-700' : 'bg-white/90 text-gray-700 border-gray-300 hover:bg-gray-50 hover:text-gray-900'}`}
                 >
                   {filter.label}
                 </Button>
@@ -154,72 +140,147 @@ export function NewsFilters({ filters, setFilters }: NewsFiltersProps) {
             </div>
           </div>
 
-          {/* Date Range Filters */}
+          {/* Date Range Filters - Streamlined Inline Range Control without YYYY-MM-DD placeholder */}
           <div>
-            <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-              <Calendar className="h-3.5 w-3.5 text-cyan-600" />
+            <h3 className="mb-1.5 text-xs font-semibold text-gray-700">
               Date Range
             </h3>
-            <div className="flex flex-wrap gap-2">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-medium text-gray-600 uppercase">From Date</label>
-                <Input
-                  type="date"
-                  value={filters.fromDate}
-                  onChange={(e) => handleFromDateChange(e.target.value)}
-                  className="h-7 w-auto min-w-[130px] border-gray-300 bg-white/90 text-xs text-gray-900"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-medium text-gray-600 uppercase">To Date</label>
-                <Input
-                  type="date"
-                  value={filters.toDate}
-                  onChange={(e) => handleToDateChange(e.target.value)}
-                  min={filters.fromDate}
-                  className="h-7 w-auto min-w-[130px] border-gray-300 bg-white/90 text-xs text-gray-900"
-                />
-              </div>
+            <div className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white/95 px-2.5 h-7 shadow-xs">
+              <span className="text-[11px] font-medium text-gray-500">From</span>
+              <input
+                type="date"
+                value={filters.fromDate}
+                onChange={(e) => handleFromDateChange(e.target.value)}
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker?.()
+                  } catch {}
+                }}
+                className={`bg-transparent text-xs font-mono text-gray-800 focus:outline-none cursor-pointer ${
+                  !filters.fromDate ? "[&::-webkit-datetime-edit]:hidden w-5" : "w-auto"
+                }`}
+              />
+              <span className="text-gray-400 text-xs font-mono px-0.5">→</span>
+              <span className="text-[11px] font-medium text-gray-500">To</span>
+              <input
+                type="date"
+                value={filters.toDate}
+                onChange={(e) => handleToDateChange(e.target.value)}
+                min={filters.fromDate}
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker?.()
+                  } catch {}
+                }}
+                className={`bg-transparent text-xs font-mono text-gray-800 focus:outline-none cursor-pointer ${
+                  !filters.toDate ? "[&::-webkit-datetime-edit]:hidden w-5" : "w-auto"
+                }`}
+              />
+              {(filters.fromDate || filters.toDate) && (
+                <button
+                  type="button"
+                  onClick={() => setFilters({ ...filters, fromDate: "", toDate: "" })}
+                  className="text-gray-400 hover:text-gray-700 p-0.5 ml-1 cursor-pointer"
+                  title="Clear date range"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Active Filters Summary */}
-      {(filters.sector !== "all" || filters.timeFilter !== "all" || filters.fromDate || filters.toDate || filters.searchQuery) && (
-        <div className="flex flex-wrap items-center gap-1.5 rounded-md border border-gray-200 bg-white/90 p-2 text-xs shadow-sm backdrop-blur-sm">
-          <span className="text-xs text-gray-600">Bộ lọc đang áp dụng:</span>
+      {/* Active Filters Summary - Clean Dismissible Chips */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="text-xs font-medium text-gray-500">Active filters:</span>
+
           {filters.sector !== "all" && (
-            <Badge variant="secondary" className="bg-cyan-100 text-[11px] text-cyan-800">{sectors.find((s) => s.id === filters.sector)?.label}</Badge>
+            <span className="inline-flex items-center gap-1 rounded-md border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-800">
+              {sectors.find((s) => s.id === filters.sector)?.label || filters.sector}
+              <button
+                type="button"
+                onClick={() => setFilters({ ...filters, sector: "all" })}
+                className="hover:text-cyan-950 cursor-pointer p-0.5"
+                title="Remove sector filter"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           )}
-          {filters.timeFilter !== "all" && (
-            <Badge variant="secondary" className="bg-cyan-100 text-[11px] text-cyan-800">{timeFilters.find((t) => t.id === filters.timeFilter)?.label}</Badge>
+
+          {filters.timeFilter && filters.timeFilter !== "today" && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-800">
+              {timeFilters.find((t) => t.id === filters.timeFilter)?.label || filters.timeFilter}
+              <button
+                type="button"
+                onClick={() => setFilters({ ...filters, timeFilter: "today" })}
+                className="hover:text-cyan-950 cursor-pointer p-0.5"
+                title="Reset time filter to Today"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           )}
+
           {filters.fromDate && (
-            <Badge variant="secondary" className="bg-gray-100 text-[11px] text-gray-700">Từ: {filters.fromDate}</Badge>
+            <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+              From: {filters.fromDate}
+              <button
+                type="button"
+                onClick={() => setFilters({ ...filters, fromDate: "" })}
+                className="hover:text-gray-900 cursor-pointer p-0.5"
+                title="Remove start date"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           )}
+
           {filters.toDate && (
-            <Badge variant="secondary" className="bg-gray-100 text-[11px] text-gray-700">Đến: {filters.toDate}</Badge>
+            <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+              To: {filters.toDate}
+              <button
+                type="button"
+                onClick={() => setFilters({ ...filters, toDate: "" })}
+                className="hover:text-gray-900 cursor-pointer p-0.5"
+                title="Remove end date"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           )}
-          {filters.searchQuery && (
-            <Badge variant="secondary" className="bg-gray-100 text-[11px] text-gray-700">Tìm: "{filters.searchQuery}"</Badge>
+
+          {filters.searchQuery.trim() && (
+            <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+              Query: "{filters.searchQuery}"
+              <button
+                type="button"
+                onClick={() => setFilters({ ...filters, searchQuery: "" })}
+                className="hover:text-gray-900 cursor-pointer p-0.5"
+                title="Clear search query"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs text-gray-600 hover:text-gray-800"
+
+          <button
+            type="button"
+            className="text-xs font-medium text-gray-500 hover:text-gray-800 hover:underline cursor-pointer pl-1"
             onClick={() => {
               setFilters({
                 sector: "all",
-                timeFilter: "all",
+                timeFilter: "today",
                 fromDate: "",
                 toDate: "",
                 searchQuery: ""
               })
             }}
           >
-            Xóa tất cả
-          </Button>
+            Clear all
+          </button>
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Clock, ExternalLink, Newspaper, Filter, FileText } from "lucide-react"
+import { FileText } from "lucide-react"
 import { API_URL } from "@/lib/api"
 
 interface NewsItem {
@@ -118,12 +118,10 @@ export function StockNews({ symbol }: StockNewsProps) {
       <CardHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
-              <Newspaper className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-gray-900 text-sm font-bold">
               News about {symbol}
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
               <div className="flex gap-1 flex-wrap">
                 <Button
                   size="sm"

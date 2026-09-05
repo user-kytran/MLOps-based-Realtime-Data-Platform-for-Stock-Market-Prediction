@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { BarChart3 } from "lucide-react"
+
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getApiUrl } from "@/lib/config"
@@ -290,8 +290,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
     <Card className="border-slate-200 bg-white shadow-sm">
       <CardHeader className="gap-3 pb-2">
         <div className="flex flex-wrap items-center gap-3">
-          <CardTitle className="flex items-center gap-2 text-lg font-extrabold text-slate-950 sm:text-xl">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
             {symbol} Intraday Trading
           </CardTitle>
           <ConnectionBadge status={connectionStatus} />

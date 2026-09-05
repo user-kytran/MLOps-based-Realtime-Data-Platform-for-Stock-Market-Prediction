@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, ShieldAlert, CheckCircle2, AlertCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+
 
 interface PredictionStateViewerProps {
   symbol: string;
@@ -19,17 +19,17 @@ export function PredictionStateViewer({
   confidenceScore,
   predictionDate,
 }: PredictionStateViewerProps) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
   if (!stateText && !decision) {
     return (
       <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm mt-4">
         <CardHeader className="py-3 px-4 border-b border-gray-100">
           <CardTitle className="flex items-center gap-2 text-sm font-bold text-gray-900">
-            <FileText className="h-4 w-4 text-purple-600" />
             AI Investment Analysis & State Report
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 text-center text-gray-500 text-xs">
-          Chưa có báo cáo phân tích chi tiết (State) cho mã {symbol}.
+          Detailed AI analysis report is not yet available for {symbol}.
         </CardContent>
       </Card>
     );
@@ -40,7 +40,6 @@ export function PredictionStateViewer({
     if (d.includes("BUY") || d.includes("OVERWEIGHT")) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300 shadow-xs">
-          <TrendingUp className="w-3.5 h-3.5" />
           {dec || "Buy"}
         </span>
       );
@@ -48,14 +47,12 @@ export function PredictionStateViewer({
     if (d.includes("SELL") || d.includes("UNDERWEIGHT")) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300 shadow-xs">
-          <TrendingDown className="w-3.5 h-3.5" />
           {dec || "Sell"}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-xs">
-        <Minus className="w-3.5 h-3.5" />
         {dec || "Hold"}
       </span>
     );
@@ -247,30 +244,40 @@ export function PredictionStateViewer({
 
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm mt-4">
-      <CardHeader className="py-3 px-4 border-b border-gray-100 flex flex-row items-center justify-between">
+      <CardHeader className="py-2.5 px-4 border-b border-gray-100 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-purple-600" />
           <CardTitle className="text-sm font-bold text-gray-900">
             AI Trading Plan & Debate Analysis (State)
           </CardTitle>
         </div>
         <div className="flex items-center gap-2">
           {predictionDate && (
-            <span className="text-[11px] font-medium text-gray-500">
-              Ngày: {predictionDate}
+            <span className="text-[11px] font-medium text-gray-500 font-mono">
+              Date: {predictionDate}
             </span>
           )}
           {getDecisionBadge(decision)}
+          {stateText && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-[11px] font-semibold text-cyan-800 hover:text-cyan-900 bg-cyan-50 border border-cyan-200 rounded px-2 py-0.5 cursor-pointer ml-1"
+            >
+              {isExpanded ? "Collapse" : "Expand"}
+            </button>
+          )}
         </div>
       </CardHeader>
-      <CardContent className="p-4 space-y-2 font-sans">
+      <CardContent className={`p-4 space-y-2 font-sans transition-all duration-200 ${
+        isExpanded ? "max-h-none" : "max-h-[250px] overflow-y-auto pr-2"
+      }`}>
         {stateText ? (
           renderMarkdownContent(stateText)
         ) : (
           <div className="text-xs text-gray-600">
-            <p className="font-semibold text-gray-800">Khuyến nghị: {decision || "N/A"}</p>
+            <p className="font-semibold text-gray-800">Recommendation: {decision || "N/A"}</p>
             {confidenceScore !== null && confidenceScore !== undefined && (
-              <p className="mt-1">Độ tin cậy mô hình: {(confidenceScore * 100).toFixed(1)}%</p>
+              <p className="mt-1">Model Confidence: {(confidenceScore * 100).toFixed(1)}%</p>
             )}
           </div>
         )}

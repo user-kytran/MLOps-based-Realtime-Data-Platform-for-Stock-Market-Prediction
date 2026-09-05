@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Clock } from "lucide-react"
 
 import { useMarketStatus } from "@/hooks/useMarketStatus"
 import { useAuth } from "@/lib/authContext"
@@ -188,8 +187,7 @@ export function Header() {
             <div className="hidden lg:block w-px h-6 bg-gray-200"></div>
 
             {/* Time (Shown on lg+) */}
-            <div className="hidden lg:flex items-center space-x-2">
-              <Clock className="w-3.5 h-3.5 text-gray-400" />
+            <div className="hidden lg:flex items-center">
               <div className="text-right">
                 <div className="text-xs font-mono font-bold text-gray-800 leading-tight">
                   {mounted ? formatTime(currentTime) : "--:--:--"}

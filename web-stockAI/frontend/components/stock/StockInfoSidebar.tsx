@@ -53,7 +53,7 @@ export function StockInfoSidebar({ stockInfo, stockRealtime, reference }: StockI
         </div>
         <div className="grid grid-cols-3 gap-2 text-xs">
           <div className="bg-gray-50 rounded p-2 border border-blue-200">
-            <div className="text-gray-500 text-xs mb-1 text-center">TC</div>
+            <div className="text-gray-500 text-xs mb-1 text-center">REF</div>
             <div className="font-extrabold text-center text-blue-600 text-sm">{reference.toLocaleString()}</div>
           </div>
           <div className="bg-gray-50 rounded p-2 border border-red-200"> {/* Đổi border sang red cho CEILING */}

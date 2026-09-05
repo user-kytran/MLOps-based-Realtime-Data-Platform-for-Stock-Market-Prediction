@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { API_URL } from "@/lib/api"
@@ -167,12 +167,11 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
       <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
-            <BarChart3 className="h-4 w-4 text-cyan-600" />
-            Thống kê tin tức
+            News Statistics
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-6 text-center text-xs text-gray-600">Đang tải...</div>
+          <div className="py-6 text-center text-xs text-gray-600">Loading...</div>
         </CardContent>
       </Card>
     )
@@ -184,11 +183,10 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
     <Card className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-gray-900 text-sm font-bold">
-          <BarChart3 className="h-4 w-4 text-cyan-600" />
-          Thống kê tin tức
+          News Statistics
         </CardTitle>
         <p className="mt-1 text-xs text-gray-600">
-          Tổng số: <span className="font-bold text-cyan-600">{totalNews.toLocaleString()}</span> bài báo
+          Total: <span className="font-bold text-cyan-600">{totalNews.toLocaleString()}</span> articles
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -254,7 +252,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                       variant="outline"
                       className="bg-gray-200 text-[10px] text-gray-700 border-gray-300"
                     >
-                      {stat.total} bài
+                      {stat.total} articles
                     </Badge>
                   </div>
                   {/* Progress Bar */}
@@ -286,7 +284,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
             {expandedSector === stat.sector && (
               <div className="ml-2 space-y-1.5 border-l-2 pl-3 animate-in slide-in-from-top-2" style={{ borderColor: stat.color }}>
                 <div className="mb-1.5 text-[11px] font-medium text-gray-600">
-                  Top cổ phiếu nhiều tin nhất:
+                  Top mentioned stocks:
                 </div>
                 {stat.stocks.map((stock, index) => (
                   <div
@@ -303,7 +301,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-[11px] text-gray-600">
-                        {stock.count} bài
+                        {stock.count} articles
                       </div>
                       <div className="w-16 bg-gray-200 rounded-full h-1.5">
                         <div
