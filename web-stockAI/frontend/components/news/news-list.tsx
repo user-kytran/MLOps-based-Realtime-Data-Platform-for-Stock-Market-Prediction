@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { API_URL } from "@/lib/api"
 import { cachedFetch } from "@/lib/apiCache"
 import { Card, CardContent } from "@/components/ui/card"
@@ -169,13 +170,13 @@ export function NewsList({ filters }: NewsListProps) {
               <div className="space-y-1.5">
                 {/* Header: Stock Code + Sector */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <a href={`/stock/${item.stock_code}`} className="cursor-pointer hover:opacity-80 transition-opacity">
-                    <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-mono font-bold text-cyan-800 border-cyan-300">
+                  <Link href={`/stock/${item.stock_code}`} className="inline-flex items-center hover:opacity-80 transition-opacity">
+                    <Badge variant="outline" className="h-5 px-2 text-[11px] font-bold bg-cyan-100 text-cyan-800 border-cyan-300 leading-none flex items-center justify-center">
                       {item.stock_code}
                     </Badge>
-                  </a>
-                  <Badge variant="outline" className="h-5 bg-gray-100 px-1.5 text-[11px] text-gray-700 border-gray-300">
-                    {sector}
+                  </Link>
+                  <Badge variant="outline" className="h-5 px-2 text-[11px] font-medium bg-gray-100 text-gray-700 border-gray-300 leading-none flex items-center justify-center">
+                    {sector.replace(/_/g, " ")}
                   </Badge>
                 </div>
 
