@@ -193,7 +193,7 @@ function TechnicalTooltip({ active, payload }: any) {
 
 function LegendItem({ color, label, candle = false }: { color: string; label: string; candle?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500">
+    <span className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gray-600">
       {candle ? (
         <span className="h-4 w-3 rounded-sm" style={{ backgroundColor: color }} />
       ) : (
@@ -312,7 +312,7 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
               type="button"
               onClick={() => setSelectedRange(option.label)}
               aria-pressed={selectedRange === option.label}
-              className={`min-h-8 min-w-11 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              className={`min-h-8 min-w-11 rounded-md px-3 text-xs font-mono font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 selectedRange === option.label
                   ? "bg-white text-gray-700 shadow-sm"
                   : "text-gray-500 hover:bg-white/60 hover:text-gray-800"
@@ -352,7 +352,7 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
                   <CartesianGrid stroke={COLORS.grid} vertical={false} />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: COLORS.axis, fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: COLORS.axis, fontSize: 11, fontWeight: 600, fontFamily: "ui-monospace, monospace" }}
                     tickFormatter={formatAxisDate}
                     tickLine={false}
                     axisLine={{ stroke: "#a8b1c1" }}
@@ -362,7 +362,7 @@ export function HistoricalChart({ symbol }: HistoricalChartProps) {
                   <YAxis
                     orientation="right"
                     domain={priceDomain}
-                    tick={{ fill: COLORS.axis, fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: COLORS.axis, fontSize: 11, fontWeight: 600, fontFamily: "ui-monospace, monospace" }}
                     tickFormatter={(value) => `${(value / 1000).toFixed(value >= 100000 ? 0 : 1)}`}
                     tickLine={false}
                     axisLine={false}

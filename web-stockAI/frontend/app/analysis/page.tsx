@@ -36,11 +36,11 @@ export default function AnalysisPage() {
           <div className="mx-auto max-w-7xl space-y-4">
             <MarketSummary />
 
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-              <div className="xl:col-span-5">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-12 items-stretch">
+              <div className="xl:col-span-5 flex flex-col">
                 <PredictionSummary />
               </div>
-              <div className="xl:col-span-7">
+              <div className="xl:col-span-7 flex flex-col">
                 <PredictionAccuracy />
               </div>
             </div>

@@ -77,7 +77,7 @@ export function SectorPriceTrend() {
         </div>
       }
     >
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={280}>
         <BarChart data={stockData} margin={{ top: 8, right: 16, bottom: 24, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
           <XAxis

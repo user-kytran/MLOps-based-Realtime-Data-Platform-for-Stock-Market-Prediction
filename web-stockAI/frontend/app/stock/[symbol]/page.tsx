@@ -103,13 +103,13 @@ function StockDetailContent({ symbol }: { symbol: string }) {
         <Tabs defaultValue="trading" className="w-full">
           <div className="mb-3 overflow-x-auto">
             <TabsList className="min-w-max justify-start border border-gray-200 bg-white/95 shadow-sm backdrop-blur-sm">
-              <TabsTrigger value="trading" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">Trading</TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">History</TabsTrigger>
-              <TabsTrigger value="statistics" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">Statistics</TabsTrigger>
-              <TabsTrigger value="financial" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">Financial</TabsTrigger>
-              <TabsTrigger value="company" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">Company</TabsTrigger>
-              <TabsTrigger value="predict" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">Predict</TabsTrigger>
-              <TabsTrigger value="news" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs">News</TabsTrigger>
+              <TabsTrigger value="trading" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Trading</TabsTrigger>
+              <TabsTrigger value="history" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">History</TabsTrigger>
+              <TabsTrigger value="statistics" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Statistics</TabsTrigger>
+              <TabsTrigger value="financial" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Financial</TabsTrigger>
+              <TabsTrigger value="company" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Company</TabsTrigger>
+              <TabsTrigger value="predict" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">Predict</TabsTrigger>
+              <TabsTrigger value="news" className="data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-gray-700 hover:text-gray-900 hover:bg-cyan-100 transition-all duration-200 px-3 py-1.5 text-xs font-semibold">News</TabsTrigger>
             </TabsList>
           </div>
 

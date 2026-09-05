@@ -51,7 +51,7 @@ export function SectorVolumeDetail() {
         </select>
       }
     >
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={240}>
         <BarChart data={sectorStocks} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 6 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
           <XAxis
@@ -79,7 +79,7 @@ export function SectorVolumeDetail() {
             ]}
             cursor={{ fill: "rgba(15, 23, 42, 0.03)" }}
           />
-          <Bar dataKey="volume" radius={[0, 4, 4, 0]} barSize={14}>
+          <Bar dataKey="volume" radius={[0, 4, 4, 0]} barSize={16}>
             {sectorStocks.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}

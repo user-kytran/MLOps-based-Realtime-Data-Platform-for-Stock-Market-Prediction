@@ -92,11 +92,11 @@ export function StockWidget({
               <TrendIcon 
                 className={`h-4 w-4 ${isPositive ? 'text-green-500' : 'text-red-500'}`} 
               />
-              <span className={`font-bold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+              <span className={`font-bold font-mono text-xs ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {isPositive ? '+' : ''}{changePercent.toFixed(2)}%
               </span>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm font-mono font-bold tabular-nums text-gray-700">
               {price.toLocaleString('vi-VN')}
             </div>
           </div>

@@ -155,8 +155,8 @@ export function NewsList({ filters }: NewsListProps) {
     <div className="space-y-3">
       {/* Total count */}
       <div className="flex items-center justify-between text-xs text-gray-600">
-        <span>Found {news.length} news</span>
-        <span>Page {currentPage} / {totalPages}</span>
+        <span>Found <strong className="font-mono">{news.length}</strong> news</span>
+        <span>Page <span className="font-mono">{currentPage}</span> / <span className="font-mono">{totalPages}</span></span>
       </div>
 
       {/* News List */}
@@ -169,7 +169,7 @@ export function NewsList({ filters }: NewsListProps) {
                 {/* Header: Stock Code + Sector */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <a href={`/stock/${item.stock_code}`} className="cursor-pointer hover:opacity-80 transition-opacity">
-                    <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-semibold text-cyan-800 border-cyan-300">
+                    <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-mono font-bold text-cyan-800 border-cyan-300">
                       {item.stock_code}
                     </Badge>
                   </a>
@@ -188,7 +188,7 @@ export function NewsList({ filters }: NewsListProps) {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-0">
-                  <span className="text-[11px] text-gray-500">{formatDate(item.date)}</span>
+                  <span className="text-[11px] font-mono text-gray-500">{formatDate(item.date)}</span>
                   <div className="flex items-center gap-1.5">
                     {item.is_pdf && item.pdf_link && (
                       <Button
@@ -238,8 +238,8 @@ export function NewsList({ filters }: NewsListProps) {
                     size="sm"
                     onClick={() => setCurrentPage(page)}
                     className={page === currentPage
-                      ? "h-7 min-w-7 bg-cyan-600 px-2 text-xs text-white hover:bg-cyan-700"
-                      : "h-7 min-w-7 bg-white px-2 text-xs text-gray-700 border-gray-300 hover:bg-gray-50"
+                      ? "h-7 min-w-7 bg-cyan-600 px-2 text-xs font-mono font-bold text-white hover:bg-cyan-700"
+                      : "h-7 min-w-7 bg-white px-2 text-xs font-mono text-gray-700 border-gray-300 hover:bg-gray-50"
                     }
                   >
                     {page}

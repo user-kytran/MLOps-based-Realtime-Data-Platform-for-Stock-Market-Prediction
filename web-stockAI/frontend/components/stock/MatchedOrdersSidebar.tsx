@@ -74,8 +74,8 @@ export function MatchedOrdersSidebar({ matchedOrders }: MatchedOrdersSidebarProp
           {matchedOrders.length > 0 && (
             <div className="border-t border-gray-200 pt-3 px-2">
               <div className="text-center bg-gray-50 rounded p-2">
-                <div className="text-gray-500">Total Orders</div>
-                <div className="font-bold text-blue-600">{matchedOrders.length}</div>
+                <div className="text-gray-500 text-xs">Total Orders</div>
+                <div className="font-mono font-bold text-blue-600 text-base">{matchedOrders.length}</div>
               </div>
             </div>
           )}

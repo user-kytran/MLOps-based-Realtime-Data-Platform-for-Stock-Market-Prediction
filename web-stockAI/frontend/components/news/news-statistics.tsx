@@ -186,7 +186,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
           News Statistics
         </CardTitle>
         <p className="mt-1 text-xs text-gray-600">
-          Total: <span className="font-bold text-cyan-600">{totalNews.toLocaleString()}</span> articles
+          Total: <span className="font-mono font-bold text-cyan-600">{totalNews.toLocaleString()}</span> articles
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -252,7 +252,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                       variant="outline"
                       className="bg-gray-200 text-[10px] text-gray-700 border-gray-300"
                     >
-                      {stat.total} articles
+                      <span className="font-mono">{stat.total}</span> articles
                     </Badge>
                   </div>
                   {/* Progress Bar */}
@@ -301,7 +301,7 @@ export function NewsStatistics({ filters }: { filters: Filters }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-[11px] text-gray-600">
-                        {stock.count} articles
+                        <span className="font-mono">{stock.count}</span> articles
                       </div>
                       <div className="w-16 bg-gray-200 rounded-full h-1.5">
                         <div

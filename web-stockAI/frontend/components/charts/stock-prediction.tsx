@@ -49,18 +49,18 @@ export function StockPrediction({ symbol }: StockPredictionProps) {
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="text-2xl font-extrabold">{getTrendLabel(nextDayPrediction.trend)}</span>
               </div>
-              <div className="text-xs text-gray-600">Date {nextDayPrediction.date || "—"}</div>
+              <div className="text-xs text-gray-600">Date <span className="font-mono font-semibold">{nextDayPrediction.date || "—"}</span></div>
             </div>
 
             <div className="text-center p-3 bg-blue-50 rounded-lg border-2 border-blue-200">
               <div className="text-xs text-blue-700 font-semibold mb-2">Accuracy</div>
-              <div className="text-xl font-bold text-blue-900 mb-2">{accuracy.toFixed(1)}%</div>
+              <div className="text-xl font-bold font-mono text-blue-900 mb-2">{accuracy.toFixed(1)}%</div>
               <Progress value={accuracy} className="h-2" />
             </div>
 
             <div className="text-center p-3 bg-purple-50 rounded-lg border-2 border-purple-200">
               <div className="text-xs text-purple-700 font-semibold mb-2">Correct Predictions</div>
-              <div className="text-xl font-bold text-purple-900">{correctCount}/{totalCount}</div>
+              <div className="text-xl font-bold font-mono text-purple-900">{correctCount}/{totalCount}</div>
               <div className="text-xs text-purple-600 mt-1">Total Predictions</div>
             </div>
           </div>

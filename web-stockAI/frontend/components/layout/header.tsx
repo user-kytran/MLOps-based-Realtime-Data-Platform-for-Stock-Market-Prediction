@@ -38,7 +38,7 @@ export function Header() {
     })
   }
 
-  const formatDate = (date: Date) => {
+  const formatDateParts = (date: Date) => {
     const weekday = date.toLocaleDateString('en-US', {
       weekday: 'short',
       timeZone: 'Asia/Ho_Chi_Minh'
@@ -51,7 +51,12 @@ export function Header() {
       month: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh'
     })
-    return `${weekday}, ${day}/${month}`
+    return { weekday, dateStr: `${day}/${month}` }
+  }
+
+  const formatDate = (date: Date) => {
+    const { weekday, dateStr } = formatDateParts(date)
+    return `${weekday}, ${dateStr}`
   }
 
   return (
@@ -189,11 +194,16 @@ export function Header() {
             {/* Time (Shown on lg+) */}
             <div className="hidden lg:flex items-center">
               <div className="text-right">
-                <div className="text-xs font-mono font-bold text-gray-800 leading-tight">
+                <div className="text-xs font-mono font-bold text-gray-800 leading-tight tabular-nums">
                   {mounted ? formatTime(currentTime) : "--:--:--"}
                 </div>
                 <div className="text-[10px] text-gray-500 font-medium leading-tight">
-                  {mounted ? formatDate(currentTime) : "--/--"}
+                  {mounted ? (
+                    <>
+                      <span>{formatDateParts(currentTime).weekday}</span>,{' '}
+                      <span className="font-mono font-bold text-gray-600">{formatDateParts(currentTime).dateStr}</span>
+                    </>
+                  ) : "--/--"}
                 </div>
               </div>
             </div>

@@ -28,7 +28,7 @@ export function TopVolumeChart() {
         </span>
       }
     >
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={280}>
         <BarChart data={topVolume} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
           <XAxis 
@@ -53,7 +53,7 @@ export function TopVolumeChart() {
               'Volume'
             ]}
           />
-          <Bar dataKey="volume" radius={[4, 4, 0, 0]} barSize={22}>
+          <Bar dataKey="volume" radius={[4, 4, 0, 0]} barSize={20}>
             {topVolume.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.fill} />
             ))}

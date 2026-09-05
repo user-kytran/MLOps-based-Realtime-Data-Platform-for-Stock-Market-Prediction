@@ -51,16 +51,16 @@ export function SectorDistribution() {
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
         {/* Left: Clean Donut Chart */}
-        <div className="relative h-[220px] w-full md:col-span-5 flex items-center justify-center">
+        <div className="relative h-[180px] w-[180px] mx-auto md:col-span-5 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={sectorData}
                 cx="50%"
                 cy="50%"
-                innerRadius={55}
-                outerRadius={80}
-                paddingAngle={2}
+                innerRadius={56}
+                outerRadius={78}
+                paddingAngle={3}
                 dataKey="value"
               >
                 {sectorData.map((entry, index) => (
@@ -77,7 +77,7 @@ export function SectorDistribution() {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-xl font-bold text-slate-800">{sectorData.length}</span>
+            <span className="text-2xl font-extrabold font-mono text-slate-800 leading-tight">{sectorData.length}</span>
             <span className="text-[11px] text-slate-500 font-semibold">Sectors</span>
           </div>
         </div>

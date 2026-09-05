@@ -66,50 +66,50 @@ export function StockInfoSidebar({ stockInfo, stockRealtime, reference }: StockI
           </div>
         </div>
         <div className="space-y-2 text-xs border-t border-gray-200 pt-3">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-gray-500">Industry</span>
-            <span className="font-extrabold text-sm text-gray-700">{stockInfo.industry || 'N/A'}</span>
+            <span className="font-extrabold text-sm text-gray-700 font-sans">{stockInfo.industry || 'N/A'}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-gray-500">Exchange</span>
-            <span className="font-extrabold text-sm text-gray-700">{stockInfo.exchange}</span>
+            <span className="font-extrabold text-sm text-gray-700 font-sans">{stockInfo.exchange}</span>
           </div>
           {stockInfo.trailingPE && (
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">P/E</span>
-              <span className="font-extrabold text-sm text-gray-700">{stockInfo.trailingPE.toFixed(2)}</span>
+              <span className="font-extrabold text-sm text-gray-700 font-mono">{stockInfo.trailingPE.toFixed(2)}</span>
             </div>
           )}
           {stockInfo.priceToBook && (
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">P/B</span>
-              <span className="font-extrabold text-sm text-gray-700">{stockInfo.priceToBook.toFixed(2)}</span>
+              <span className="font-extrabold text-sm text-gray-700 font-mono">{stockInfo.priceToBook.toFixed(2)}</span>
             </div>
           )}
           {stockInfo.returnOnEquity && (
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">ROE (%)</span>
-              <span className="font-extrabold text-sm text-gray-700">{(stockInfo.returnOnEquity * 100).toFixed(2)}</span>
+              <span className="font-extrabold text-sm text-gray-700 font-mono">{(stockInfo.returnOnEquity * 100).toFixed(2)}</span>
             </div>
           )}
         </div>
         <div className="space-y-2 text-xs border-t border-gray-200 pt-3">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-gray-500">Total Volume</span>
-            <span className="font-extrabold text-sm text-blue-600">{displayDayVolume.toLocaleString()}</span>
+            <span className="font-extrabold text-sm text-blue-600 font-mono">{displayDayVolume.toLocaleString()}</span>
           </div>
           {stockInfo.averageVolume && (
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">Average Volume</span>
-              <span className="font-extrabold text-sm text-gray-700">{stockInfo.averageVolume.toLocaleString()}</span>
+              <span className="font-extrabold text-sm text-gray-700 font-mono">{stockInfo.averageVolume.toLocaleString()}</span>
             </div>
           )}
         </div>
         {stockInfo.epsTrailingTwelveMonths && (
           <div className="space-y-2 text-xs border-t border-gray-200 pt-3">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-gray-500">EPS (VND)</span>
-              <span className="font-extrabold text-sm text-gray-700">{stockInfo.epsTrailingTwelveMonths.toLocaleString()}</span>
+              <span className="font-extrabold text-sm text-gray-700 font-mono">{stockInfo.epsTrailingTwelveMonths.toLocaleString()}</span>
             </div>
           </div>
         )}

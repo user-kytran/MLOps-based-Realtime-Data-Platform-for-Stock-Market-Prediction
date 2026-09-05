@@ -66,13 +66,13 @@ export function StockCompanyInfo({ stockInfo }: StockCompanyInfoProps) {
             {stockInfo.phone && (
               <div>
                 <div className="text-sm text-gray-500">Phone</div>
-                <div className="text-sm font-extrabold text-gray-700">{stockInfo.phone}</div>
+                <div className="text-sm font-extrabold text-gray-700 font-mono">{stockInfo.phone}</div>
               </div>
             )}
             {stockInfo.fullTimeEmployees && (
               <div>
                 <div className="text-sm text-gray-500">Number of Employees</div>
-                <div className="text-sm font-extrabold text-gray-700">{stockInfo.fullTimeEmployees.toLocaleString()} people</div>
+                <div className="text-sm font-extrabold text-gray-700"><span className="font-mono">{stockInfo.fullTimeEmployees.toLocaleString()}</span> people</div>
               </div>
             )}
             {stockInfo.website && (
@@ -116,7 +116,7 @@ export function StockCompanyInfo({ stockInfo }: StockCompanyInfoProps) {
                 <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="text-sm font-extrabold text-gray-700">{officer.name}</div>
                   <div className="text-sm text-gray-500 mt-1">{officer.title}</div>
-                  {officer.age && <div className="text-xs text-gray-400 mt-1">{officer.age} years old</div>}
+                  {officer.age && <div className="text-xs text-gray-400 mt-1"><span className="font-mono font-bold">{officer.age}</span> years old</div>}
                 </div>
               ))}
             </div>

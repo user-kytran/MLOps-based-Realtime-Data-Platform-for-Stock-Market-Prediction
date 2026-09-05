@@ -45,7 +45,8 @@ export const tooltipStyle = {
 export const axisTick = {
   fill: "#64748b",
   fontSize: 11,
-  fontWeight: 500,
+  fontWeight: 600,
+  fontFamily: "var(--font-mono), ui-monospace, monospace",
 }
 
 interface AnalysisPanelProps {
@@ -66,8 +67,8 @@ export function AnalysisPanel({
   contentClassName,
 }: AnalysisPanelProps) {
   return (
-    <Card className={cn("rounded-xl border-slate-200 bg-white shadow-xs transition-shadow duration-200 hover:shadow-sm overflow-hidden", className)}>
-      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+    <Card className={cn("rounded-xl border-slate-200 bg-white shadow-xs transition-shadow duration-200 hover:shadow-sm overflow-hidden flex flex-col h-full", className)}>
+      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-3 shrink-0">
         <div className="min-w-0">
           {eyebrow ? (
             <p className="text-[11px] font-semibold uppercase tracking-wider text-cyan-800 mb-0.5">
@@ -80,7 +81,7 @@ export function AnalysisPanel({
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
       </CardHeader>
-      <CardContent className={cn("p-4", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("p-4 flex-1 flex flex-col justify-between", contentClassName)}>{children}</CardContent>
     </Card>
   )
 }
@@ -105,7 +106,7 @@ export function MetricTile({ label, value, subtext, tone = "neutral", className 
   return (
     <div className={cn("rounded-lg border px-3.5 py-2.5 transition-all", tileTone[tone], className)}>
       <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">{label}</p>
-      <p className="truncate font-bold text-lg md:text-xl text-slate-900 tracking-tight leading-none">
+      <p className="truncate font-bold font-mono text-lg md:text-xl text-slate-900 tracking-tight leading-none">
         {value}
       </p>
       {subtext ? <p className="text-[11px] text-slate-500 mt-1 font-normal">{subtext}</p> : null}

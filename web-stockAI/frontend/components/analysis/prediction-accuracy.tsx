@@ -89,105 +89,104 @@ export function PredictionAccuracy() {
         </span>
       }
     >
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 items-center">
-        {/* Left: Accuracy Donut Gauge */}
-        <div className="flex flex-col items-center justify-center lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-4">
-          <div className="relative h-[160px] w-[160px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={70}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={tooltipStyle}
-                  formatter={(value: number, name: string) => [
-                    `${value} predictions (${((value / totalStats.total) * 100).toFixed(1)}%)`,
-                    name
-                  ]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-extrabold text-slate-800">{overallAccuracy}%</span>
-              <span className="text-[11px] font-semibold text-slate-500">Accuracy</span>
+      <div className="flex flex-col justify-between h-full gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 items-center">
+          {/* Left: Accuracy Donut Gauge */}
+          <div className="flex flex-col items-center justify-center lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-100 pb-4 lg:pb-0 lg:pr-4">
+            <div className="relative h-[180px] w-[180px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={56}
+                    outerRadius={78}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value: number, name: string) => [
+                      `${value} predictions (${((value / totalStats.total) * 100).toFixed(1)}%)`,
+                      name
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-2xl font-extrabold font-mono text-slate-800 leading-tight">{overallAccuracy}%</span>
+                <span className="text-[11px] font-semibold text-slate-500">Accuracy</span>
+              </div>
             </div>
           </div>
 
-          <div className="w-full grid grid-cols-2 gap-2 mt-2">
-            <div className="rounded-lg border border-green-200 bg-green-50/60 p-2 text-center">
-              <span className="text-[11px] font-semibold text-green-700 block">
-                Correct
-              </span>
-              <span className="text-base font-bold text-green-900 leading-tight block mt-0.5">
-                {totalStats.correct}
-              </span>
+          {/* Right: Top 10 Most Accurate Stocks */}
+          <div className="lg:col-span-8">
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-xs font-bold text-slate-800">
+                Top 10 Most Accurate Predictions
+              </h4>
+              <span className="text-[11px] text-slate-400">Accuracy %</span>
             </div>
-            <div className="rounded-lg border border-red-200 bg-red-50/60 p-2 text-center">
-              <span className="text-[11px] font-semibold text-red-700 block">
-                Incorrect
-              </span>
-              <span className="text-base font-bold text-red-900 leading-tight block mt-0.5">
-                {totalStats.total - totalStats.correct}
-              </span>
-            </div>
+
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={top10Accurate} layout="vertical" margin={{ top: 2, right: 28, bottom: 2, left: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={axisTick}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis
+                  dataKey="symbol"
+                  type="category"
+                  width={42}
+                  tick={axisTick}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip 
+                  contentStyle={tooltipStyle}
+                  formatter={(value: number, name: string, props: any) => [
+                    `${value.toFixed(1)}% (${props.payload.correct}/${props.payload.total} sessions)`,
+                    'Hit Rate'
+                  ]}
+                />
+                <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={12}>
+                  {top10Accurate.map((item, index) => (
+                    <Cell
+                      key={index}
+                      fill={item.accuracy >= 70 ? "#16a34a" : item.accuracy >= 50 ? "#0891b2" : "#64748b"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Right: Top 10 Most Accurate Stocks */}
-        <div className="lg:col-span-8">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-xs font-bold text-slate-800">
-              Top 10 Most Accurate Predictions
-            </h4>
-            <span className="text-[11px] text-slate-400">Accuracy %</span>
+        {/* Bottom Metric Row (Matching PredictionSummary) */}
+        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+          <div className="rounded-lg border border-green-200 bg-green-50/60 p-2 text-center">
+            <span className="text-[11px] font-semibold text-green-700 block">Correct Matches</span>
+            <span className="text-base font-bold font-mono text-green-900 leading-tight block mt-0.5">
+              {totalStats.correct}
+            </span>
           </div>
-
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={top10Accurate} layout="vertical" margin={{ top: 2, right: 28, bottom: 2, left: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
-              <XAxis
-                type="number"
-                domain={[0, 100]}
-                tick={axisTick}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}%`}
-              />
-              <YAxis
-                dataKey="symbol"
-                type="category"
-                width={42}
-                tick={axisTick}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip 
-                contentStyle={tooltipStyle}
-                formatter={(value: number, name: string, props: any) => [
-                  `${value.toFixed(1)}% (${props.payload.correct}/${props.payload.total} sessions)`,
-                  'Hit Rate'
-                ]}
-              />
-              <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={14}>
-                {top10Accurate.map((item, index) => (
-                  <Cell
-                    key={index}
-                    fill={item.accuracy >= 70 ? "#16a34a" : item.accuracy >= 50 ? "#0891b2" : "#64748b"}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="rounded-lg border border-red-200 bg-red-50/60 p-2 text-center">
+            <span className="text-[11px] font-semibold text-red-700 block">Incorrect Matches</span>
+            <span className="text-base font-bold font-mono text-red-900 leading-tight block mt-0.5">
+              {totalStats.total - totalStats.correct}
+            </span>
+          </div>
         </div>
       </div>
     </AnalysisPanel>

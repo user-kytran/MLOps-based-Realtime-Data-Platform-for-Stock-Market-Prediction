@@ -32,7 +32,7 @@ export function PriceChangeChart() {
         </span>
       }
     >
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={240}>
         <BarChart data={chartData} layout="vertical" margin={{ top: 6, right: 28, bottom: 4, left: 6 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
           <XAxis 
@@ -57,7 +57,7 @@ export function PriceChangeChart() {
             contentStyle={tooltipStyle}
             formatter={(value: number) => [`${value >= 0 ? "+" : ""}${value.toFixed(2)}%`, 'Change']}
           />
-          <Bar dataKey="change" radius={[0, 4, 4, 0]} barSize={18}>
+          <Bar dataKey="change" radius={[0, 4, 4, 0]} barSize={16}>
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}

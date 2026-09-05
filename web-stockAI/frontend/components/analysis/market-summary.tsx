@@ -78,21 +78,27 @@ export function MarketSummary() {
         </div>
 
         {/* Market Breadth Proportion Bar */}
-        <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-            <span className="flex items-center gap-1.5 text-green-700 font-bold">
-              <span className="h-2.5 w-2.5 rounded-full bg-green-600" />
-              Bullish ({advancing}) · {advancingPct}%
+        <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 sm:p-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[11px] sm:text-xs font-semibold text-slate-600">
+            <span className="flex items-center gap-1.5 text-green-700 font-bold whitespace-nowrap">
+              <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-green-600 shrink-0" />
+              <span>Bullish (<span className="font-mono tabular-nums">{advancing}</span>)</span>
+              <span className="text-slate-400">·</span>
+              <span className="font-mono tabular-nums">{advancingPct}%</span>
             </span>
-            <span className="text-slate-500 font-medium">
-              Unchanged ({unchanged}) · {unchangedPct}%
+            <span className="flex items-center gap-1 text-slate-600 font-medium whitespace-nowrap">
+              <span>Unchanged (<span className="font-mono tabular-nums">{unchanged}</span>)</span>
+              <span className="text-slate-400">·</span>
+              <span className="font-mono tabular-nums">{unchangedPct}%</span>
             </span>
-            <span className="flex items-center gap-1.5 text-red-700 font-bold">
-              Bearish ({declining}) · {decliningPct}%
-              <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
+            <span className="flex items-center gap-1.5 text-red-700 font-bold whitespace-nowrap">
+              <span>Bearish (<span className="font-mono tabular-nums">{declining}</span>)</span>
+              <span className="text-slate-400">·</span>
+              <span className="font-mono tabular-nums">{decliningPct}%</span>
+              <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-red-600 shrink-0" />
             </span>
           </div>
-          <div className="h-2.5 w-full bg-slate-200 rounded-full flex overflow-hidden">
+          <div className="h-2 sm:h-2.5 w-full bg-slate-200 rounded-full flex overflow-hidden">
             <div
               style={{ width: `${(advancing / totalStocks) * 100}%` }}
               className="bg-green-600 transition-all duration-300"

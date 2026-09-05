@@ -219,7 +219,7 @@ export function StockNews({ symbol }: StockNewsProps) {
                   <div className="space-y-1.5">
                     {/* Header: Stock Code */}
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-semibold text-cyan-800 border-cyan-300">
+                      <Badge variant="outline" className="h-5 bg-cyan-100 px-1.5 text-[11px] font-mono font-bold text-cyan-800 border-cyan-300">
                         {item.stock_code}
                       </Badge>
                     </div>
