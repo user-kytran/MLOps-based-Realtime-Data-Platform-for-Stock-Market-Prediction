@@ -1,0 +1,74 @@
+groups:
+  - name: stock_pipeline_alerts
+    rules:
+      - alert: StockProducerDown
+        expr: up{job="stock_producers"} == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Stock Producer instance down"
+          description: "Producer {{ $labels.instance }} bị mất kết nối hoặc container đã dừng hoạt động."
+
+      - alert: StockProducerWebSocketDisconnected
+        expr: stock_producer_websocket_connected == 0
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Stock Producer WebSocket disconnected"
+          description: "Producer {{ $labels.producer_id }} mất kết nối WebSocket tới Yahoo Finance."
+
+      - alert: FlinkJobManagerDown
+        expr: up{job="flink_cluster", role="jobmanager"} == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flink JobManager down"
+          description: "Flink JobManager không thể truy cập."
+
+      - alert: FlinkNoRunningJobs
+        expr: flink_jobmanager_numRunningJobs == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "No running jobs in Flink cluster"
+          description: "Flink JobManager không có job nào đang chạy. Pipeline stream bị gián đoạn."
+
+      - alert: FlinkCheckpointFailing
+        expr: increase(flink_jobmanager_job_numberOfFailedCheckpoints[5m]) > 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Flink checkpoints are failing"
+          description: "Flink job {{ $labels.job_name }} bị lỗi checkpoint liên tiếp."
+
+      - alert: WebBackendDown
+        expr: up{job="stock_backend"} == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "WebStock Backend is down"
+          description: "webstock-backend không phản hồi (DOWN)."
+
+      - alert: WebFrontendDown
+        expr: webstock_frontend_up == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "WebStock Frontend is down"
+          description: "webstock-frontend bị lỗi hoặc timeout healthcheck."
+
+      - alert: WebBackendScyllaDisconnected
+        expr: webstock_scylla_connected == 0
+        for: 15s
+        labels:
+          severity: warning
+        annotations:
+          summary: "WebStock Backend ScyllaDB link disconnected"
+          description: "webstock-backend bị mất kết nối tới ScyllaDB cluster."

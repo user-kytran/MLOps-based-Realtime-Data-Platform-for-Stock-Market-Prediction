@@ -9,3 +9,4 @@ authlib
 pyyaml
 orjson
 pytz
+prometheus-client

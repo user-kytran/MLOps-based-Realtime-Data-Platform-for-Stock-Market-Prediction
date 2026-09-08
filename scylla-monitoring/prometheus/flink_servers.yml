@@ -1,0 +1,13 @@
+- targets:
+  - jobmanager:9091
+  labels:
+    role: jobmanager
+    cluster: flink_cluster
+    dc: local
+
+- targets:
+  - flink-service-taskmanager-1:9091
+  labels:
+    role: taskmanager
+    cluster: flink_cluster
+    dc: local

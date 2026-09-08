@@ -17,7 +17,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SCYLLA_NODES = [os.getenv('SCYLLA_NODE1'), os.getenv('SCYLLA_NODE2'), os.getenv('SCYLLA_NODE3')]
+raw_scylla_hosts = os.getenv("SCYLLA_HOSTS")
+if raw_scylla_hosts:
+    SCYLLA_NODES = [h.strip() for h in raw_scylla_hosts.split(",") if h.strip()]
+else:
+    SCYLLA_NODES = [n for n in [os.getenv('SCYLLA_NODE1'), os.getenv('SCYLLA_NODE2'), os.getenv('SCYLLA_NODE3')] if n]
+if not SCYLLA_NODES:
+    SCYLLA_NODES = ["scylla-node1", "scylla-node2", "scylla-node3"]
 SCYLLA_KEYSPACE = os.getenv('SCYLLA_KEYSPACE')
 SCYLLA_PORT = int(os.getenv('SCYLLA_PORT', 9042))
 SCYLLA_DC = os.getenv('SCYLLA_DC', 'datacenter1')
@@ -95,7 +101,7 @@ dag = DAG(
     'DAGs_warehouse',
     default_args=default_args,
     description='Daily dump ScyllaDB to Warehouse',
-    schedule_interval='0 16 * * *',  # 16:00 Vietnam time (UTC+7)
+    schedule_interval='5 15 * * 1-5',  # 15:05 Vietnam time (UTC+7) Thứ 2 - Thứ 6 ngay sau khi chốt phiên ATC
     start_date=pendulum.datetime(2025, 10, 1, tz=local_tz),
     catchup=False,
     tags=['warehouse', 'etl'],
@@ -124,7 +130,7 @@ def dump_daily_data(**context):
             logging.info(f"Found {len(symbols)} symbols to process")
             
             stocks_data = []
-            prices_data = []
+            prices_data_map = {}
             
             for symbol in symbols:
                 if use_date_filter:
@@ -161,7 +167,8 @@ def dump_daily_data(**context):
                         r.quote_type
                     ))
                     
-                    prices_data.append((
+                    key = (clean_symbol, trade_date)
+                    prices_data_map[key] = (
                         clean_symbol,
                         trade_date,
                         float(r.open) if r.open else None,
@@ -173,7 +180,9 @@ def dump_daily_data(**context):
                         float(r.change_percent) if r.change_percent else None,
                         float(r.vwap) if r.vwap else None,
                         r.market_hours
-                    ))
+                    )
+            
+            prices_data = list(prices_data_map.values())
             
             logging.info(f"Collected {len(prices_data)} records from ScyllaDB")
             
@@ -235,7 +244,7 @@ def dump_news(**context):
                 for stock_code in stock_codes:
                     # Full dump: all historical news
                     rows = session.execute("""
-                        SELECT article_id, stock_code, "date", content, sentiment_score, crawled_at
+                        SELECT article_id, stock_code, "date", content, sentiment_score, crawled_at, title, link, pdf_link
                         FROM stock_news
                         WHERE stock_code = %s
                     """, [stock_code])
@@ -255,7 +264,7 @@ def dump_news(**context):
                 for stock_code in stock_codes:
                     # Incremental: only new news from latest_date onwards
                     rows = session.execute("""
-                        SELECT article_id, stock_code, "date", content, sentiment_score, crawled_at
+                        SELECT article_id, stock_code, "date", content, sentiment_score, crawled_at, title, link, pdf_link
                         FROM stock_news
                         WHERE stock_code = %s AND "date" >= %s
                     """, [stock_code, query_timestamp])
@@ -266,21 +275,41 @@ def dump_news(**context):
             logging.info(f"Filtered news rows: {len(filtered_rows)}")
             
             stocks_data = []
-            news_data = []
+            news_data_map = {}
             
             for r in filtered_rows:
                 # Remove .VN suffix from stock_code
                 clean_stock_code = r.stock_code.replace('.VN', '') if r.stock_code.endswith('.VN') else r.stock_code
-                
                 stocks_data.append((clean_stock_code, 'NASDAQ', 1))
-                content = r.content if r.content is not None else ""
-                news_data.append((
+                
+                content = r.content if r.content and len(r.content.strip()) > 0 else ""
+                if not content:
+                    title = getattr(r, 'title', '') or ''
+                    pdf_link = getattr(r, 'pdf_link', '') or ''
+                    link = getattr(r, 'link', '') or ''
+                    if title:
+                        content = title
+                        if pdf_link:
+                            content += f"\n\n[Tài liệu đính kèm]({pdf_link})"
+                        elif link:
+                            content += f"\n\n[Chi tiết]({link})"
+                    else:
+                        content = f"Thông tin mã {clean_stock_code}"
+
+                # Normalize date for deduplication constraint (stock_code, news_date, article_id)
+                news_date = r.date.date() if hasattr(r.date, 'date') else r.date
+                key = (clean_stock_code, news_date, r.article_id)
+                
+                # Deduplicate: overwrite with latest record
+                news_data_map[key] = (
                     clean_stock_code,
                     r.date,
                     content,
                     r.article_id,
-                    r.sentiment_score
-                ))
+                    r.sentiment_score or 0.0
+                )
+            
+            news_data = list(news_data_map.values())
                 
             logging.info(f"Collected {len(news_data)} news records to insert")
                 

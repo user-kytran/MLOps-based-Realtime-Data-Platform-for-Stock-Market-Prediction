@@ -1,4 +1,4 @@
-import signal, asyncio, logging, os, time, sys
+import signal, asyncio, logging, os, time, sys, json
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import SerializingProducer
 from confluent_kafka.serialization import StringSerializer
@@ -7,6 +7,7 @@ from confluent_kafka.schema_registry.avro import AvroSerializer
 import yfinance as yf
 from yfinance.config import YfConfig
 import yfinance.live as yf_live
+from prometheus_client import start_http_server, Counter, Gauge, Histogram, Info
 
 # Patch async_connect để tắt keepalive ping timeout (1011) do Yahoo Finance không phản hồi ping
 _original_async_connect = yf_live.async_connect
@@ -18,10 +19,88 @@ async def _patched_async_connect(url, **kwargs):
 
 yf_live.async_connect = _patched_async_connect
 
+# Patch AsyncWebSocket.listen để khi socket đứt thì raise ra ngoài cho vòng lặp của StockDataProducer
+# tạo mới đối tượng yf.AsyncWebSocket và gửi lại bản tin subscribe đầy đủ
+async def _clean_listen(self, message_handler=None):
+    await self._connect()
+    self._message_handler = message_handler
+
+    if self._heartbeat_task is None or self._heartbeat_task.done():
+        self._heartbeat_task = asyncio.create_task(self._periodic_subscribe())
+
+    try:
+        async for message in self._ws:
+            message_json = json.loads(message)
+            encoded_data = message_json.get("message", "")
+            decoded_message = self._decode_message(encoded_data)
+            if self._message_handler:
+                if asyncio.iscoroutinefunction(self._message_handler):
+                    await self._message_handler(decoded_message)
+                else:
+                    self._message_handler(decoded_message)
+    finally:
+        if self._heartbeat_task:
+            self._heartbeat_task.cancel()
+        if self._ws is not None:
+            try:
+                await self._ws.close()
+            except Exception:
+                pass
+            self._ws = None
+
+yf_live.AsyncWebSocket.listen = _clean_listen
+
 yf.set_tz_cache_location("/home/obito/.cache/py-yfinance")
 YfConfig.debug.hide_exceptions = True
 
+
 HEALTHCHECK_FILE = "/tmp/healthy"
+
+PRODUCER_ID = os.getenv("PRODUCER_ID", os.getenv("HOSTNAME", "stock-producer"))
+METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
+
+METRIC_WS_CONNECTED = Gauge(
+    "stock_producer_websocket_connected",
+    "WebSocket connection state (1=Connected, 0=Disconnected)",
+    ["producer_id"]
+)
+METRIC_MSGS_TOTAL = Counter(
+    "stock_producer_messages_total",
+    "Total messages streamed into Kafka",
+    ["producer_id", "symbol"]
+)
+METRIC_ERRORS_TOTAL = Counter(
+    "stock_producer_errors_total",
+    "Total producer errors",
+    ["producer_id", "error_type"]
+)
+METRIC_SEND_LATENCY = Histogram(
+    "stock_producer_kafka_send_latency_seconds",
+    "Latency of produce operation to Kafka in seconds",
+    ["producer_id"],
+    buckets=(0.0005, 0.001, 0.002, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0)
+)
+METRIC_CONSECUTIVE_FAILURES = Gauge(
+    "stock_producer_consecutive_failures",
+    "Consecutive reconnection failure count",
+    ["producer_id"]
+)
+METRIC_LAST_MSG_TIMESTAMP = Gauge(
+    "stock_producer_last_message_timestamp_seconds",
+    "Timestamp of last received message",
+    ["producer_id"]
+)
+METRIC_SYMBOLS_TRACKED = Gauge(
+    "stock_producer_symbols_tracked",
+    "Number of symbols tracked by this producer",
+    ["producer_id"]
+)
+METRIC_PRODUCER_INFO = Info(
+    "stock_producer",
+    "Metadata about stock producer instance",
+    ["producer_id"]
+)
+
 
 
 def check_websocket_open(ws_obj) -> bool:
@@ -73,6 +152,9 @@ class StockDataProducer:
         self.symbols = symbols or []
         self.shutdown_event = asyncio.Event()
         self.ws = None
+        self.msg_count = 0
+        self.last_log_time = time.time()
+        self.last_msg_time = time.time()
         
         bootstrap = bootstrap or os.getenv('KAFKA_BOOTSTRAP_SERVERS')
         self.admin = AdminClient({'bootstrap.servers': bootstrap})
@@ -94,6 +176,14 @@ class StockDataProducer:
         
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
+
+        METRIC_PRODUCER_INFO.labels(producer_id=PRODUCER_ID).info({
+            "topic": self.topic,
+            "symbols_count": str(len(self.symbols))
+        })
+        METRIC_SYMBOLS_TRACKED.labels(producer_id=PRODUCER_ID).set(len(self.symbols))
+        METRIC_WS_CONNECTED.labels(producer_id=PRODUCER_ID).set(0)
+        METRIC_CONSECUTIVE_FAILURES.labels(producer_id=PRODUCER_ID).set(0)
     
     def _signal_handler(self, signum, frame):
         logger.info(f"Nhận signal {signum}, đang shutdown...")
@@ -114,19 +204,35 @@ class StockDataProducer:
             "price_hint": str(msg.get("price_hint", "")),
             "producer_timestamp": int(time.time() * 1000)
         }
-        self.producer.produce(topic=self.topic, value=mapped_data)
-        self.producer.poll(0)
+        try:
+            t0 = time.perf_counter()
+            self.producer.produce(topic=self.topic, value=mapped_data)
+            self.producer.poll(0)
+            latency = time.perf_counter() - t0
+            METRIC_SEND_LATENCY.labels(producer_id=PRODUCER_ID).observe(latency)
+            METRIC_MSGS_TOTAL.labels(producer_id=PRODUCER_ID, symbol=mapped_data.get('symbol', '')).inc()
+            now = time.time()
+            METRIC_LAST_MSG_TIMESTAMP.labels(producer_id=PRODUCER_ID).set(now)
+            self.msg_count += 1
+            self.last_msg_time = now
+            if now - self.last_log_time >= 30:
+                logger.info(f"Đã stream {self.msg_count} bản ghi vào Kafka (gần nhất: {mapped_data.get('symbol')} - giá {mapped_data.get('price')})")
+                self.last_log_time = now
+        except Exception as e:
+            METRIC_ERRORS_TOTAL.labels(producer_id=PRODUCER_ID, error_type="kafka_produce_error").inc()
+            logger.error(f"Lỗi khi produce message vào Kafka: {e}")
 
     async def _healthcheck_watchdog(self):
         """Task chạy ngầm định kỳ mỗi 10s cập nhật timestamp vào file nếu WebSocket đang OPEN"""
         logger.info("[Healthcheck] Watchdog task đã bắt đầu...")
         while not self.shutdown_event.is_set():
             try:
-                if check_websocket_open(self.ws):
+                is_open = check_websocket_open(self.ws)
+                METRIC_WS_CONNECTED.labels(producer_id=PRODUCER_ID).set(1 if is_open else 0)
+                if is_open:
                     with open(HEALTHCHECK_FILE, "w") as f:
                         f.write(str(time.time()))
                 else:
-                    # Socket không mở -> không cập nhật mtime để Docker phát hiện Unhealthy
                     logger.debug("[Healthcheck] Socket chưa OPEN, bỏ qua cập nhật heartbeat.")
             except Exception as e:
                 logger.debug(f"[Healthcheck] Lỗi ghi heartbeat: {e}")
@@ -151,6 +257,8 @@ class StockDataProducer:
                     # Reset thời gian chờ và bộ đếm lỗi khi kết nối thành công
                     retry_delay = min_delay
                     consecutive_failures = 0
+                    METRIC_WS_CONNECTED.labels(producer_id=PRODUCER_ID).set(1)
+                    METRIC_CONSECUTIVE_FAILURES.labels(producer_id=PRODUCER_ID).set(0)
 
                     async def message_handler(msg):
                         await asyncio.to_thread(self._send, msg)
@@ -159,11 +267,16 @@ class StockDataProducer:
 
                 except Exception as e:
                     consecutive_failures += 1
+                    METRIC_WS_CONNECTED.labels(producer_id=PRODUCER_ID).set(0)
+                    METRIC_CONSECUTIVE_FAILURES.labels(producer_id=PRODUCER_ID).set(consecutive_failures)
+                    METRIC_ERRORS_TOTAL.labels(producer_id=PRODUCER_ID, error_type="websocket_disconnect").inc()
                     logger.warning(f"WebSocket mất kết nối: {e}. Thử lại sau {retry_delay} giây (Lần lỗi: {consecutive_failures})...")
                     try:
-                        await self.ws.close()
+                        if self.ws:
+                            await self.ws.close()
                     except Exception:
                         pass
+                    self.ws = None
 
                     # Crash-on-Failure: Nếu lỗi liên tục quá 15 lần mà không hồi phục -> Thoát để Docker/Autoheal tái tạo container sạch sẽ
                     if consecutive_failures >= max_consecutive_failures:
@@ -183,14 +296,19 @@ class StockDataProducer:
 
         
 async def main():
-    # all_symbols = ["AAA.VN","AAM.VN","ABS.VN","ABT.VN","ACB.VN","ACC.VN","ACL.VN","ADG.VN","ADP.VN","ADS.VN","AGG.VN","AGR.VN","ANV.VN","APG.VN","APH.VN","ASM.VN","ASP.VN","AST.VN","BAF.VN","BCE.VN","BCM.VN","BFC.VN","BIC.VN","BID.VN","BKG.VN","BMC.VN","BMI.VN","BMP.VN","BRC.VN","BSI.VN","BTP.VN","BVH.VN","BWE.VN","C32.VN","CCL.VN","CDC.VN","CII.VN","CLC.VN","CLL.VN","CMG.VN","CMX.VN","CNG.VN","CRC.VN","CRE.VN","CSM.VN","CSV.VN","CTD.VN","CTF.VN","CTG.VN","CTI.VN","CTR.VN","CTS.VN","D2D.VN","DAH.VN","DBC.VN","DBD.VN","DBT.VN","DC4.VN","DCL.VN","DCM.VN","DGC.VN","DGW.VN","DHA.VN","DHC.VN","DHM.VN","DIG.VN","DMC.VN","DPG.VN","DPM.VN","DPR.VN","DRC.VN","DRL.VN","DSC.VN","DSE.VN","DSN.VN","DTA.VN","DVP.VN","DXG.VN","DXS.VN","EIB.VN","ELC.VN","EVE.VN","EVF.VN","FCM.VN","FCN.VN","FIR.VN","FIT.VN","FMC.VN","FPT.VN","FRT.VN","FTS.VN","GAS.VN","GDT.VN","GEE.VN","GEX.VN","GIL.VN","GMD.VN","GSP.VN","GVR.VN","HAG.VN","HAH.VN","HAP.VN","HAR.VN","HAX.VN","HCD.VN","HCM.VN","HDB.VN","HDC.VN","HDG.VN","HHP.VN","HHS.VN","HHV.VN","HID.VN","HII.VN","HMC.VN","HPG.VN","HPX.VN","HQC.VN","HSG.VN","HSL.VN","HT1.VN","HTG.VN","HTI.VN","HTN.VN","HUB.VN","HVH.VN","ICT.VN","IDI.VN","IJC.VN","ILB.VN","IMP.VN","ITC.VN","ITD.VN","JVC.VN","KBC.VN","KDC.VN","KDH.VN","KHG.VN","KHP.VN","KMR.VN","KOS.VN","KSB.VN","LAF.VN","LBM.VN","LCG.VN","LHG.VN","LIX.VN","LPB.VN","LSS.VN","MBB.VN","MCM.VN","MCP.VN","MHC.VN","MIG.VN","MSB.VN","MSH.VN","MSN.VN","MWG.VN","NAB.VN","NAF.VN","NBB.VN","NCT.VN","NHA.VN","NHH.VN","NKG.VN","NLG.VN","NNC.VN","NO1.VN","NSC.VN","NT2.VN","NTL.VN","OCB.VN","OGC.VN","ORS.VN","PAC.VN","PAN.VN","PC1.VN","PDR.VN","PET.VN","PGC.VN","PHC.VN","PHR.VN","PIT.VN","PLP.VN","PLX.VN","PNJ.VN","POW.VN","PPC.VN","PTB.VN","PTC.VN","PTL.VN","PVD.VN","PVP.VN","PVT.VN","QCG.VN","RAL.VN","REE.VN","RYG.VN","SAB.VN","SAM.VN","SAV.VN","SBG.VN","SBT.VN","SCR.VN","SCS.VN","SFC.VN","SFG.VN","SGN.VN","SGR.VN","SGT.VN","SHB.VN","SHI.VN","SIP.VN","SJD.VN","SJS.VN","SKG.VN","SMB.VN","SSB.VN","SSI.VN","ST8.VN","STB.VN","STK.VN","SVT.VN","SZC.VN","SZL.VN","TCB.VN","TCH.VN","TCI.VN","TCL.VN","TCM.VN","TCO.VN","TCT.VN","TDC.VN","TDG.VN","TDP.VN","TEG.VN","THG.VN","TIP.VN","TLD.VN","TLG.VN","TLH.VN","TMT.VN","TNH.VN","TNI.VN","TNT.VN","TPB.VN","TRC.VN","TSC.VN","TTA.VN","TTF.VN","TV2.VN","TVS.VN","TYA.VN","UIC.VN","VCA.VN","VCB.VN","VCG.VN","VCI.VN","VDS.VN","VFG.VN","VGC.VN","VHC.VN","VHM.VN","VIB.VN","VIC.VN","VIP.VN","VIX.VN","VJC.VN","VMD.VN","VND.VN","VNL.VN","VNM.VN","VNS.VN","VOS.VN","VPB.VN","VPG.VN","VPH.VN","VPI.VN","VRC.VN","VRE.VN","VSC.VN","VTO.VN","VTP.VN","YBM.VN","YEG.VN"]
-    
-    # Lấy symbols từ environment variable hoặc sử dụng toàn bộ danh sách
+    logger.info(f"Khởi chạy Prometheus metrics server tại port {METRICS_PORT} cho {PRODUCER_ID}...")
+    try:
+        start_http_server(METRICS_PORT)
+        logger.info(f"Prometheus metrics endpoint sẵn sàng tại http://0.0.0.0:{METRICS_PORT}/metrics")
+    except Exception as e:
+        logger.warning(f"Không thể khởi chạy metrics server: {e}")
+
+    # Lấy symbols từ environment variable
     symbols_env = os.getenv('SYMBOLS', '')
     if symbols_env:
         symbols = symbols_env.split(',')
-    # else:
-    #     symbols = all_symbols
+    else:
+        symbols = []
     
     logger.info(f"Khởi động Stock WebSocket Producer với {len(symbols)} symbols...")
     streamer = StockDataProducer(symbols=symbols, partitions=12, replication=3)

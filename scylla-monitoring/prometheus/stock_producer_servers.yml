@@ -1,0 +1,7 @@
+- targets:
+  - stock-producer-1:8000
+  - stock-producer-2:8000
+  - stock-producer-3:8000
+  labels:
+    cluster: stock_producers
+    dc: local

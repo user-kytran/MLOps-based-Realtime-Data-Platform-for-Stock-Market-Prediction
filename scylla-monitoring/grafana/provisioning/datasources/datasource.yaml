@@ -1,14 +1,14 @@
-# config file version
 apiVersion: 1
 datasources:
 - name: prometheus
   type: prometheus
-  url: http://172.18.0.23:9090
+  uid: P1809F7CD0C75ACF3
+  url: http://aprom:9090
   access: proxy
   basicAuth: false
   isDefault: true
   jsonData:
-    timeInterval: '20s'
+    timeInterval: '5s'
 - name: alertmanager
   type: alertmanager
   orgId: 1
@@ -19,6 +19,6 @@ datasources:
   user: 
   database: 
   basicAuth: 
-  isDefault: 
+  isDefault: false
   jsonData:
     implementation: 'prometheus'

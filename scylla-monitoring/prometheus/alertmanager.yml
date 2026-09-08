@@ -1,0 +1,25 @@
+global:
+  resolve_timeout: 3m
+
+route:
+  group_by: ['alertname', 'cluster', 'job']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  receiver: 'telegram-notifications'
+
+receivers:
+- name: 'telegram-notifications'
+  telegram_configs:
+  - bot_token: '8545467752:AAEV53fhvSM46VBpoxFIrCu97ICobrHKEH4'
+    chat_id: 1629276260
+    send_resolved: true
+    parse_mode: 'HTML'
+    message: |
+      {{ if eq .Status "firing" }}🔥 <b>[CẢNH BÁO SỰ CỐ HỆ THỐNG]</b>{{ else }}✅ <b>[SỰ CỐ ĐÃ ĐƯỢC KHẮC PHỤC]</b>{{ end }}
+      <b>Tên lỗi:</b> {{ .CommonLabels.alertname }}
+      <b>Mức độ:</b> {{ .CommonLabels.severity }}
+      <b>Dịch vụ:</b> {{ .CommonLabels.job }} ({{ .CommonLabels.instance }})
+      <b>Chi tiết:</b> {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.summary }}{{ end }}
+      <b>Mô tả:</b> {{ if .CommonAnnotations.description }}{{ .CommonAnnotations.description }}{{ else }}{{ .CommonLabels.description }}{{ end }}
+      <b>Thời gian:</b> {{ (index .Alerts 0).StartsAt.Local.Format "15:04:05 02/01/2006" }}

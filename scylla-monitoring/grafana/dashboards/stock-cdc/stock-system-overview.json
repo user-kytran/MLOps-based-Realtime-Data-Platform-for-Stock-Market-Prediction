@@ -1,0 +1,578 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "title": "Stock Platform - Full System Overview",
+  "tags": [
+    "system",
+    "architecture",
+    "end-to-end",
+    "overview",
+    "stock"
+  ],
+  "timezone": "Asia/Ho_Chi_Minh",
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "title": "End-to-End Pipeline Health (Stage by Stage)",
+      "type": "row"
+    },
+    {
+      "id": 1,
+      "title": "1. Ingestion: Producers Online",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "green",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "expr": "count(up{job=\"stock_producers\"} == 1)",
+          "legendFormat": "Producers UP (Max 3)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "2. Engine: Flink Processing Job",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "expr": "flink_jobmanager_numRunningJobs",
+          "legendFormat": "Running Pipeline",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "3. Storage: ScyllaDB Cluster",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "green",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "expr": "count(up{job=\"scylla\"} == 1)",
+          "legendFormat": "Healthy Nodes (Max 3)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "4. Serving: CDC & Web Clients",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "expr": "cdc_active_connections",
+          "legendFormat": "Active Clients",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 11,
+      "title": "Throughput Across The Pipeline",
+      "type": "row"
+    },
+    {
+      "id": 5,
+      "title": "Stage 1 & 2: Ingestion vs Flink Processing Rate",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "unit": "ops"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(stock_producer_messages_total[1m])) or vector(0)",
+          "legendFormat": "Yahoo Ingestion Rate (msgs/s)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(flink_taskmanager_job_task_numRecordsInPerSecond) or vector(0)",
+          "legendFormat": "Flink In Rate (records/s)",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(flink_taskmanager_job_task_numRecordsOutPerSecond) or vector(0)",
+          "legendFormat": "Flink Out Rate (records/s)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Stage 3 & 4: ScyllaDB Throughput & CDC Events",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "unit": "ops"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(scylla_storage_proxy_coordinator_foreground_writes[1m])) or vector(0)",
+          "legendFormat": "Scylla Writes (ops/s)",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(scylla_storage_proxy_coordinator_foreground_reads[1m])) or vector(0)",
+          "legendFormat": "Scylla Reads (ops/s)",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(cdc_events_total[1m]))",
+          "legendFormat": "CDC Dispatched (Events/s)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 12,
+      "title": "Latency & Reliability",
+      "type": "row"
+    },
+    {
+      "id": 7,
+      "title": "CDC End-to-End Latency (Database -> Client)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2
+          },
+          "unit": "ms"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(increase(cdc_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "P50 Latency (ms)",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(increase(cdc_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "P95 Latency (ms)",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(increase(cdc_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "P99 Latency (ms)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Producer to Kafka Send Latency",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2
+          },
+          "unit": "s"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(stock_producer_kafka_send_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P95 Produce Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(stock_producer_kafka_send_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P99 Produce Latency",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 13,
+      "title": "Infrastructure & Resource Consumption",
+      "type": "row"
+    },
+    {
+      "id": 9,
+      "title": "Memory Usage by Layer",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "lineWidth": 2
+          },
+          "unit": "bytes"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(flink_taskmanager_Status_JVM_Memory_Heap_Used)",
+          "legendFormat": "Flink TaskManager Heap",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(flink_jobmanager_Status_JVM_Memory_Heap_Used)",
+          "legendFormat": "Flink JobManager Heap",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(process_resident_memory_bytes{job=\"stock_producers\"})",
+          "legendFormat": "Stock Producers (RSS)",
+          "refId": "C"
+        },
+        {
+          "expr": "process_resident_memory_bytes{job=\"stock_backend\"}",
+          "legendFormat": "Stock Backend (RSS)",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "CPU Usage by Layer",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "unit": "percentunit"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(flink_taskmanager_Status_JVM_CPU_Load)",
+          "legendFormat": "Flink TaskManager CPU",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(process_cpu_seconds_total{job=\"stock_producers\"}[1m]))",
+          "legendFormat": "Stock Producers CPU",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(process_cpu_seconds_total{job=\"stock_backend\"}[1m])",
+          "legendFormat": "Stock Backend CPU",
+          "refId": "C"
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,25 @@
 services:
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: aalert
+    restart: unless-stopped
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:z
+      - /etc/localtime:/etc/localtime:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=debug'
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    networks:
+      financi-network:
+        aliases:
+          - alertmanager
+
   prometheus:
     image: prom/prometheus:v3.5.0
     container_name: aprom
@@ -11,7 +32,12 @@ services:
       - ./prometheus/build/prometheus.yml:/etc/prometheus/prometheus.yml:z
       - ./prometheus/prom_rules/:/etc/prometheus/prom_rules/:z
       - ./prometheus/scylla_servers.yml:/etc/scylla.d/prometheus/targets/scylla_servers.yml:z
+      - ./prometheus/scylla_servers.yml:/etc/scylla.d/prometheus/targets/node_exporter_servers.yml:z
+      - ./prometheus/scylla_servers.yml:/etc/scylla.d/prometheus/targets/scylla_manager_agents.yml:z
+      - ./prometheus/scylla_manager_servers.example.yml:/etc/scylla.d/prometheus/targets/scylla_manager_servers.yml:z
       - ./prometheus/stock_backend_servers.yml:/etc/scylla.d/prometheus/stock_backend_servers.yml:z
+      - ./prometheus/stock_producer_servers.yml:/etc/scylla.d/prometheus/stock_producer_servers.yml:z
+      - ./prometheus/flink_servers.yml:/etc/scylla.d/prometheus/flink_servers.yml:z
       - /etc/localtime:/etc/localtime:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -20,6 +46,8 @@ services:
       - '--enable-feature=promql-experimental-functions'
     environment:
       - TZ=Asia/Ho_Chi_Minh
+    depends_on:
+      - alertmanager
     networks:
       financi-network:
         aliases:
@@ -31,6 +59,7 @@ services:
     restart: unless-stopped
     user: "1000:1000"
     ports:
+      - "3000:3000"
       - "1020:3000"
     volumes:
       - ./grafana/build:/var/lib/grafana/dashboards:z

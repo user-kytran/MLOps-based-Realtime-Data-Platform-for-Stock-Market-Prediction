@@ -38,7 +38,10 @@ stock_router = APIRouter()
 
 cdc_latency = Histogram('cdc_latency_ms', 'CDC end-to-end latency', ['symbol'], buckets=[10,50,100,200,500,1000,2000,5000])
 cdc_events = Counter('cdc_events_total', 'Total CDC events', ['symbol'])
+cdc_dispatched_total = Counter('cdc_dispatched_total', 'Total CDC events dispatched to clients')
+cdc_dispatched_total.inc(0)
 cdc_connections = Gauge('cdc_active_connections', 'Active WebSocket connections')
+cdc_connections.set(0)
 
 def get_vietnam_market_status(target_dt: datetime.datetime = None):
     vn_tz = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -232,6 +235,11 @@ def cassandra_date_to_iso(cass_date):
 
 @stock_router.get("/metrics")
 async def metrics():
+    try:
+        from ... import update_platform_health_metrics
+        update_platform_health_metrics()
+    except Exception:
+        pass
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
@@ -931,6 +939,7 @@ class ConnectionManager:
                                         logger.error(f"Error parsing producer_timestamp {producer_ts}: {e}")
                                 
                                 cdc_events.labels(symbol=symbol).inc()
+                                cdc_dispatched_total.inc()
                                 
                                 # Log mỗi 100 messages để giảm I/O overhead
                                 msg_count += 1
