@@ -211,8 +211,8 @@ def read_news_detail(
             pass
 
     if not row:
-        query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news WHERE stock_code = %s AND article_id = %s ALLOW FILTERING"
-        rows = db.execute(query, [stock_code, article_id])
+        query = "SELECT stock_code, article_id, title, date, link, is_pdf, pdf_link, content FROM stock_news WHERE article_id = %s"
+        rows = db.execute(query, [article_id])
         row = rows.one() if rows else None
 
     if not row:

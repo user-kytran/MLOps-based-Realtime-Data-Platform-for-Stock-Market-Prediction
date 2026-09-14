@@ -134,7 +134,7 @@ export function PredictionAccuracy() {
               <span className="text-[11px] text-slate-400">Accuracy %</span>
             </div>
 
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={195}>
               <BarChart data={top10Accurate} layout="vertical" margin={{ top: 2, right: 28, bottom: 2, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
                 <XAxis
@@ -152,6 +152,7 @@ export function PredictionAccuracy() {
                   tick={axisTick}
                   tickLine={false}
                   axisLine={false}
+                  interval={0}
                 />
                 <Tooltip 
                   contentStyle={tooltipStyle}

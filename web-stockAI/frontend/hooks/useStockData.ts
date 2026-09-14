@@ -24,24 +24,16 @@ export function useStockData(symbol: string) {
       return
     }
 
-    setLoading(true)
     setError("")
-
     const apiUrl = getApiUrl()
 
-    // 1. Parallel fetch for stock info, reference price, and latest realtime snapshot (Cached)
+    // 1. GIAI ĐOẠN 1 - FAST PATH (< 50ms):
+    // Tải trước giá tham chiếu (Reference) & snapshot realtime gần nhất để tab Trading hiển thị ngay lập tức
     Promise.all([
-      cachedFetch(`${apiUrl}/stocks/stock_info/${upperSymbol}`, 10 * 60 * 1000).catch(() => null),
       cachedFetch(`${apiUrl}/stocks/get_reference`, 30 * 60 * 1000).catch(() => []),
       cachedFetch(`${apiUrl}/stocks/stocks_latest`, 2000).catch(() => []),
     ])
-      .then(([infoData, refData, latestData]) => {
-        if (infoData && !infoData.error) {
-          setStockInfo(infoData)
-        } else {
-          setError("No data found for this symbol")
-        }
-
+      .then(([refData, latestData]) => {
         if (Array.isArray(refData)) {
           const item = refData.find((d: any) => d.symbol === upperSymbol)
           if (item) setReference(item.close)
@@ -62,11 +54,12 @@ export function useStockData(symbol: string) {
         }
       })
       .finally(() => {
+        // Mở khóa hiển thị tab Trading ngay lập tức, không để người dùng phải chờ
         setLoading(false)
       })
 
-    // 2. Fetch matched orders (Cached & Deduplicated, slice top 100 for high rendering performance)
-    cachedFetch(`${apiUrl}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(upperSymbol)}`, 2000)
+    // 2. Tải sổ lệnh khớp cho tab Trading
+    cachedFetch(`${apiUrl}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(upperSymbol)}`, 60 * 1000)
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           const sliceData = data.slice(-100)
@@ -80,6 +73,22 @@ export function useStockData(symbol: string) {
         }
       })
       .catch(() => {})
+
+    // 3. GIAI ĐOẠN 2 - BACKGROUND PREFETCH (Chạy nền song song):
+    // Tải stock_info chi tiết và nạp sẵn bộ đệm cho các tab History, Predict, News
+    cachedFetch(`${apiUrl}/stocks/stock_info/${upperSymbol}`, 30 * 60 * 1000)
+      .then((infoData) => {
+        if (infoData && !infoData.error) {
+          setStockInfo(infoData)
+        }
+      })
+      .catch(() => {})
+
+    // Prefetch dữ liệu nền cho các tab còn lại để khi bấm vào là có ngay
+    cachedFetch(`${apiUrl}/stocks/stock_daily_by_symbol?symbol=${encodeURIComponent(upperSymbol)}`, 10 * 60 * 1000).catch(() => {})
+    cachedFetch(`${apiUrl}/stocks/stock_predictions_history?symbol=${upperSymbol}`, 10 * 60 * 1000).catch(() => {})
+    cachedFetch(`${apiUrl}/stocks/stock_predictions_accuracy`, 10 * 60 * 1000).catch(() => {})
+    cachedFetch(`${apiUrl}/news/news_by_symbol?symbol=${upperSymbol}`, 5 * 60 * 1000).catch(() => {})
   }, [symbol])
 
   // Real-time WebSocket subscription for live tick updates

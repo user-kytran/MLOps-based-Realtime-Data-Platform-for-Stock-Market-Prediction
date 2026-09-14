@@ -261,27 +261,15 @@ groups:
     annotations:
       description: 'OOM Kill on {{ $labels.instance }}'
       summary: A process was terminated on Instance {{ $labels.instance }}
-  - alert: tooManyFiles
-    expr: (node_filesystem_files{mountpoint="/var/lib/scylla"} - node_filesystem_files_free{mountpoint="/var/lib/scylla"}) / on(instance) group_left count(scylla_reactor_cpu_busy_ms) by (instance)>20000
-    for: 10s
-    labels:
-      severity: "info"
-      description: 'Over 20k open files in /var/lib/scylla per shard {{ $labels.instance }}'
-      summary: There are over 20K open files per shard on Instance {{ $labels.instance }}
-  - alert: tooManyFiles
-    expr: (node_filesystem_files{mountpoint="/var/lib/scylla"} - node_filesystem_files_free{mountpoint="/var/lib/scylla"}) / on(instance) group_left count(scylla_reactor_cpu_busy_ms) by (instance)>30000
-    for: 10s
-    labels:
-      severity: "warn"
-      description: 'Over 30k open files in /var/lib/scylla per shard {{ $labels.instance }}'
-      summary: There are over 30K open files per shard on Instance {{ $labels.instance }}
-  - alert: tooManyFiles
-    expr: (node_filesystem_files{mountpoint="/var/lib/scylla"} - node_filesystem_files_free{mountpoint="/var/lib/scylla"}) / on(instance) group_left count(scylla_reactor_cpu_busy_ms) by (instance)>40000
-    for: 5m
-    labels:
-      severity: "error"
-      description: 'Over 40k open files in /var/lib/scylla per shard {{ $labels.instance }}'
-      summary: There are over 40K open files per shard on Instance {{ $labels.instance }}
+  # Disabled tooManyFiles: In Docker deployments, /var/lib/scylla shares the host root filesystem,
+  # counting all host OS inodes and causing false-positive alerts.
+  # - alert: tooManyFiles
+  #   expr: (node_filesystem_files{mountpoint="/var/lib/scylla"} - node_filesystem_files_free{mountpoint="/var/lib/scylla"}) / on(instance) group_left count(scylla_reactor_cpu_busy_ms) by (instance)>20000
+  #   for: 10s
+  #   labels:
+  #     severity: "info"
+  #     description: 'Over 20k open files in /var/lib/scylla per shard {{ $labels.instance }}'
+  #     summary: There are over 20K open files per shard on Instance {{ $labels.instance }}
   - alert: nodeInJoinMode
     expr: scylla_node_operation_mode == 2
     for: 5h

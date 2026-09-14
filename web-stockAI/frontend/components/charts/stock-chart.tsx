@@ -233,7 +233,7 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
     const loadData = async (showLoading = false) => {
       if (showLoading) setLoading(true)
       try {
-        const result = await cachedFetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(symbol)}`, 2000)
+        const result = await cachedFetch(`${getApiUrl()}/stocks/stock_price_by_symbol?symbol=${encodeURIComponent(symbol)}`, 60 * 1000)
         if (mounted) {
           setChartData(aggregateTicks(Array.isArray(result) ? result : []))
           setError("")

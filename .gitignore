@@ -329,3 +329,7 @@ TradingAgents/
 TradingAgents
 
 
+scripts/fix_remaining_historical_days.py
+scripts/reingest_missing_days.py
+
+strix_runs/

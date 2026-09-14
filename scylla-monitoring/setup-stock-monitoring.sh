@@ -8,6 +8,7 @@ mkdir -p prometheus/build
 cp prometheus/stock_backend_servers.yml prometheus/build/ 2>/dev/null || true
 cp prometheus/stock_producer_servers.yml prometheus/build/ 2>/dev/null || true
 cp prometheus/flink_servers.yml prometheus/build/ 2>/dev/null || true
+cp prometheus/host_hardware_servers.yml prometheus/build/ 2>/dev/null || true
 
 if [ -f prometheus/build/prometheus.yml ]; then
     if ! grep -q "stock_backend" prometheus/build/prometheus.yml; then
@@ -54,6 +55,6 @@ EOF_FLINK
     fi
 fi
 
-docker compose up -d alertmanager prometheus 2>/dev/null || docker-compose restart prometheus 2>/dev/null || echo "Khởi động lại Prometheus thủ công"
+docker compose up -d host-hardware-exporter alertmanager prometheus 2>/dev/null || docker-compose restart prometheus 2>/dev/null || echo "Khởi động lại Prometheus thủ công"
 
 echo "Hoàn tất setup monitoring! Prometheus: http://localhost:9090, Grafana: http://localhost:3000 hoặc http://localhost:1020"

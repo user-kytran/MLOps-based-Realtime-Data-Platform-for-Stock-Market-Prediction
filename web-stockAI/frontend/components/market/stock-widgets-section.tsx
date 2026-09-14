@@ -14,7 +14,7 @@ export function StockWidgetsSection() {
 
   return (
     <section className="w-full py-4">
-      <div className="w-full px-4">
+      <div className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {topStocks.map((stock) => (
             <StockWidget

@@ -45,6 +45,7 @@ export function PriceChangeChart() {
           />
           <YAxis 
             type="category"
+            interval={0}
             dataKey="symbol" 
             stroke={chartColors.axis}
             tick={axisTick}

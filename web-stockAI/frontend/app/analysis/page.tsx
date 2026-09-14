@@ -42,7 +42,7 @@ export default function AnalysisPage() {
             </p>
           </section>
 
-          <div className="mx-auto max-w-7xl space-y-4">
+          <div className="w-full space-y-4">
             <MarketSummary />
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-12 items-stretch">

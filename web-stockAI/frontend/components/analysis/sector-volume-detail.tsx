@@ -65,6 +65,7 @@ export function SectorVolumeDetail() {
           <YAxis
             dataKey="symbol"
             type="category"
+            interval={0}
             stroke={chartColors.axis}
             tick={axisTick}
             tickLine={false}

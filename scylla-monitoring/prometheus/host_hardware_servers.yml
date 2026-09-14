@@ -1,0 +1,6 @@
+- targets:
+  - host-hardware-exporter:9101
+  labels:
+    instance: kytran-ssh
+    cluster: host_hardware
+    dc: local

@@ -50,8 +50,14 @@ class NewsRepository:
     def check_articles_exist(self, article_ids: List[str]) -> List[str]:
         if not article_ids: return []
         try:
-            placeholders = ",".join(["%s"] * len(article_ids))
-            return [r.article_id for r in self.db.execute(f"SELECT article_id FROM stock_news WHERE article_id IN ({placeholders}) ALLOW FILTERING", article_ids, timeout=60)]
+            stmt = self.db.prepare("SELECT article_id FROM stock_news WHERE article_id = ?")
+            futures = [self.db.execute_async(stmt, [aid], timeout=60) for aid in article_ids]
+            existing = []
+            for f in futures:
+                rows = f.result()
+                if rows:
+                    existing.append(rows[0].article_id)
+            return existing
         except Exception as e:
             logger.error("Error checking existing articles: %s", e)
             return []

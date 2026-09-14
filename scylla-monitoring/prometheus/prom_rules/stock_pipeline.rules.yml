@@ -72,3 +72,48 @@ groups:
         annotations:
           summary: "WebStock Backend ScyllaDB link disconnected"
           description: "webstock-backend bị mất kết nối tới ScyllaDB cluster."
+
+      - alert: ServerInternetDown
+        expr: server_internet_online == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Server kytran-ssh lost Internet connectivity"
+          description: "Máy chủ kytran-ssh không thể kết nối tới Internet (Google DNS / Cloudflare DNS thất bại)."
+
+      - alert: ServerGatewayUnreachable
+        expr: server_gateway_online == 0
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Server Default Gateway Unreachable"
+          description: "Máy chủ kytran-ssh không thể kết nối tới Router Gateway (192.168.13.1)."
+
+      - alert: CPUOverheatingWarning
+        expr: hardware_cpu_temperature_celsius{sensor="package_id_0"} > 88
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU Temperature High Warning"
+          description: "Nhiệt độ CPU Package vượt quá 88°C trên máy kytran-ssh."
+
+      - alert: CPUCriticalTemperature
+        expr: hardware_cpu_temperature_celsius{sensor="package_id_0"} > 95
+        for: 20s
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU Critical Temperature Alert"
+          description: "Nhiệt độ CPU Package vượt quá 95°C (gần ngưỡng tối đa 100°C) trên máy kytran-ssh."
+
+      - alert: NVMeOverheatingWarning
+        expr: hardware_nvme_temperature_celsius{label="Composite"} > 75
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NVMe SSD High Temperature Warning"
+          description: "Nhiệt độ ổ cứng NVMe SSD vượt quá 75°C (ngưỡng cảnh báo 84.8°C)."

@@ -62,9 +62,9 @@ export function Header() {
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-12">
+        <div className="relative flex items-center justify-between h-12">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
+          <Link href="/" className="flex items-center space-x-3 group z-10">
             <div className="relative shrink-0">
               <Image
                 src="/logo.png"
@@ -87,7 +87,7 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex mx-auto flex-1 justify-center space-x-1">
+          <nav className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-1">
             <Link
               href="/"
               className={`relative px-3 py-1.5 rounded-md font-semibold text-sm transition-all duration-200 ${
@@ -143,7 +143,7 @@ export function Header() {
           </nav>
 
           {/* Desktop Right: Market Status, Time & User Profile */}
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden md:flex items-center space-x-3 z-10">
             {/* Market Status (Shown on lg+) - Clean Professional Financial Pill */}
             <div className="hidden lg:flex items-center space-x-3">
               {mounted && marketStatus ? (
@@ -220,7 +220,7 @@ export function Header() {
           </div>
 
           {/* Mobile Right: Auth & Menu Button */}
-          <div className="flex md:hidden items-center space-x-2">
+          <div className="flex md:hidden items-center space-x-2 z-10">
             {user ? <UserNav /> : <GoogleSignInButton size="small" />}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

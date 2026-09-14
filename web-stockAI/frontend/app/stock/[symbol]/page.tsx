@@ -6,11 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StockHeader, StockInfoSidebar, MatchedOrdersSidebar } from "@/components/stock"
 import { useStockData } from "@/hooks/useStockData"
 import { AuthGuard } from "@/components/auth"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useOnboarding } from "@/lib/onboardingContext"
+import type { StockInfo } from "@/types/stock"
 
-const StockChart = dynamic(() => import("@/components/charts").then(m => ({ default: m.StockChart })), { ssr: false })
-const HistoricalChart = dynamic(() => import("@/components/charts").then(m => ({ default: m.HistoricalChart })), { ssr: false })
+const StockChart = dynamic(() => import("@/components/charts/stock-chart").then(m => ({ default: m.StockChart })), { ssr: false })
+const HistoricalChart = dynamic(() => import("@/components/charts/historical-chart").then(m => ({ default: m.HistoricalChart })), { ssr: false })
 const StockPrediction = dynamic(() => import("@/components/charts/stock-prediction").then(m => ({ default: m.StockPrediction })), { ssr: false })
 const StockNews = dynamic(() => import("@/components/news/stock-news").then(m => ({ default: m.StockNews })), { ssr: false })
 const StockCompanyInfo = dynamic(() => import("@/components/stock").then(m => ({ default: m.StockCompanyInfo })), { ssr: false })
@@ -33,25 +34,25 @@ function StockDetailContent({ symbol }: { symbol: string }) {
     }
   }, [activeTabOverride])
 
-  if (loading && !error) {
-    return (
-      <div className="min-h-screen relative">
-        <div
-          className="fixed inset-0 bg-cover bg-center pointer-events-none"
-          style={{
-            backgroundImage: "url('/img_bg.png')",
-            opacity: 0.1,
-            zIndex: -1, 
-          }}
-        ></div>
-
-        <Header />
-        <div className="container mx-auto px-4 py-8 text-center relative z-10">
-          <p className="text-gray-600">Loading market data for {symbol}...</p>
-        </div>
-      </div>
-    )
-  }
+  // Fallback tạm thời cho tab Trading hiển thị ngay trong < 100ms
+  // Khi stockInfo tải xong ở chế độ nền (background), React sẽ tự động re-render cập nhật đầy đủ
+  const effectiveStockInfo: StockInfo = useMemo(() => {
+    if (stockInfo) return stockInfo
+    return {
+      symbol,
+      shortName: symbol,
+      longName: symbol,
+      exchange: "HOSE",
+      currency: "VND",
+      currentPrice: stockRealtime?.price || reference,
+      previousClose: reference,
+      open: reference,
+      dayLow: reference,
+      dayHigh: reference,
+      volume: stockRealtime?.day_volume || 0,
+      averageVolume: 0,
+    }
+  }, [stockInfo, symbol, stockRealtime?.price, stockRealtime?.day_volume, reference])
 
   if (error && !loading) {
     return (
@@ -80,18 +81,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
     return null 
   }
 
-  if (!stockInfo) {
-    return (
-      <div className="min-h-screen relative">
-        <Header />
-        <div className="container mx-auto px-4 py-8 text-center relative z-10">
-          <p className="text-gray-600">No quote data found or market not in session.</p>
-        </div>
-      </div>
-    )
-  }
-
-  const hasRealtimeData = !!stockRealtime;
+  const hasRealtimeData = !!stockRealtime || reference > 0;
 
   return (
     <div className="min-h-screen relative">
@@ -107,7 +97,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
       <Header />
 
       <div className="w-full px-4 py-4 relative z-10">
-        <StockHeader symbol={stockInfo.symbol} name={stockInfo.shortName} />
+        <StockHeader symbol={effectiveStockInfo.symbol} name={effectiveStockInfo.shortName} />
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
           <div className="mb-3 overflow-x-auto">
@@ -126,7 +116,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[560px]">
               <div className="lg:col-span-3">
                 <StockInfoSidebar 
-                  stockInfo={stockInfo} 
+                  stockInfo={effectiveStockInfo} 
                   stockRealtime={stockRealtime} 
                   reference={reference} 
                 />
@@ -134,7 +124,7 @@ function StockDetailContent({ symbol }: { symbol: string }) {
 
               <div className="lg:col-span-6">
                 {hasRealtimeData ? (
-                  <StockChart symbol={stockInfo.symbol} referencePrice={reference} stockInfo={stockInfo} />
+                  <StockChart symbol={effectiveStockInfo.symbol} referencePrice={reference} stockInfo={effectiveStockInfo} />
                 ) : (
                   <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-dashed text-gray-500">
                     <p>Real-time chart currently unavailable.</p>
@@ -155,27 +145,51 @@ function StockDetailContent({ symbol }: { symbol: string }) {
           </TabsContent>
 
           <TabsContent value="history">
-            {selectedTab === "history" && <HistoricalChart symbol={stockInfo.symbol} />}
+            {selectedTab === "history" && <HistoricalChart symbol={effectiveStockInfo.symbol} />}
           </TabsContent>
 
           <TabsContent value="statistics">
-            {selectedTab === "statistics" && <StockStatistics stockInfo={stockInfo} />}
+            {selectedTab === "statistics" && (
+              stockInfo ? (
+                <StockStatistics stockInfo={stockInfo} />
+              ) : (
+                <div className="flex h-[320px] items-center justify-center text-xs font-semibold text-slate-400 bg-white/95 rounded-xl border border-gray-200 shadow-sm">
+                  Loading market statistics for {symbol}...
+                </div>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="financial">
-            {selectedTab === "financial" && <StockFinancialInfo stockInfo={stockInfo} />}
+            {selectedTab === "financial" && (
+              stockInfo ? (
+                <StockFinancialInfo stockInfo={stockInfo} />
+              ) : (
+                <div className="flex h-[320px] items-center justify-center text-xs font-semibold text-slate-400 bg-white/95 rounded-xl border border-gray-200 shadow-sm">
+                  Loading financial statements for {symbol}...
+                </div>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="company">
-            {selectedTab === "company" && <StockCompanyInfo stockInfo={stockInfo} />}
+            {selectedTab === "company" && (
+              stockInfo ? (
+                <StockCompanyInfo stockInfo={stockInfo} />
+              ) : (
+                <div className="flex h-[320px] items-center justify-center text-xs font-semibold text-slate-400 bg-white/95 rounded-xl border border-gray-200 shadow-sm">
+                  Loading corporate profile for {symbol}...
+                </div>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="predict">
-            {selectedTab === "predict" && <StockPrediction symbol={stockInfo.symbol} />}
+            {selectedTab === "predict" && <StockPrediction symbol={effectiveStockInfo.symbol} />}
           </TabsContent>
 
           <TabsContent value="news">
-            {selectedTab === "news" && <StockNews symbol={stockInfo.symbol} />}
+            {selectedTab === "news" && <StockNews symbol={effectiveStockInfo.symbol} />}
           </TabsContent>
         </Tabs>
       </div>

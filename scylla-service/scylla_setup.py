@@ -195,9 +195,15 @@ class ScyllaDBSetup:
         CREATE INDEX IF NOT EXISTS ON stock_daily_summary (trade_date)
         """
         
+        # Index on article_id for stock_news
+        create_news_article_index = """
+        CREATE INDEX IF NOT EXISTS ON stock_news (article_id)
+        """
+
         indexes = [
             ("exchange_idx", create_exchange_index),
-            ("date_idx", create_date_index)
+            ("date_idx", create_date_index),
+            ("news_article_idx", create_news_article_index)
         ]
         
         for index_name, create_query in indexes:

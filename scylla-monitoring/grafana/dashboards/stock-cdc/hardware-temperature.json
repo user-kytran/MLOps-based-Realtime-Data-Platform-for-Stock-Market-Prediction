@@ -1,0 +1,698 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "title": "Hardware & Network - kytran-ssh Monitoring",
+  "tags": [
+    "hardware",
+    "temperature",
+    "cpu",
+    "nvme",
+    "network",
+    "kytran-ssh"
+  ],
+  "timezone": "Asia/Ho_Chi_Minh",
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "title": "Nhi\u1ec7t \u0110\u1ed9 Ph\u1ea7n C\u1ee9ng & Tr\u1ea1ng Th\u00e1i M\u1ea1ng T\u1ed5ng Quan (kytran-ssh)",
+      "type": "row"
+    },
+    {
+      "id": 1,
+      "title": "CPU Package Temp",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 30,
+          "max": 100,
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "orange",
+                "value": 85
+              },
+              {
+                "color": "red",
+                "value": 95
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"package_id_0\"}",
+          "legendFormat": "CPU Package",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "\u1ed4 C\u1ee9ng NVMe SSD",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 20,
+          "max": 90,
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 84.8
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "hardware_nvme_temperature_celsius{label=\"Composite\"}",
+          "legendFormat": "NVMe SSD",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Card Wi-Fi (Intel AX201)",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 20,
+          "max": 85,
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 75
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "hardware_wifi_temperature_celsius",
+          "legendFormat": "Intel AX201",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Chipset Bo M\u1ea1ch (PCH)",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 20,
+          "max": 85,
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 75
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "hardware_pch_temperature_celsius",
+          "legendFormat": "PCH Comet Lake",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Internet Connectivity",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "OFFLINE / M\u1ea4T M\u1ea0NG"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "ONLINE / K\u1ebeT N\u1ed0I T\u1ed0T"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background"
+      },
+      "targets": [
+        {
+          "expr": "server_internet_online",
+          "legendFormat": "Internet",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Gateway Ping Latency",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "server_ping_latency_ms{target=\"gateway\"}",
+          "legendFormat": "Gateway 192.168.13.1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 11,
+      "title": "CPU Intel i7-10750H (6 Nh\u00e2n / 12 Lu\u1ed3ng) Chi Ti\u1ebft T\u1eebng Core",
+      "type": "row"
+    },
+    {
+      "id": 7,
+      "title": "Nhi\u1ec7t \u0110\u1ed9 T\u1eebng Core vs Package (Ng\u01b0\u1ee1ng t\u1ed1i \u0111a 100.0\u00b0C)",
+      "type": "bargauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 30,
+          "max": 100,
+          "unit": "celsius",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "orange",
+                "value": 85
+              },
+              {
+                "color": "red",
+                "value": 95
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"package_id_0\"}",
+          "legendFormat": "CPU Package",
+          "refId": "A"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_0\"}",
+          "legendFormat": "Core 0",
+          "refId": "B"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_1\"}",
+          "legendFormat": "Core 1",
+          "refId": "C"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_2\"}",
+          "legendFormat": "Core 2",
+          "refId": "D"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_3\"}",
+          "legendFormat": "Core 3",
+          "refId": "E"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_4\"}",
+          "legendFormat": "Core 4",
+          "refId": "F"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"core_5\"}",
+          "legendFormat": "Core 5",
+          "refId": "G"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "L\u1ecbch S\u1eed Bi\u1ebfn Thi\u00ean Nhi\u1ec7t \u0110\u1ed9 CPU (Package & Cores)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "lineInterpolation": "smooth"
+          },
+          "unit": "celsius"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=\"package_id_0\"}",
+          "legendFormat": "Package",
+          "refId": "A"
+        },
+        {
+          "expr": "hardware_cpu_temperature_celsius{sensor=~\"core_.*\"}",
+          "legendFormat": "{{label}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 12,
+      "title": "Nhi\u1ec7t \u0110\u1ed9 C\u00e1c Linh Ki\u1ec7n Ph\u1ea7n C\u1ee9ng Kh\u00e1c (NVMe, Wi-Fi, PCH, ACPI)",
+      "type": "row"
+    },
+    {
+      "id": 9,
+      "title": "L\u1ecbch S\u1eed Nhi\u1ec7t \u0110\u1ed9 Linh Ki\u1ec7n",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "unit": "celsius"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "hardware_nvme_temperature_celsius{label=\"Composite\"}",
+          "legendFormat": "NVMe SSD (Composite)",
+          "refId": "A"
+        },
+        {
+          "expr": "hardware_wifi_temperature_celsius",
+          "legendFormat": "Card Wi-Fi (Intel AX201)",
+          "refId": "B"
+        },
+        {
+          "expr": "hardware_pch_temperature_celsius",
+          "legendFormat": "Chipset Bo M\u1ea1ch (PCH)",
+          "refId": "C"
+        },
+        {
+          "expr": "hardware_acpi_temperature_celsius",
+          "legendFormat": "ACPI Thermal Zone",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 13,
+      "title": "Gi\u00e1m S\u00e1t M\u1ea1ng & \u0110\u1ed9 Tr\u1ec5 Internet (kytran-ssh)",
+      "type": "row"
+    },
+    {
+      "id": 10,
+      "title": "Ping Latency (Gateway, Google DNS, Cloudflare DNS)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2
+          },
+          "unit": "ms"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "server_ping_latency_ms{target=\"gateway\"}",
+          "legendFormat": "Gateway (192.168.13.1)",
+          "refId": "A"
+        },
+        {
+          "expr": "server_ping_latency_ms{target=\"google_dns\"}",
+          "legendFormat": "Google DNS (8.8.8.8)",
+          "refId": "B"
+        },
+        {
+          "expr": "server_ping_latency_ms{target=\"cloudflare_dns\"}",
+          "legendFormat": "Cloudflare DNS (1.1.1.1)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Wi-Fi Link Quality & DNS Resolution Time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2
+          },
+          "unit": "none"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "server_wifi_link_quality",
+          "legendFormat": "Wi-Fi Link Quality (/70)",
+          "refId": "A"
+        },
+        {
+          "expr": "server_dns_latency_ms",
+          "legendFormat": "DNS Query Latency (ms)",
+          "refId": "B"
+        }
+      ]
+    }
+  ]
+}

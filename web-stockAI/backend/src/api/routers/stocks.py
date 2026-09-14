@@ -377,10 +377,14 @@ async def read_gainers_losers(db=Depends(get_db)):
     return {"gainers": [row_to_dict(row) for row in gainers], "losers": [row_to_dict(row) for row in losers]}
 
 
+_stock_price_cache: dict[str, tuple[float, list]] = {}
+
 @stock_router.get("/stock_price_by_symbol")
 async def read_stock_price_by_symbol(symbol: str, db=Depends(get_db)):
+    sym = symbol.upper()
     vn_tz = ZoneInfo("Asia/Ho_Chi_Minh")
     now = datetime.datetime.now(vn_tz)
+
     # Xác định ngày giao dịch gần nhất (tránh cuối tuần)
     trading_date = now.date()
     if now.hour < 9:
@@ -393,32 +397,58 @@ async def read_stock_price_by_symbol(symbol: str, db=Depends(get_db)):
     else:
         if trading_date.weekday() >= 5:
             trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
-    # Lấy dữ liệu từ 9h đến 15h của ngày giao dịch (dùng VN timezone)
+
+    # TTL Cache: ngoài giờ GD (sau 15:05, trước 9:00 hoặc cuối tuần) cache 12h; trong phiên cache 5s
+    now_ts = time.time()
+    is_market_closed = (now.hour >= 15 and now.minute >= 5) or (now.hour < 9) or (now.weekday() >= 5)
+    cache_ttl = 12 * 3600 if is_market_closed else 5
+    cache_key = f"{sym}:{trading_date}"
+
+    if cache_key in _stock_price_cache:
+        cached_ts, cached_result = _stock_price_cache[cache_key]
+        if now_ts - cached_ts < cache_ttl:
+            return cached_result
+
     start_dt = datetime.datetime.combine(trading_date, datetime.time(9, 0, 0), tzinfo=vn_tz)
     end_dt = datetime.datetime.combine(trading_date, datetime.time(15, 0, 0), tzinfo=vn_tz)
     start_timestamp_ms = str(int(start_dt.timestamp() * 1000))
     end_timestamp_ms = str(int(end_dt.timestamp() * 1000))
-    query = "SELECT * FROM stock_prices WHERE symbol = %s AND timestamp >= %s AND timestamp <= %s;"
-    rows = db.execute(query, (symbol + ".VN", start_timestamp_ms, end_timestamp_ms))
-    def row_to_dict(row):
-        return {
-            "symbol": row.symbol,
-            "timestamp": row.timestamp,
-            "price": row.price,
-            "change": row.change,
-            "change_percent": row.change_percent,
-            "day_volume": row.day_volume,
-            "last_size": row.last_size,
-        }
-    return [row_to_dict(row) for row in rows.all()]
 
+    def _query():
+        query = "SELECT symbol, timestamp, price, change, change_percent, day_volume, last_size FROM stock_prices WHERE symbol = %s AND timestamp >= %s AND timestamp <= %s;"
+        rows = db.execute(query, (sym + ".VN", start_timestamp_ms, end_timestamp_ms))
+        return [
+            {
+                "symbol": r.symbol,
+                "timestamp": r.timestamp,
+                "price": r.price,
+                "change": r.change,
+                "change_percent": r.change_percent,
+                "day_volume": r.day_volume,
+                "last_size": r.last_size,
+            }
+            for r in rows.all()
+        ]
+
+    result = await asyncio.to_thread(_query)
+    _stock_price_cache[cache_key] = (now_ts, result)
+    return result
+
+
+_stock_info_cache: dict[str, tuple[float, dict]] = {}
 
 @stock_router.get("/stock_info/{symbol}")
 async def get_stock_info(symbol: str):
-    try:
-        ticker = yf.Ticker(f'{symbol}.VN')
+    sym = symbol.upper()
+    now_ts = time.time()
+    if sym in _stock_info_cache:
+        cached_ts, cached_data = _stock_info_cache[sym]
+        if now_ts - cached_ts < 24 * 3600:
+            return cached_data
+
+    def _fetch_info():
+        ticker = yf.Ticker(f'{sym}.VN')
         info = ticker.info
-        
         company_officers = []
         if 'companyOfficers' in info and info['companyOfficers']:
             for officer in info['companyOfficers']:
@@ -428,21 +458,18 @@ async def get_stock_info(symbol: str):
                     'title': officer.get('title'),
                     'yearBorn': officer.get('yearBorn')
                 })
-        
         return {
-            'symbol': symbol,
+            'symbol': sym,
             'shortName': info.get('shortName', ''),
             'longName': info.get('longName', ''),
             'exchange': info.get('exchange', ''),
             'currency': info.get('currency', 'VND'),
-            
             'address1': info.get('address1'),
             'address2': info.get('address2'),
             'city': info.get('city'),
             'country': info.get('country'),
             'phone': info.get('phone'),
             'website': info.get('website'),
-            
             'industry': info.get('industry'),
             'industryDisp': info.get('industryDisp'),
             'sector': info.get('sector'),
@@ -450,31 +477,25 @@ async def get_stock_info(symbol: str):
             'longBusinessSummary': info.get('longBusinessSummary'),
             'fullTimeEmployees': info.get('fullTimeEmployees'),
             'companyOfficers': company_officers,
-            
             'currentPrice': info.get('currentPrice', info.get('regularMarketPrice', 0)),
             'previousClose': info.get('previousClose', 0),
             'open': info.get('open', info.get('regularMarketOpen', 0)),
             'dayLow': info.get('dayLow', info.get('regularMarketDayLow', 0)),
             'dayHigh': info.get('dayHigh', info.get('regularMarketDayHigh', 0)),
-            
             'volume': info.get('volume', info.get('regularMarketVolume', 0)),
             'averageVolume': info.get('averageVolume', 0),
-            
             'marketCap': info.get('marketCap'),
             'enterpriseValue': info.get('enterpriseValue'),
             'beta': info.get('beta'),
-            
             'fiftyTwoWeekLow': info.get('fiftyTwoWeekLow'),
             'fiftyTwoWeekHigh': info.get('fiftyTwoWeekHigh'),
             'fiftyDayAverage': info.get('fiftyDayAverage'),
             'twoHundredDayAverage': info.get('twoHundredDayAverage'),
-            
             'trailingPE': info.get('trailingPE'),
             'priceToBook': info.get('priceToBook'),
             'dividendYield': info.get('dividendYield'),
             'dividendRate': info.get('dividendRate'),
             'payoutRatio': info.get('payoutRatio'),
-            
             'totalRevenue': info.get('totalRevenue'),
             'revenuePerShare': info.get('revenuePerShare'),
             'revenueGrowth': info.get('revenueGrowth'),
@@ -482,30 +503,32 @@ async def get_stock_info(symbol: str):
             'ebitdaMargins': info.get('ebitdaMargins'),
             'operatingMargins': info.get('operatingMargins'),
             'profitMargins': info.get('profitMargins'),
-            
             'totalCash': info.get('totalCash'),
             'totalDebt': info.get('totalDebt'),
             'debtToEquity': info.get('debtToEquity'),
             'currentRatio': info.get('currentRatio'),
             'quickRatio': info.get('quickRatio'),
-            
             'returnOnAssets': info.get('returnOnAssets'),
             'returnOnEquity': info.get('returnOnEquity'),
             'freeCashflow': info.get('freeCashflow'),
             'operatingCashflow': info.get('operatingCashflow'),
-            
             'earningsGrowth': info.get('earningsGrowth'),
             'epsTrailingTwelveMonths': info.get('epsTrailingTwelveMonths'),
-            
             'bookValue': info.get('bookValue'),
             'sharesOutstanding': info.get('sharesOutstanding'),
             'floatShares': info.get('floatShares'),
             'heldPercentInsiders': info.get('heldPercentInsiders'),
             'heldPercentInstitutions': info.get('heldPercentInstitutions')
         }
+
+    try:
+        data = await asyncio.to_thread(_fetch_info)
+        if data and not data.get("error"):
+            _stock_info_cache[sym] = (now_ts, data)
+        return data
     except Exception as e:
         logger.error(f"Error fetching stock info for {symbol}: {e}")
-        return {"error": str(e)}
+        return {"symbol": sym, "error": str(e)}
 
 
 @stock_router.get("/stock_daily_by_symbol")

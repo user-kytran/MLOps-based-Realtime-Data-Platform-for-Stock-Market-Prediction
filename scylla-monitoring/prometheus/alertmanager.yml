@@ -2,7 +2,7 @@ global:
   resolve_timeout: 3m
 
 route:
-  group_by: ['alertname', 'cluster', 'job']
+  group_by: ['alertname', 'cluster', 'job', 'severity']
   group_wait: 10s
   group_interval: 30s
   repeat_interval: 1h
@@ -17,9 +17,9 @@ receivers:
     parse_mode: 'HTML'
     message: |
       {{ if eq .Status "firing" }}🔥 <b>[CẢNH BÁO SỰ CỐ HỆ THỐNG]</b>{{ else }}✅ <b>[SỰ CỐ ĐÃ ĐƯỢC KHẮC PHỤC]</b>{{ end }}
-      <b>Tên lỗi:</b> {{ .CommonLabels.alertname }}
-      <b>Mức độ:</b> {{ .CommonLabels.severity }}
-      <b>Dịch vụ:</b> {{ .CommonLabels.job }} ({{ .CommonLabels.instance }})
-      <b>Chi tiết:</b> {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else }}{{ .CommonLabels.summary }}{{ end }}
-      <b>Mô tả:</b> {{ if .CommonAnnotations.description }}{{ .CommonAnnotations.description }}{{ else }}{{ .CommonLabels.description }}{{ end }}
+      <b>Tên lỗi:</b> {{ if .CommonLabels.alertname }}{{ .CommonLabels.alertname }}{{ else }}{{ (index .Alerts 0).Labels.alertname }}{{ end }}
+      <b>Mức độ:</b> {{ if .CommonLabels.severity }}{{ .CommonLabels.severity }}{{ else if (index .Alerts 0).Labels.severity }}{{ (index .Alerts 0).Labels.severity }}{{ else }}info{{ end }}
+      <b>Dịch vụ:</b> {{ if .CommonLabels.job }}{{ .CommonLabels.job }}{{ else if (index .Alerts 0).Labels.job }}{{ (index .Alerts 0).Labels.job }}{{ else }}scylla_cluster{{ end }}{{ if or .CommonLabels.instance (index .Alerts 0).Labels.instance }} ({{ if .CommonLabels.instance }}{{ .CommonLabels.instance }}{{ else }}{{ (index .Alerts 0).Labels.instance }}{{ end }}){{ end }}
+      <b>Chi tiết:</b> {{ if .CommonAnnotations.summary }}{{ .CommonAnnotations.summary }}{{ else if .CommonLabels.summary }}{{ .CommonLabels.summary }}{{ else if (index .Alerts 0).Annotations.summary }}{{ (index .Alerts 0).Annotations.summary }}{{ else if (index .Alerts 0).Labels.summary }}{{ (index .Alerts 0).Labels.summary }}{{ else }}Không có chi tiết{{ end }}
+      <b>Mô tả:</b> {{ if .CommonAnnotations.description }}{{ .CommonAnnotations.description }}{{ else if .CommonLabels.description }}{{ .CommonLabels.description }}{{ else if (index .Alerts 0).Annotations.description }}{{ (index .Alerts 0).Annotations.description }}{{ else if (index .Alerts 0).Labels.description }}{{ (index .Alerts 0).Labels.description }}{{ else }}Không có mô tả{{ end }}
       <b>Thời gian:</b> {{ (index .Alerts 0).StartsAt.Local.Format "15:04:05 02/01/2006" }}

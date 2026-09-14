@@ -1,4 +1,29 @@
 services:
+  host-hardware-exporter:
+    image: python:3.11-slim
+    container_name: host-hardware-exporter
+    restart: unless-stopped
+    command: python /app/exporter.py
+    volumes:
+      - ./hardware-exporter:/app:ro
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+    environment:
+      - SYS_PATH=/host/sys
+      - PROC_PATH=/host/proc
+      - GATEWAY_IP=192.168.13.1
+      - HC_PING_URL=https://hc-ping.com/80eb57aa-0fb3-4f4e-aafb-252832041ccf
+      - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      financi-network:
+        aliases:
+          - host-hardware-exporter
+
   alertmanager:
     image: prom/alertmanager:v0.28.1
     container_name: aalert
@@ -15,6 +40,11 @@ services:
       - '--log.level=debug'
     environment:
       - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
     networks:
       financi-network:
         aliases:
@@ -38,16 +68,26 @@ services:
       - ./prometheus/stock_backend_servers.yml:/etc/scylla.d/prometheus/stock_backend_servers.yml:z
       - ./prometheus/stock_producer_servers.yml:/etc/scylla.d/prometheus/stock_producer_servers.yml:z
       - ./prometheus/flink_servers.yml:/etc/scylla.d/prometheus/flink_servers.yml:z
+      - ./prometheus/host_hardware_servers.yml:/etc/scylla.d/prometheus/host_hardware_servers.yml:z
       - /etc/localtime:/etc/localtime:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus/data'
+      - '--storage.tsdb.retention.time=7d'
+      - '--storage.tsdb.retention.size=3GB'
+      - '--storage.tsdb.wal-compression'
       - '--web.enable-lifecycle'
       - '--enable-feature=promql-experimental-functions'
     environment:
       - TZ=Asia/Ho_Chi_Minh
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
     depends_on:
       - alertmanager
+      - host-hardware-exporter
     networks:
       financi-network:
         aliases:
@@ -83,6 +123,11 @@ services:
       - GF_SECURITY_ANGULAR_SUPPORT_ENABLED=false
       - GF_SERVER_ENABLE_GZIP=true
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/ver_5.2/scylla-overview.5.2.json
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "3"
     depends_on:
       - prometheus
     networks:

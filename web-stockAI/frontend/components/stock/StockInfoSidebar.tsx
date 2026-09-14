@@ -38,7 +38,7 @@ export function StockInfoSidebar({ stockInfo, stockRealtime, reference }: StockI
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-bold text-gray-900">{stockInfo.symbol}</CardTitle>
         <p className="text-sm text-gray-600">{stockInfo.shortName}</p>
-        <p className="text-xs text-gray-500">{stockInfo.industry} • {stockInfo.exchange}</p>
+        <p className="text-xs text-gray-500">{stockInfo.industry ? `${stockInfo.industry} • ` : ""}{stockInfo.exchange || "HOSE"}</p>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Giá hiện tại */}
