@@ -305,6 +305,9 @@ stock-prediction/*.log
 
 # Warehouse Service
 warehouse/warehouse_data/
+warehouse/backups/*.sql.gz
+warehouse/backups/*.sql
+warehouse/backups/*.dump
 warehouse/logs/
 warehouse/*.log
 

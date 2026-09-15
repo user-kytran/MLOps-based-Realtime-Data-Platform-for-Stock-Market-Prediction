@@ -16,9 +16,6 @@ services:
       - financi-network
     restart: always
 
-volumes:
-  warehouse_data:
-
 networks:
   financi-network:
     external: true
