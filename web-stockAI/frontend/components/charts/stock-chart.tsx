@@ -185,7 +185,7 @@ function IntradayTooltip({ active, payload }: any) {
     <div className="w-[220px] rounded-lg border border-slate-300 bg-white p-3 text-xs shadow-2xl">
       <div className="mb-2 flex items-center justify-between gap-3">
         <span className="font-bold text-slate-950">{point.time}</span>
-        <span className="font-mono font-bold text-blue-700">{formatPrice(point.price)} VND</span>
+        <span className={`font-mono font-bold ${positive ? "text-emerald-600" : "text-red-600"}`}>{formatPrice(point.price)} VND</span>
       </div>
       <div className="h-px bg-slate-200" />
       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -283,6 +283,55 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
     }
   }, [chartData, stockInfo])
 
+  // Xác định xu hướng giá so với giá tham chiếu (Tăng / Giảm / Không đổi)
+  const chartTrend = useMemo<"up" | "down" | "flat">(() => {
+    const lastPrice = chartData.at(-1)?.price ?? stockInfo?.currentPrice
+    const ref = referencePrice && referencePrice > 0 ? referencePrice : stockInfo?.previousClose
+
+    if (lastPrice !== undefined && ref !== undefined && ref > 0) {
+      if (lastPrice > ref) return "up"
+      if (lastPrice < ref) return "down"
+      return "flat"
+    }
+
+    const lastChange = chartData.at(-1)?.change
+    if (lastChange !== undefined) {
+      if (lastChange > 0) return "up"
+      if (lastChange < 0) return "down"
+      return "flat"
+    }
+
+    return "flat"
+  }, [chartData, stockInfo, referencePrice])
+
+  // Màu sắc động cho biểu đồ: Xanh lá (Tăng), Đỏ (Giảm), Vàng (Tham chiếu/Không đổi)
+  const trendColors = useMemo(() => {
+    switch (chartTrend) {
+      case "up":
+        return {
+          stroke: "#10b981",       // emerald-500 (Tăng - Xanh lá Yahoo Finance)
+          fill: "#10b981",
+          stopOpacityStart: 0.35,
+          stopOpacityEnd: 0.0,
+        }
+      case "down":
+        return {
+          stroke: "#ef4444",       // red-500 (Giảm - Đỏ Yahoo Finance)
+          fill: "#ef4444",
+          stopOpacityStart: 0.35,
+          stopOpacityEnd: 0.0,
+        }
+      case "flat":
+      default:
+        return {
+          stroke: "#eab308",       // amber-500 (Không đổi - Vàng tham chiếu)
+          fill: "#eab308",
+          stopOpacityStart: 0.25,
+          stopOpacityEnd: 0.0,
+        }
+    }
+  }, [chartTrend])
+
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
       <CardHeader className="gap-3 pb-2">
@@ -318,8 +367,8 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
                 <ComposedChart data={chartData} syncId={`intraday-${symbol}`} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
                   <defs>
                     <linearGradient id={`intraday-fill-${symbol}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={COLORS.price} stopOpacity={0.3} />
-                      <stop offset="100%" stopColor={COLORS.priceFill} stopOpacity={0.15} />
+                      <stop offset="0%" stopColor={trendColors.fill} stopOpacity={trendColors.stopOpacityStart} />
+                      <stop offset="100%" stopColor={trendColors.fill} stopOpacity={trendColors.stopOpacityEnd} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke={COLORS.grid} strokeDasharray="4 4" vertical={false} />
@@ -353,10 +402,10 @@ export function StockChart({ symbol, referencePrice, stockInfo }: StockChartProp
                   <Line
                     type="linear"
                     dataKey="price"
-                    stroke={COLORS.price}
+                    stroke={trendColors.stroke}
                     strokeWidth={2.25}
                     dot={false}
-                    activeDot={{ r: 5, fill: COLORS.price, stroke: "#fff", strokeWidth: 2 }}
+                    activeDot={{ r: 5, fill: trendColors.stroke, stroke: "#fff", strokeWidth: 2 }}
                     isAnimationActive={false}
                   />
                 </ComposedChart>

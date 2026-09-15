@@ -398,15 +398,15 @@ async def read_stock_price_by_symbol(symbol: str, db=Depends(get_db)):
         if trading_date.weekday() >= 5:
             trading_date = trading_date - datetime.timedelta(days=int(trading_date.weekday() - 4))
 
-    # TTL Cache: ngoài giờ GD (sau 15:05, trước 9:00 hoặc cuối tuần) cache 12h; trong phiên cache 5s
+    # TTL Cache chuẩn xác:
+    # - Trong giờ giao dịch (ngày thường 09:00 -> 15:05): cache 5 giây để luôn đón tick mới
+    # - Sau khi đóng cửa phiên (>= 15:05) hoặc cuối tuần: cache 12 giờ vì dữ liệu ngày đã chốt
     now_ts = time.time()
-    is_market_closed = (now.hour >= 15 and now.minute >= 5) or (now.hour < 9) or (now.weekday() >= 5)
-    cache_ttl = 12 * 3600 if is_market_closed else 5
     cache_key = f"{sym}:{trading_date}"
 
     if cache_key in _stock_price_cache:
-        cached_ts, cached_result = _stock_price_cache[cache_key]
-        if now_ts - cached_ts < cache_ttl:
+        expires_at, cached_result = _stock_price_cache[cache_key]
+        if now_ts < expires_at:
             return cached_result
 
     start_dt = datetime.datetime.combine(trading_date, datetime.time(9, 0, 0), tzinfo=vn_tz)
@@ -431,7 +431,9 @@ async def read_stock_price_by_symbol(symbol: str, db=Depends(get_db)):
         ]
 
     result = await asyncio.to_thread(_query)
-    _stock_price_cache[cache_key] = (now_ts, result)
+    is_in_trading = (now.weekday() < 5) and (datetime.time(9, 0) <= now.time() < datetime.time(15, 5))
+    expires_at = now_ts + (5 if is_in_trading else 12 * 3600)
+    _stock_price_cache[cache_key] = (expires_at, result)
     return result
 
 
